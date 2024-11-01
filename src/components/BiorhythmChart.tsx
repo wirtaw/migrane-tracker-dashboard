@@ -19,19 +19,19 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
   const getPercentage = (value: number): number => ((value + 1) * 50);
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <Activity className="w-5 h-5 text-indigo-600" />
-        <h2 className="text-lg font-semibold">Biorhythm Analysis</h2>
+        <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+        <h2 className="text-lg font-semibold dark:text-white">Biorhythm Analysis</h2>
       </div>
       
       <div className="space-y-4">
         <div className="space-y-2">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm dark:text-gray-300">
             <span>Physical (23 days)</span>
             <span>{Math.round(getPercentage(physical))}%</span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 
               className="h-full bg-blue-500 transition-all duration-300"
               style={{ width: `${getPercentage(physical)}%` }}
@@ -40,11 +40,11 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
         </div>
 
         <div className="space-y-2">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm dark:text-gray-300">
             <span>Emotional (28 days)</span>
             <span>{Math.round(getPercentage(emotional))}%</span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 
               className="h-full bg-pink-500 transition-all duration-300"
               style={{ width: `${getPercentage(emotional)}%` }}
@@ -53,11 +53,11 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
         </div>
 
         <div className="space-y-2">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-sm dark:text-gray-300">
             <span>Intellectual (33 days)</span>
             <span>{Math.round(getPercentage(intellectual))}%</span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 
               className="h-full bg-purple-500 transition-all duration-300"
               style={{ width: `${getPercentage(intellectual)}%` }}
