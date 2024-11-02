@@ -19,36 +19,102 @@ export interface WeatherData {
   pressure: number;
   description: string;
   icon: string;
-  solarActivity: number;
-  magneticIndex: number;
 }
 
-const OPEN_WEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5';
+export interface GeophysicalWeatherData {
+  solarFlux: number;
+  aIndex: number;
+  kIndex: number;
+  pastSpaceWeather: string | null;
+  nextSpaceWeather: string | null;
+}
+
+const OPEN_WEATHER_BASE_URL: string = 'https://api.openweathermap.org/data/2.5';
+const NOAA_GOV_CURRENT_BASE_URL: string = 'https://services.swpc.noaa.gov/text/wwv.txt';
+
+function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
+  const result: GeophysicalWeatherData = {
+    solarFlux: 0,
+    aIndex: 0,
+    kIndex: -1,
+    pastSpaceWeather: '',
+    nextSpaceWeather: ''
+  };
+
+  if (!text) {
+    return result;
+  }
+
+  const lines = text.split('\n');
+
+  if (!lines.length) {
+    return result;
+  }
+  
+  // Extract solar flux and A-index
+  const solarFluxLine: string | undefined = lines.find(line => line.includes('Solar flux'));
+  const solarFluxMatch = (solarFluxLine) ? solarFluxLine.match(/Solar flux (\d+) and estimated planetary A-index (\d+)/) : null;
+  if (solarFluxMatch) {
+    result.solarFlux = parseInt(solarFluxMatch[1], 10);
+    result.aIndex = parseInt(solarFluxMatch[2], 10);
+  }
+
+  // Extract K-index
+  const kIndexLine: string | undefined = lines.find(line => line.includes('K-index'));
+  const kIndexMatch = (kIndexLine) ? kIndexLine.match(/K-index at \d+ UTC on \d+ \w+ was (\d+\.\d+)/) : null;
+  if (kIndexMatch) {
+    result.kIndex = parseFloat(kIndexMatch[1]);
+  }
+
+  // Extract space weather summaries
+  const pastSpaceWeatherLine: string | undefined = lines.find(line => line.startsWith('Space weather for the past 24 hours'));
+  result.pastSpaceWeather = (pastSpaceWeatherLine) ? pastSpaceWeatherLine.split(' has been ')[1].trim().replace('.', '') : null;
+
+  const nextSpaceWeatherLine: string | undefined = lines.find(line => line.startsWith('Space weather for the next 24 hours'));
+  result.nextSpaceWeather = (nextSpaceWeatherLine) ? nextSpaceWeatherLine.split(' is predicted to be ')[1].trim().replace('.', '') : null;
+
+  return result;
+}
 
 export async function fetchWeatherData(): Promise<WeatherData> {
   try {
-    const response = await fetch(
-      `${OPEN_WEATHER_BASE_URL}/weather?lat=${env.LATITUDE}&lon=${env.LONGITUDE}&units=${env.WEATHER_UNITS}&appid=${env.OPEN_WEATHER_API_KEY}`
-    );
-    
-    if (!response.ok) {
-      throw new Error('Weather data fetch failed');
-    }
+      const response = await fetch(
+        `${OPEN_WEATHER_BASE_URL}/weather?lat=${env.LATITUDE}&lon=${env.LONGITUDE}&units=${env.WEATHER_UNITS}&appid=${env.OPEN_WEATHER_API_KEY}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Weather data fetch failed');
+      }
+  
+      const data: WeatherResponse = await response.json();
 
-    const data: WeatherResponse = await response.json();
-
-    return {
-      temperature: Math.round(data.main.temp),
-      humidity: data.main.humidity,
-      pressure: data.main.pressure,
-      description: data.weather[0].description,
-      icon: data.weather[0].icon,
-      // Mock data for now - these would come from separate APIs
-      solarActivity: 4.2,
-      magneticIndex: 3,
-    };
+      const weather: WeatherData = {
+        temperature: Math.round(data.main.temp),
+        humidity: data.main.humidity,
+        pressure: data.main.pressure,
+        description: data.weather[0].description,
+        icon: data.weather[0].icon
+      };
+  
+      return weather;
   } catch (error) {
     console.error('Error fetching weather data:', error);
     throw error;
   }
+}
+
+export async function fetchGeophysicalWeatherData(): Promise<GeophysicalWeatherData> {
+  const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
+  
+  if (!responseGeoActivity.ok) {
+    throw new Error('Weather data fetch failed');
+  }
+
+  const geoActivityData: string = await responseGeoActivity.text();
+
+  console.info(geoActivityData);
+
+  const geoActivityDataMapped: GeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
+
+  return geoActivityDataMapped;
 }

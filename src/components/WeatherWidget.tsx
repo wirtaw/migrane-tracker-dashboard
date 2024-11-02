@@ -3,7 +3,7 @@ import { Cloud, Sun, Thermometer, AlertCircle } from 'lucide-react';
 import { useWeather } from '../hooks/useWeather';
 
 export default function WeatherWidget() {
-  const { weather, loading, error } = useWeather();
+  const { weather, geophysicalweather, loading, error } = useWeather();
 
   if (loading) {
     return (
@@ -58,13 +58,13 @@ export default function WeatherWidget() {
 
         <div className="space-y-4">
           <div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Solar Activity</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Solar Flux {geophysicalweather.solarFlux}</div>
             <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 10 }).map((_, i) => (
                 <div
-                  key={i}
+                  key={i+31}
                   className={`w-2 h-8 rounded-full ${
-                    i < weather.solarActivity
+                    i+31 < geophysicalweather.solarFlux
                       ? 'bg-yellow-400 dark:bg-yellow-500'
                       : 'bg-gray-200 dark:bg-gray-700'
                   }`}
@@ -74,18 +74,48 @@ export default function WeatherWidget() {
           </div>
 
           <div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Magnetic Index</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Magnetic Index (k Index) {geophysicalweather.kIndex}</div>
             <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 9 }).map((_, i) => (
                 <div
                   key={i}
                   className={`w-2 h-8 rounded-full ${
-                    i < weather.magneticIndex
+                    i < geophysicalweather.kIndex
                       ? 'bg-purple-400 dark:bg-purple-500'
                       : 'bg-gray-200 dark:bg-gray-700'
                   }`}
                 />
               ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Magnetic Index (A Index) {geophysicalweather.aIndex}</div>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <div
+                  key={i+21}
+                  className={`w-2 h-8 rounded-full ${
+                    i+21 < geophysicalweather.aIndex
+                      ? 'bg-red-400 dark:bg-red-500'
+                      : 'bg-gray-200 dark:bg-gray-700'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Past Space Weather</div>
+            <div className="flex items-center gap-1">
+              {geophysicalweather.pastSpaceWeather}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Next Space Weather</div>
+            <div className="flex items-center gap-1">
+              {geophysicalweather.nextSpaceWeather}
             </div>
           </div>
         </div>
