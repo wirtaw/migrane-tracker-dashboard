@@ -6,6 +6,8 @@ interface BiorhythmProps {
   targetDate?: Date;
 }
 
+const DAY_MILLISECONDS: number = 24 * 60 * 60 * 1000;
+
 const calculateBiorhythm = (birthDate: Date, targetDate: Date = new Date(), days: number): number => {
   const t = Math.floor((targetDate.getTime() - birthDate.getTime()) / (24 * 60 * 60 * 1000));
   return Math.sin((2 * Math.PI * t) / days);
@@ -15,6 +17,12 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
   const physical = calculateBiorhythm(birthDate, targetDate, 23);
   const emotional = calculateBiorhythm(birthDate, targetDate, 28);
   const intellectual = calculateBiorhythm(birthDate, targetDate, 33);
+  const physicalNext = calculateBiorhythm(birthDate, new Date(targetDate.getTime() + DAY_MILLISECONDS), 23);
+  const emotionalNext = calculateBiorhythm(birthDate, new Date(targetDate.getTime() + DAY_MILLISECONDS), 28);
+  const intellectualNext = calculateBiorhythm(birthDate, new Date(targetDate.getTime() + DAY_MILLISECONDS), 33);
+  const diffPhysical: string = (physicalNext - physical) > 0 ? 'up' : 'down';
+  const diffIntellectual: string = (intellectualNext - intellectual) > 0 ? 'up' : 'down';
+  const diffEmotional: string = (emotionalNext - emotional) > 0 ? 'up' : 'down';
 
   const getPercentage = (value: number): number => ((value + 1) * 50);
 
@@ -29,7 +37,7 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
         <div className="space-y-2">
           <div className="flex justify-between text-sm dark:text-gray-300">
             <span>Physical (23 days)</span>
-            <span>{Math.round(getPercentage(physical))}%</span>
+            <span>{Math.round(getPercentage(physical))}% ({diffPhysical})</span>
           </div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 
@@ -42,7 +50,7 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
         <div className="space-y-2">
           <div className="flex justify-between text-sm dark:text-gray-300">
             <span>Emotional (28 days)</span>
-            <span>{Math.round(getPercentage(emotional))}%</span>
+            <span>{Math.round(getPercentage(emotional))}% ({diffEmotional})</span>
           </div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 
@@ -55,7 +63,7 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
         <div className="space-y-2">
           <div className="flex justify-between text-sm dark:text-gray-300">
             <span>Intellectual (33 days)</span>
-            <span>{Math.round(getPercentage(intellectual))}%</span>
+            <span>{Math.round(getPercentage(intellectual))}% ({diffIntellectual})</span>
           </div>
           <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div 

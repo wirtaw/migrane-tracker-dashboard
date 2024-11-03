@@ -12,23 +12,27 @@ export function useWeather() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [canGetWeather, setCanGetWeather] = useState<boolean | null>(true);
+  const [canGetGeophysicalWeather, setCanGetGeophysicalWeather] = useState<boolean | null>(true);
 
   useEffect(() => {
     async function getWeatherData() {
       try {
         setLoading(true);
         let data = null;
-        if (!weather) {
+        if (!weather && canGetWeather) {
           data = await fetchWeatherData();
           setWeather(data);
         }
-        if (!geophysicalweather.solarFlux || geophysicalweather.kIndex < 0 || !geophysicalweather.aIndex) {
+        if (canGetGeophysicalWeather && !geophysicalweather.solarFlux || geophysicalweather.kIndex < 0 || !geophysicalweather.aIndex) {
           data = await fetchGeophysicalWeatherData();
           setGeophysicalWeather(data);
         }
         setError(null);
       } catch (err) {
-        setError('Failed to fetch weather data');
+        setError(`Failed to fetch weather data. ${JSON.stringify(err)}`);
+        setCanGetWeather(false);
+        setCanGetGeophysicalWeather(false);
         console.error(err);
       } finally {
         setLoading(false);

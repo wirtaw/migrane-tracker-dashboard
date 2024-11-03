@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cloud, Sun, Thermometer, AlertCircle } from 'lucide-react';
+import { Cloud, Sun, Thermometer, AlertCircle, CloudCog, Sparkle, SunDim } from 'lucide-react';
 import { useWeather } from '../hooks/useWeather';
 
 export default function WeatherWidget() {
@@ -19,12 +19,12 @@ export default function WeatherWidget() {
     );
   }
 
-  if (error || !weather) {
+  if (error || !weather || !geophysicalweather) {
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
         <div className="flex items-center gap-2 text-red-500">
           <AlertCircle className="w-5 h-5" />
-          <p className="text-sm">Failed to load weather data</p>
+          <p className="text-sm">Failed to load weather data. {error}</p>
         </div>
       </div>
     );
@@ -43,16 +43,47 @@ export default function WeatherWidget() {
             <Thermometer className="w-5 h-5 text-red-500" />
             <div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Temperature</div>
-              <div className="font-semibold dark:text-white">{weather.temperature}°C</div>
+              <div className="font-semibold dark:text-white">{weather.temperature} °C</div>
+              <div className="font-semibold dark:text-white">{weather.feels_like} °C (feels like)</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Sparkle className="w-5 h-5 text-blue-500" />
+            <div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Humidity</div>
+              <div className="font-semibold dark:text-white">{weather.humidity} %</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <CloudCog className="w-5 h-5 text-green-500" />
+            <div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Pressure</div>
+              <div className="font-semibold dark:text-white">{weather.pressure} hPa</div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <Cloud className="w-5 h-5 text-blue-500" />
             <div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Humidity</div>
-              <div className="font-semibold dark:text-white">{weather.humidity}%</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Clouds</div>
+              <div className="font-semibold dark:text-white">{weather.clouds} %</div>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <SunDim className="w-5 h-5 text-blue-500" />
+            <div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Uvi</div>
+              <div className="font-semibold dark:text-white">{weather.uvi}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+          
+            <div className="text-sm text-gray-600 dark:text-gray-400">Description</div>
+            <div className="font-semibold dark:text-white">{weather.description}</div>
           </div>
         </div>
 

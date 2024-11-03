@@ -1,24 +1,44 @@
 import { env } from '../config/env';
 
 interface WeatherResponse {
-  main: {
+  alerts: Array<{
+    description: string;
+    start: number;
+    end: number;
+    event: string;
+    sender_name: string;
+  }>;
+  current: {
     temp: number;
     humidity: number;
     pressure: number;
+    feels_like: number;
+    clouds: number;
+    uvi: number;
+    weather: Array<{
+      main: string;
+      description: string;
+      icon: string;
+    }>
   };
-  weather: Array<{
-    main: string;
-    description: string;
-    icon: string;
-  }>;
 }
 
 export interface WeatherData {
   temperature: number;
   humidity: number;
   pressure: number;
+  feels_like: number;
+  clouds: number;
+  uvi: number;
   description: string;
   icon: string;
+  alerts: Array<{
+    description: string;
+    start: number;
+    end: number;
+    event: string;
+    sender_name: string;
+  }>
 }
 
 export interface GeophysicalWeatherData {
@@ -29,7 +49,7 @@ export interface GeophysicalWeatherData {
   nextSpaceWeather: string | null;
 }
 
-const OPEN_WEATHER_BASE_URL: string = 'https://api.openweathermap.org/data/2.5';
+const OPEN_WEATHER_BASE_URL: string = 'https://api.openweathermap.org/data/3.0';
 const NOAA_GOV_CURRENT_BASE_URL: string = 'https://services.swpc.noaa.gov/text/wwv.txt';
 
 function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
@@ -79,7 +99,7 @@ function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
 export async function fetchWeatherData(): Promise<WeatherData> {
   try {
       const response = await fetch(
-        `${OPEN_WEATHER_BASE_URL}/weather?lat=${env.LATITUDE}&lon=${env.LONGITUDE}&units=${env.WEATHER_UNITS}&appid=${env.OPEN_WEATHER_API_KEY}`
+        `${OPEN_WEATHER_BASE_URL}/onecall?lat=${env.LATITUDE}&lon=${env.LONGITUDE}&units=${env.WEATHER_UNITS}&exclude=hourly,daily&appid=${env.OPEN_WEATHER_API_KEY}`
       );
       
       if (!response.ok) {
@@ -89,11 +109,15 @@ export async function fetchWeatherData(): Promise<WeatherData> {
       const data: WeatherResponse = await response.json();
 
       const weather: WeatherData = {
-        temperature: Math.round(data.main.temp),
-        humidity: data.main.humidity,
-        pressure: data.main.pressure,
-        description: data.weather[0].description,
-        icon: data.weather[0].icon
+        temperature: Math.round(data.current.temp),
+        humidity: data.current.humidity,
+        pressure: data.current.pressure,
+        feels_like: Math.round(data.current.feels_like),
+        clouds: data.current.clouds,
+        uvi: data.current.uvi,
+        description: data.current.weather[0].description,
+        icon: data.current.weather[0].icon,
+        alerts: data.alerts,
       };
   
       return weather;
@@ -111,8 +135,6 @@ export async function fetchGeophysicalWeatherData(): Promise<GeophysicalWeatherD
   }
 
   const geoActivityData: string = await responseGeoActivity.text();
-
-  console.info(geoActivityData);
 
   const geoActivityDataMapped: GeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
 
