@@ -4,6 +4,7 @@ import CalendarView from './components/CalendarView';
 import Header from './components/Header';
 import LifeMetrics from './components/LifeMetrics';
 import WeatherWidget from './components/WeatherWidget';
+import GeoMagneticWidget from './components/GeoMagneticWidget';
 import { ThemeProvider } from './context/ThemeContext';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             </div>
             <div>
               <WeatherWidget />
+              <GeoMagneticWidget />
             </div>
             <div>
               <BiorhythmChart birthDate={birthDate} />
