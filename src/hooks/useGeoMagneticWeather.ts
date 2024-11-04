@@ -6,8 +6,8 @@ export function useGeoMagneticWeather() {
     solarFlux: 0,
     aIndex: 0,
     kIndex: -1,
-    pastSpaceWeather: '',
-    nextSpaceWeather: ''
+    pastWeather: { level: '' },
+    nextWeather: { level: '' }
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

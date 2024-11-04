@@ -5,10 +5,12 @@ import Header from './components/Header';
 import LifeMetrics from './components/LifeMetrics';
 import WeatherWidget from './components/WeatherWidget';
 import GeoMagneticWidget from './components/GeoMagneticWidget';
+import TrackingButtons from './components/TrackingButtons';
 import { ThemeProvider } from './context/ThemeContext';
+import { env } from './config/env';
 
 function App() {
-  const [birthDate] = useState(new Date('1985-05-09'));
+  const [birthDate] = useState(new Date(env.BIRTH_DATE));
 
   return (
     <ThemeProvider>
@@ -21,7 +23,12 @@ function App() {
             </div>
             <div>
               <WeatherWidget />
+            </div>
+            <div>
               <GeoMagneticWidget />
+            </div>
+            <div>
+              <TrackingButtons />
             </div>
             <div>
               <BiorhythmChart birthDate={birthDate} />

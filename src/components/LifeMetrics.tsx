@@ -6,6 +6,10 @@ interface LifeMetricsProps {
 }
 
 export default function LifeMetrics({ birthDate }: LifeMetricsProps) {
+  if (!birthDate) {
+    return '';
+  }
+
   const calculateMetrics = () => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - birthDate.getTime());

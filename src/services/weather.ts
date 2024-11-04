@@ -55,8 +55,8 @@ export interface GeophysicalWeatherData {
   solarFlux: number;
   aIndex: number;
   kIndex: number;
-  pastSpaceWeather: string | null;
-  nextSpaceWeather: string | null;
+  pastWeather: { level: string };
+  nextWeather: { level: string };
 }
 
 const OPEN_WEATHER_BASE_URL: string = 'https://api.openweathermap.org/data/3.0';
@@ -68,8 +68,8 @@ function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
     solarFlux: 0,
     aIndex: 0,
     kIndex: -1,
-    pastSpaceWeather: '',
-    nextSpaceWeather: ''
+    pastWeather: { level: '' },
+    nextWeather: { level: '' }
   };
 
   if (!text) {
@@ -99,10 +99,10 @@ function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
 
   // Extract space weather summaries
   const pastSpaceWeatherLine: string | undefined = lines.find(line => line.startsWith('Space weather for the past 24 hours'));
-  result.pastSpaceWeather = (pastSpaceWeatherLine) ? pastSpaceWeatherLine.split(' has been ')[1].trim().replace('.', '') : null;
+  result.pastWeather.level = (pastSpaceWeatherLine) ? pastSpaceWeatherLine.split(' has been ')[1].trim().replace('.', '') : '';
 
   const nextSpaceWeatherLine: string | undefined = lines.find(line => line.startsWith('Space weather for the next 24 hours'));
-  result.nextSpaceWeather = (nextSpaceWeatherLine) ? nextSpaceWeatherLine.split(' is predicted to be ')[1].trim().replace('.', '') : null;
+  result.nextWeather.level = (nextSpaceWeatherLine) ? nextSpaceWeatherLine.split(' is predicted to be ')[1].trim().replace('.', '') : '';
 
   return result;
 }
