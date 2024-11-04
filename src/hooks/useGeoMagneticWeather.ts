@@ -26,9 +26,9 @@ export function useGeoMagneticWeather() {
         setError(null);
       } catch (err) {
         setError(`Failed to fetch weather data. ${JSON.stringify(err)}`);
-        setCanGetGeophysicalWeather(false);
         console.error(err);
       } finally {
+        setCanGetGeophysicalWeather(false);
         setLoading(false);
       }
     }

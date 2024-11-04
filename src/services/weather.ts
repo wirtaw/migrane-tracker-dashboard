@@ -1,4 +1,14 @@
+import { fetchWeatherApi } from 'openmeteo';
 import { env } from '../config/env';
+
+interface OpenMeteoParams {
+  latitude: number;
+  longitude: number;
+  current: Array <string>;
+  daily: Array<string>,
+  timezone: string;
+  wind_speed_unit: string;
+};
 
 interface WeatherResponse {
   alerts: Array<{
@@ -51,6 +61,7 @@ export interface GeophysicalWeatherData {
 
 const OPEN_WEATHER_BASE_URL: string = 'https://api.openweathermap.org/data/3.0';
 const NOAA_GOV_CURRENT_BASE_URL: string = 'https://services.swpc.noaa.gov/text/wwv.txt';
+const OPEN_METEO_BASE_URL: string = 'https://api.open-meteo.com/v1/forecast';
 
 function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
   const result: GeophysicalWeatherData = {
@@ -118,6 +129,56 @@ export async function fetchWeatherData(): Promise<WeatherData> {
         description: data.current.weather[0].description,
         icon: data.current.weather[0].icon,
         alerts: data.alerts,
+      };
+  
+      return weather;
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+    throw error;
+  }
+}
+
+const range = (start: number, stop: number, step: number) =>
+	Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);
+
+export async function fetchOpenMeteoWeatherData(): Promise<WeatherData> {
+  try {
+      const params: OpenMeteoParams = {
+        "latitude": env.LATITUDE,
+        "longitude": env.LONGITUDE,
+        "current": ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "rain", "showers", "weather_code", "cloud_cover", "surface_pressure", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m"],
+	      "daily": ["uv_index_max", "precipitation_sum", "rain_sum"],
+        "wind_speed_unit": "ms",
+        "timezone": "Europe/Vilnius"
+      };
+      const responses = await fetchWeatherApi(OPEN_METEO_BASE_URL, params);
+      
+      if (!responses) {
+        throw new Error('Weather data fetch failed');
+      }
+  
+      const [response] = responses;
+
+      const current = response.current()!;
+      const daily = response.daily()!;
+      const utcOffsetSeconds = response.utcOffsetSeconds();
+
+      const time = range(Number(daily.time()), Number(daily.timeEnd()), daily.interval()).map(
+        (t) => new Date((t + utcOffsetSeconds) * 1000)
+      );
+
+      const uvIndexMax = daily.variables(0)!.valuesArray()!;
+
+      const weather: WeatherData = {
+        temperature: Math.round(current.variables(0)!.value()),
+        humidity: current.variables(1)!.value(),
+        pressure: Math.round(current.variables(8)!.value()),
+        feels_like: Math.round(current.variables(2)!.value()),
+        clouds: current.variables(7)!.value(),
+        uvi: Math.round(uvIndexMax.reduce((acc, prev) => acc + prev,0) / time.length),
+        description: '',
+        icon: '',
+        alerts: [],
       };
   
       return weather;
