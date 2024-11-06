@@ -14,7 +14,11 @@ interface BiorhythmValue {
   color: string;
 }
 
-const calculateBiorhythm = (birthDate: Date, targetDate: Date = new Date(), days: number): number => {
+const calculateBiorhythm = (
+  birthDate: Date,
+  targetDate: Date = new Date(),
+  days: number
+): number => {
   const t = Math.floor((targetDate.getTime() - birthDate.getTime()) / (24 * 60 * 60 * 1000));
   return Math.sin((2 * Math.PI * t) / days);
 };
@@ -24,9 +28,11 @@ const getPercentage = (value: number): number => Math.round((value + 1) * 50);
 const getTrendIcon = (current: number, next: number) => {
   const diff = next - current;
   if (Math.abs(diff) < 0.05) return <Minus className="w-4 h-4 text-gray-400" />;
-  return diff > 0 ? 
-    <TrendingUp className="w-4 h-4 text-green-500" /> : 
-    <TrendingDown className="w-4 h-4 text-red-500" />;
+  return diff > 0 ? (
+    <TrendingUp className="w-4 h-4 text-green-500" />
+  ) : (
+    <TrendingDown className="w-4 h-4 text-red-500" />
+  );
 };
 
 const getDeltaText = (current: number, next: number): string => {
@@ -39,7 +45,7 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
   if (!birthDate) {
     return '';
   }
-  
+
   const tomorrow = new Date(targetDate);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -49,22 +55,22 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
       cycle: 23,
       current: calculateBiorhythm(birthDate, targetDate, 23),
       next: calculateBiorhythm(birthDate, tomorrow, 23),
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
     },
     {
       name: 'Emotional',
       cycle: 28,
       current: calculateBiorhythm(birthDate, targetDate, 28),
       next: calculateBiorhythm(birthDate, tomorrow, 28),
-      color: 'bg-pink-500'
+      color: 'bg-pink-500',
     },
     {
       name: 'Intellectual',
       cycle: 33,
       current: calculateBiorhythm(birthDate, targetDate, 33),
       next: calculateBiorhythm(birthDate, tomorrow, 33),
-      color: 'bg-purple-500'
-    }
+      color: 'bg-purple-500',
+    },
   ];
 
   return (
@@ -73,9 +79,9 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
         <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
         <h2 className="text-lg font-semibold dark:text-white">Biorhythm Analysis</h2>
       </div>
-      
+
       <div className="space-y-6">
-        {biorhythms.map((rhythm) => (
+        {biorhythms.map(rhythm => (
           <div key={rhythm.name} className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -97,11 +103,11 @@ export default function BiorhythmChart({ birthDate, targetDate = new Date() }: B
             </div>
 
             <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div 
+              <div
                 className={`absolute top-0 left-0 h-full ${rhythm.color} transition-all duration-300`}
                 style={{ width: `${getPercentage(rhythm.current)}%` }}
               />
-              <div 
+              <div
                 className={`absolute top-0 h-full w-1 bg-white dark:bg-gray-900 transform -translate-x-1/2 opacity-50`}
                 style={{ left: `${getPercentage(rhythm.next)}%` }}
               />

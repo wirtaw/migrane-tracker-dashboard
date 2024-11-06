@@ -13,7 +13,10 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="type"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Incident Type
         </label>
         <select
@@ -28,7 +31,10 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
       </div>
 
       <div>
-        <label htmlFor="start" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="start"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Start Time
         </label>
         <input
@@ -39,7 +45,10 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
       </div>
 
       <div>
-        <label htmlFor="duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="duration"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Duration (hours)
         </label>
         <input
@@ -52,7 +61,10 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
       </div>
 
       <div>
-        <label htmlFor="triggers" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="triggers"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Potential Triggers
         </label>
         <input
@@ -64,7 +76,10 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="notes"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Notes
         </label>
         <textarea

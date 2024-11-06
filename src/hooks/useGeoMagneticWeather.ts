@@ -7,7 +7,7 @@ export function useGeoMagneticWeather() {
     aIndex: 0,
     kIndex: -1,
     pastWeather: { level: '' },
-    nextWeather: { level: '' }
+    nextWeather: { level: '' },
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,11 @@ export function useGeoMagneticWeather() {
         setLoading(true);
         let data = null;
 
-        if (canGetGeophysicalWeather && !geophysicalweather.solarFlux || geophysicalweather.kIndex < 0 || !geophysicalweather.aIndex) {
+        if (
+          (canGetGeophysicalWeather && !geophysicalweather.solarFlux) ||
+          geophysicalweather.kIndex < 0 ||
+          !geophysicalweather.aIndex
+        ) {
           data = await fetchGeophysicalWeatherData();
           setGeophysicalWeather(data);
         }

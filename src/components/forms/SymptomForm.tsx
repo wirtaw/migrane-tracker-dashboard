@@ -13,7 +13,10 @@ export default function SymptomForm({ onSubmit }: SymptomFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="symptom" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="symptom"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Symptom Type
         </label>
         <select
@@ -29,7 +32,10 @@ export default function SymptomForm({ onSubmit }: SymptomFormProps) {
       </div>
 
       <div>
-        <label htmlFor="severity" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="severity"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Severity (1-10)
         </label>
         <input
@@ -42,7 +48,10 @@ export default function SymptomForm({ onSubmit }: SymptomFormProps) {
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="notes"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Notes
         </label>
         <textarea

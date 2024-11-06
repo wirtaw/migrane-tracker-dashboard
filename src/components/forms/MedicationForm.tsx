@@ -13,7 +13,10 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="medication" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="medication"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Medication Name
         </label>
         <input
@@ -24,7 +27,10 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
       </div>
 
       <div>
-        <label htmlFor="dosage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="dosage"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Dosage
         </label>
         <div className="mt-1 flex gap-2">
@@ -33,9 +39,7 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
             id="dosage"
             className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
           />
-          <select
-            className="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          >
+          <select className="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
             <option>mg</option>
             <option>ml</option>
             <option>g</option>
@@ -44,7 +48,10 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
       </div>
 
       <div>
-        <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="time"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Time Taken
         </label>
         <input
@@ -55,7 +62,10 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
       </div>
 
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="notes"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Notes
         </label>
         <textarea

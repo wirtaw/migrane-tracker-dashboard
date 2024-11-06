@@ -1,5 +1,13 @@
 import React from 'react';
-import { Sun, Thermometer, AlertCircle, Droplets, Gauge, CloudSun, UmbrellaIcon } from 'lucide-react';
+import {
+  Sun,
+  Thermometer,
+  AlertCircle,
+  Droplets,
+  Gauge,
+  CloudSun,
+  UmbrellaIcon,
+} from 'lucide-react';
 import { useWeather } from '../hooks/useWeather';
 
 function UVIndexIndicator({ uvi }: { uvi: number }) {
@@ -26,7 +34,6 @@ function UVIndexIndicator({ uvi }: { uvi: number }) {
     </div>
   );
 }
-
 
 export default function WeatherWidget() {
   const { weather, loading, error } = useWeather();
@@ -83,18 +90,23 @@ export default function WeatherWidget() {
               <Thermometer className="w-6 h-6 text-red-500" />
               <div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">Temperature</div>
-                <div className="text-2xl font-bold dark:text-white">{currentWeather.temperature}°C</div>
+                <div className="text-2xl font-bold dark:text-white">
+                  {currentWeather.temperature}°C
+                </div>
               </div>
             </div>
             <div className="text-sm text-gray-600 dark:text-gray-400 pl-9">
-              Feels like <span className="font-medium dark:text-gray-300">{currentWeather.feels_like}°C</span>
+              Feels like{' '}
+              <span className="font-medium dark:text-gray-300">{currentWeather.feels_like}°C</span>
             </div>
           </div>
-          {currentWeather.icon && (<img 
-            src={`https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png`}
-            alt={currentWeather.description}
-            className="w-16 h-16"
-          />)}
+          {currentWeather.icon && (
+            <img
+              src={`https://openweathermap.org/img/wn/${currentWeather.icon}@2x.png`}
+              alt={currentWeather.description}
+              className="w-16 h-16"
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -102,7 +114,9 @@ export default function WeatherWidget() {
             <Droplets className="w-5 h-5 text-blue-500" />
             <div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Humidity</div>
-              <div className="text-xl font-semibold dark:text-white">{currentWeather.humidity}%</div>
+              <div className="text-xl font-semibold dark:text-white">
+                {currentWeather.humidity}%
+              </div>
             </div>
           </div>
 
@@ -110,7 +124,9 @@ export default function WeatherWidget() {
             <Gauge className="w-5 h-5 text-teal-500" />
             <div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Pressure</div>
-              <div className="text-xl font-semibold dark:text-white">{currentWeather.pressure} hPa</div>
+              <div className="text-xl font-semibold dark:text-white">
+                {currentWeather.pressure} hPa
+              </div>
             </div>
           </div>
         </div>

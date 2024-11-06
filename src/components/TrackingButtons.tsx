@@ -6,25 +6,18 @@ import MedicationForm from './forms/MedicationForm';
 import IncidentForm from './forms/IncidentForm';
 
 export default function TrackingButtons() {
-  const [activeModal, setActiveModal] = useState<'symptom' | 'medication' | 'incident' | null>(null);
+  const [activeModal, setActiveModal] = useState<'symptom' | 'medication' | 'incident' | null>(
+    null
+  );
 
   return (
     <>
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
         <h2 className="text-lg font-semibold mb-4 dark:text-white">Track Health</h2>
         <div className="flex flex-col gap-3">
-          <AddButton
-            label="Add Symptom"
-            onClick={() => setActiveModal('symptom')}
-          />
-          <AddButton
-            label="Add Medication"
-            onClick={() => setActiveModal('medication')}
-          />
-          <AddButton
-            label="Record Incident"
-            onClick={() => setActiveModal('incident')}
-          />
+          <AddButton label="Add Symptom" onClick={() => setActiveModal('symptom')} />
+          <AddButton label="Add Medication" onClick={() => setActiveModal('medication')} />
+          <AddButton label="Record Incident" onClick={() => setActiveModal('incident')} />
         </div>
       </div>
 
