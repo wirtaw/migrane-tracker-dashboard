@@ -4,6 +4,8 @@ interface EnvConfig {
   LATITUDE: number;
   LONGITUDE: number;
   BIRTH_DATE: string;
+  SUPBASE_URL: string;
+  SUPBASE_KEY: string;
 }
 
 export const env: EnvConfig = {
@@ -12,4 +14,6 @@ export const env: EnvConfig = {
   LATITUDE: Number.parseFloat(import.meta.env.VITE_LATITUDE) || 51.5074,
   LONGITUDE: Number.parseFloat(import.meta.env.VITE_LONGITUDE) || -0.1278,
   BIRTH_DATE: import.meta.env.VITE_BIRTH_DATE || '',
+  SUPBASE_URL: import.meta.env.VITE_SUPBASE_URL || '',
+  SUPBASE_KEY: import.meta.env.VITE_SUPBASE_KEY || '',
 };

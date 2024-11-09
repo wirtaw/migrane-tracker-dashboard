@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Calendar, MapPin, Settings } from 'lucide-react';
 import { env } from '../config/env';
 import { useTheme } from '../context/ThemeContext';
+import { supabase } from '../lib/supabase.ts';
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
@@ -29,11 +30,25 @@ export default function Profile() {
     setSaveStatus('idle');
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setSaveStatus('success');
-      // Here you would typically save to your backend
-      console.log('Saved:', formData);
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('migrane_tracker-users')
+          .insert([
+            {
+              birthdate: formData.birthDate,
+              latitude: formData.latitude,
+              longitude: formData.longitude,
+            },
+          ])
+          .select();
+
+        if (error) {
+          throw error;
+        }
+        setSaveStatus('success');
+        // Here you would typically save to your backend
+        console.log('Saved:', data);
+      }
     } catch (error) {
       console.error(error);
       setSaveStatus('error');

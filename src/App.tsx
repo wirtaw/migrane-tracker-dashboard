@@ -7,20 +7,33 @@ import Profile from './pages/Profile';
 import Main from './pages/Main';
 import Legal from './pages/Legal';
 import Privacy from './pages/Privacy';
+import SignIn from './pages/SignIn';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 
 export function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Main />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="about" element={<About />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="legal" element={<Legal />} />
-          <Route path="privacy" element={<Privacy />} />
-        </Route>
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Main />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="about" element={<About />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="legal" element={<Legal />} />
+            <Route path="privacy" element={<Privacy />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
