@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 
 interface AuthContextType {
@@ -11,6 +11,23 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const userExists = async (supabase: SupabaseClient, userId: string) => {
+  if (!supabase) {
+    throw new Error('Problem to connect supbase');
+  }
+
+  const { data: users, error } = await supabase
+    .from('migrane_tracker-users')
+    .select('user_id,email,username')
+    .eq('user_id', userId);
+
+  if (error) {
+    throw error;
+  }
+
+  return users;
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -41,14 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (_event === 'INITIAL_SESSION') {
         // handle initial session
       } else if (_event === 'SIGNED_IN') {
-        const { data: users, error } = await supabase
-          .from('migrane_tracker-users')
-          .select('some_column,other_column')
-          .eq('user_id', session?.user.id);
-
-        if (error) {
-          throw error;
-        }
+        const users = await userExists(supabase, session?.user.id);
 
         if (!users?.length) {
           const { data: inserted, error: error2 } = await supabase

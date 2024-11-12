@@ -1,7 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Brain } from 'lucide-react';
+import { Brain, PowerOff } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { useAuth } from '../context/AuthContext';
 
 export function Header() {
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -10,6 +11,7 @@ export function Header() {
         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
         : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
     }`;
+  const { signOut } = useAuth();
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm">
@@ -33,6 +35,14 @@ export function Header() {
               Profile
             </NavLink>
             <ThemeToggle />
+            <button
+              onClick={signOut}
+              className="group relative w-full flex justify-center border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+            >
+              <span className="absolute left-0 inset-y-0 flex items-center">
+                <PowerOff />
+              </span>
+            </button>
           </nav>
         </div>
       </div>
