@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { User, Calendar, MapPin, Settings } from 'lucide-react';
 import { env } from '../config/env';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
 
 export default function Profile() {
+  const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [formData, setFormData] = useState({
     birthDate: env.BIRTH_DATE,
@@ -30,16 +32,17 @@ export default function Profile() {
     setSaveStatus('idle');
 
     try {
-      if (supabase) {
+      if (supabase && user?.id) {
         const { data, error } = await supabase
           .from('migrane_tracker-users')
-          .insert([
+          .update(
             {
               birthdate: formData.birthDate,
               latitude: formData.latitude,
               longitude: formData.longitude,
-            },
-          ])
+            }
+          )
+          .eq('user_id', user.id)
           .select();
 
         if (error) {
@@ -68,7 +71,7 @@ export default function Profile() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Profile</h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Manage your account settings and preferences
+                Manage your {user?.email} account settings and preferences
               </p>
             </div>
           </div>
