@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Calendar, MapPin, Settings } from 'lucide-react';
 import { env } from '../config/env';
 import { useTheme } from '../context/ThemeContext';
@@ -6,8 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
 
 export default function Profile() {
-  const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     birthDate: env.BIRTH_DATE,
     latitude: env.LATITUDE.toString(),
@@ -17,6 +17,34 @@ export default function Profile() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (supabase && user?.id) {
+        const { data, error } = await supabase
+          .from('migrane_tracker-users')
+          .select('birthdate, latitude, longitude')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user data:', error);
+          return;
+        }
+
+        if (data) {
+          setFormData(prev => ({
+            ...prev,
+            birthDate: data.birthdate || env.BIRTH_DATE,
+            latitude: data.latitude?.toString() || env.LATITUDE.toString(),
+            longitude: data.longitude?.toString() || env.LONGITUDE.toString(),
+          }));
+        }
+      }
+    }
+
+    fetchUserData();
+  }, [user?.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -35,13 +63,11 @@ export default function Profile() {
       if (supabase && user?.id) {
         const { data, error } = await supabase
           .from('migrane_tracker-users')
-          .update(
-            {
-              birthdate: formData.birthDate,
-              latitude: formData.latitude,
-              longitude: formData.longitude,
-            }
-          )
+          .update({
+            birthdate: formData.birthDate,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+          })
           .eq('user_id', user.id)
           .select();
 
@@ -49,7 +75,6 @@ export default function Profile() {
           throw error;
         }
         setSaveStatus('success');
-        // Here you would typically save to your backend
         console.log('Saved:', data);
       }
     } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BiorhythmChart from '../components/BiorhythmChart';
 import CalendarView from '../components/CalendarView';
 import LifeMetrics from '../components/LifeMetrics';
@@ -6,9 +6,35 @@ import WeatherWidget from '../components/WeatherWidget';
 import GeoMagneticWidget from '../components/GeoMagneticWidget';
 import TrackingButtons from '../components/TrackingButtons';
 import { env } from '../config/env';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase.ts';
 
 export default function Dashboard() {
-  const [birthDate] = useState(new Date(env.BIRTH_DATE));
+  const { user } = useAuth();
+  const [birthDate, setBirthDate] = useState(new Date(env.BIRTH_DATE));
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (supabase && user?.id) {
+        const { data, error } = await supabase
+          .from('migrane_tracker-users')
+          .select('birthdate, latitude, longitude')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user data:', error);
+          return;
+        }
+
+        if (data) {
+          setBirthDate(new Date(data.birthdate));
+        }
+      }
+    }
+
+    fetchUserData();
+  }, [user?.id]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
