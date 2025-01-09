@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ListsProvider } from './../context/ListsContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,5 +22,5 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/signin" replace />;
   }
 
-  return <>{children}</>;
+  return <ListsProvider>{children}</ListsProvider>;
 }

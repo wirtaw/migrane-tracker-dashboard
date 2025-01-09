@@ -4,6 +4,10 @@ import { env } from '../config/env';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
+import MedicationForm from './../components/forms/MedicationForm';
+import SymptomForm from './../components/forms/SymptomForm';
+import IncidentForm from './../components/forms/IncidentForm';
+import { useListsContext } from './../context/ListsContext';
 
 export default function Profile() {
   const { theme, toggleTheme } = useTheme();
@@ -17,7 +21,50 @@ export default function Profile() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const { medicationList, symptomList, incidentList, triggerList } = useListsContext();
+  const [isMedicationModalOpen, setMedicationModalOpen] = useState(false);
+  const [isSymptomModalOpen, setSymptomModalOpen] = useState(false);
+  const [isIncidentModalOpen, setIncidentModalOpen] = useState(false);
+  const [isTriggerModalOpen, setTriggerModalOpen] = useState(false);
 
+  const handleOpenModal = (modalType: string) => {
+    switch (modalType) {
+      case 'medication':
+        setMedicationModalOpen(true);
+        break;
+      case 'symptom':
+        setSymptomModalOpen(true);
+        break;
+      case 'incident':
+        setIncidentModalOpen(true);
+        break;
+      case 'trigger':
+        setTriggerModalOpen(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const handleCloseModal = (modalType: string) => {
+    switch (modalType) {
+      case 'medication':
+        setMedicationModalOpen(false);
+        break;
+      case 'symptom':
+        setSymptomModalOpen(false);
+        break;
+      case 'incident':
+        setIncidentModalOpen(false);
+        break;
+      case 'trigger':
+        setTriggerModalOpen(false);
+        break;
+      default:
+        break;
+    }
+  };
+  
   useEffect(() => {
     async function fetchUserData() {
       if (supabase && user?.id) {
@@ -166,6 +213,62 @@ export default function Profile() {
 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
+                <User className="w-5 h-5 text-indigo-500" />
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Info</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h2>Medications</h2>
+                <ul>
+                {medicationList.length && medicationList.map((medication: string, index: number) => (
+                  <li key={index}>{medication}</li>
+                ))}
+              </ul>
+                <button onClick={() => handleOpenModal('medication')}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                  >Modify Medications</button>
+              </div>
+
+              <div>
+                <h2>Symptoms</h2>
+                <ul>
+                  {symptomList.length && symptomList.map((symptom: string, index: number) => (
+                    <li key={index}>{symptom}</li>
+                  ))}
+                </ul>
+                <button onClick={() => handleOpenModal('symptom')}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                  >Modify Symptoms</button>
+              </div>
+
+              <div>
+                <h2>Incidents</h2>
+                <ul>
+                  {incidentList.length && incidentList.map((incident: string, index: number) => (
+                    <li key={index}>{incident}</li>
+                  ))}
+                </ul>
+                <button onClick={() => handleOpenModal('incident')}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                  >Modify Incidents</button>
+              </div>
+
+              <div>
+                <h2>Potential Triggers</h2>
+                <ul>
+                  {triggerList.length && triggerList.map((trigger: string, index: number) => (
+                    <li key={index}>{trigger}</li>
+                  ))}
+                </ul>
+                <button onClick={() => handleOpenModal('trigger')}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                  >Modify Triggers</button>
+              </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-indigo-500" />
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                   Preferences
@@ -227,7 +330,24 @@ export default function Profile() {
             </button>
           </div>
         </form>
-      </div>
+        </div>
+        {isMedicationModalOpen && (
+          <div className="modal">
+            <MedicationForm onSubmit={() => handleCloseModal('medication')} />
+          </div>
+        )}
+
+        {isSymptomModalOpen && (
+          <div className="modal">
+            <SymptomForm onSubmit={() => handleCloseModal('symptom')} />
+          </div>
+        )}
+
+        {isIncidentModalOpen && (
+          <div className="modal">
+            <IncidentForm onSubmit={() => handleCloseModal('incident')} />
+          </div>
+        )}
     </main>
   );
 }
