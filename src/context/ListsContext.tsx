@@ -20,7 +20,7 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     'Ibuprofen',
     'Paracetamol',
     'Amoxicillin',
-    'Metformin'
+    'Metformin',
   ]);
 
   const [symptomList, setSymptomList] = useState<string[]>([
@@ -31,17 +31,17 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     'Nausea',
     'Noise Sensitivity',
     'Smelly',
-    'Weather (loud wind)'
+    'Weather (loud wind)',
   ]);
 
   const [incidentList, setIncidentList] = useState<string[]>([
     'Migraine Attack',
-	'Aura Episode',
-	'Tension Headache',
+    'Aura Episode',
+    'Tension Headache',
     'Fever',
     'Cold',
     'Flu',
-    'Other'
+    'Other',
   ]);
 
   const [triggerList, setTriggerList] = useState<string[]>([
@@ -50,11 +50,22 @@ export const ListsProvider = ({ children }: { children: ReactNode }) => {
     'Food',
     'Weather',
     'Exercise',
-    'Medication'
+    'Medication',
   ]);
 
   return (
-    <ListsContext.Provider value={{ medicationList, setMedicationList, symptomList, setSymptomList, incidentList, setIncidentList, triggerList, setTriggerList }}>
+    <ListsContext.Provider
+      value={{
+        medicationList,
+        setMedicationList,
+        symptomList,
+        setSymptomList,
+        incidentList,
+        setIncidentList,
+        triggerList,
+        setTriggerList,
+      }}
+    >
       {children}
     </ListsContext.Provider>
   );
