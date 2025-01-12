@@ -12,6 +12,17 @@ import { supabase } from '../lib/supabase.ts';
 export default function Dashboard() {
   const { user } = useAuth();
   const [birthDate, setBirthDate] = useState(new Date(env.BIRTH_DATE));
+  const currentMonth = new Date();
+
+  const daysInMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() + 1,
+    0
+  ).getDate();
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   useEffect(() => {
     async function fetchUserData() {
@@ -40,7 +51,7 @@ export default function Dashboard() {
     <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <CalendarView />
+          <CalendarView weekDays={weekDays} firstDayOfMonth={firstDayOfMonth} days={days} />
         </div>
         <div>
           <WeatherWidget />
