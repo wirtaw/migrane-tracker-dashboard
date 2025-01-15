@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
-import { useListsContext } from '../../context/ListsContext';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface IncidentManageFormProps {
   onSubmit: () => void;
 }
 
 export default function IncidentManageForm({ onSubmit }: IncidentManageFormProps) {
-  const { incidentList, setIncidentList } = useListsContext();
-  const [selectedIncidents, setSelectedIncidents] = useState<string[]>([...incidentList]);
+  const { incidentEnumList, setIncidentEnumList } = useProfileDataContext();
+  const [selectedIncidents, setSelectedIncidents] = useState<string[]>([...incidentEnumList]);
   const [newIncident, setNewIncident] = useState('');
 
   const handleItemClick = (incident: string) => {
     if (!selectedIncidents.includes(incident)) {
       setSelectedIncidents([...selectedIncidents, incident]);
-      setIncidentList([...selectedIncidents, incident]);
+      setIncidentEnumList([...selectedIncidents, incident]);
     }
   };
 
   const handleRemoveItem = (incident: string) => {
     setSelectedIncidents(selectedIncidents.filter(item => item !== incident));
-    setIncidentList([...selectedIncidents.filter(item => item !== incident)]);
+    setIncidentEnumList([...selectedIncidents.filter(item => item !== incident)]);
   };
 
   const handleAddNewItem = () => {
-    if (newIncident && !incidentList.includes(newIncident)) {
-      setIncidentList([...incidentList, newIncident]);
+    if (newIncident && !incidentEnumList.includes(newIncident)) {
+      setIncidentEnumList([...incidentEnumList, newIncident]);
       setSelectedIncidents([...selectedIncidents, newIncident]);
       setNewIncident('');
     }
@@ -75,7 +75,7 @@ export default function IncidentManageForm({ onSubmit }: IncidentManageFormProps
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
         <div className="mt-2 flex flex-wrap gap-2">
-          {incidentList.map((incident, index) => (
+          {incidentEnumList.map((incident, index) => (
             <button
               key={index}
               type="button"

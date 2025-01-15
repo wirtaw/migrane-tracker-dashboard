@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Modal from './../components/Modal';
+import { useProfileDataContext } from '../context/ProfileDataContext';
 
 interface CalendarItem {
   type: 'Incident' | 'Medication' | 'Trigger';
   name: string;
+  userId: string;
 }
 
 interface ModalContent {
@@ -18,38 +20,26 @@ interface CalendarViewProps {
   days: number[];
 }
 
-const incidents = [
-  { date: '2025-01-01', name: 'Headache' },
-  { date: '2025-01-05', name: 'Migraine' },
-];
-
-const medications = [
-  { date: '2025-01-01', name: 'Aspirin' },
-  { date: '2025-01-06', name: 'Ibuprofen' },
-];
-
-const triggers = [
-  { date: '2025-01-01', name: 'Stress' },
-  { date: '2025-01-07', name: 'Lack of Sleep' },
-];
-
 const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, days }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [activeModal, setActiveModal] = useState<'details' | null>(null);
+  const { incidentList, medicationList, triggerList } = useProfileDataContext();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [modalContent, setModalContent] = useState<ModalContent | null>(null);
 
+  const getIsoDate = (date: Date): string => date.toISOString().split('T')[0] || '';
+
   const handleDayClick = (date: string) => {
-    const incidentItems: CalendarItem[] = incidents
-      .filter(item => item.date === date)
-      .map(({ name }) => ({ type: 'Incident', name }));
-    const medicationItems: CalendarItem[] = medications
-      .filter(item => item.date === date)
-      .map(({ name }) => ({ type: 'Medication', name }));
-    const triggerItems: CalendarItem[] = triggers
-      .filter(item => item.date === date)
-      .map(({ name }) => ({ type: 'Trigger', name }));
+    const incidentItems: CalendarItem[] = incidentList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ type, userId }) => ({ type: 'Incident', name: type, userId }));
+    const medicationItems: CalendarItem[] = medicationList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ title, userId }) => ({ type: 'Medication', name: title, userId }));
+    const triggerItems: CalendarItem[] = triggerList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ type, userId }) => ({ type: 'Trigger', name: type, userId }));
 
     const items: CalendarItem[] | [] = [...incidentItems, ...medicationItems, ...triggerItems];
 
@@ -112,9 +102,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, 
           const year = currentMonth.getFullYear();
           const month = currentMonth.getMonth() + 1;
           const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-          const hasIncident = incidents.some(item => item.date === date);
-          const hasMedication = medications.some(item => item.date === date);
-          const hasTrigger = triggers.some(item => item.date === date);
+          const hasIncident = incidentList.some(item => getIsoDate(item.datetimeAt) === date);
+          const hasMedication = medicationList.some(item => getIsoDate(item.datetimeAt) === date);
+          const hasTrigger = triggerList.some(item => getIsoDate(item.datetimeAt) === date);
 
           return (
             <div
@@ -144,7 +134,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, 
           </h2>
           <ul className="mt-4">
             {modalContent.items.map((item, index) => (
-              <li key={index} className="mt-2 dark:text-white shadow-sm">
+              <li key={index} className="mt-2 dark:text-white shadow-sm" data-user-id={item.userId}>
                 <span className="font-medium">{item.type}:</span> {item.name}
               </li>
             ))}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useListsContext } from './../../context/ListsContext';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface IncidentFormProps {
   onSubmit: () => void;
@@ -7,7 +7,7 @@ interface IncidentFormProps {
 
 export default function IncidentForm({ onSubmit }: IncidentFormProps) {
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { incidentList, triggerList } = useListsContext();
+  const { incidentEnumList, triggerEnumList } = useProfileDataContext();
 
   const handleTagClick = (tag: string) => {
     setTriggers([...new Set([...triggers, tag])]);
@@ -39,7 +39,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           <option value="" disabled>
             Select a type
           </option>
-          {incidentList.map((option, index) => (
+          {incidentEnumList.map((option, index) => (
             <option key={index} value={option}>
               {option}
             </option>
@@ -92,7 +92,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
         <div className="mt-2 flex flex-wrap gap-2">
-          {triggerList.map((trigger, index) => (
+          {triggerEnumList.map((trigger, index) => (
             <button
               key={index}
               type="button"

@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
-import { useListsContext } from '../../context/ListsContext';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface MedicationManageFormProps {
   onSubmit: () => void;
 }
 
 export default function MedicationManageForm({ onSubmit }: MedicationManageFormProps) {
-  const { medicationList, setMedicationList } = useListsContext();
-  const [selectedMedications, setSelectedMedications] = useState<string[]>([...medicationList]);
+  const { medicationEnumList, setMedicationEnumList } = useProfileDataContext();
+  const [selectedMedications, setSelectedMedications] = useState<string[]>([...medicationEnumList]);
   const [newMedication, setNewMedication] = useState('');
 
   const handleItemClick = (medication: string) => {
     if (!selectedMedications.includes(medication)) {
       setSelectedMedications([...selectedMedications, medication]);
-      setMedicationList([...selectedMedications, medication]);
+      setMedicationEnumList([...selectedMedications, medication]);
     }
   };
 
   const handleRemoveItem = (medication: string) => {
     setSelectedMedications(selectedMedications.filter(item => item !== medication));
-    setMedicationList([...selectedMedications.filter(item => item !== medication)]);
+    setMedicationEnumList([...selectedMedications.filter(item => item !== medication)]);
   };
 
   const handleAddNewItem = () => {
-    if (newMedication && !medicationList.includes(newMedication)) {
-      setMedicationList([...medicationList, newMedication]);
+    if (newMedication && !medicationEnumList.includes(newMedication)) {
+      setMedicationEnumList([...medicationEnumList, newMedication]);
       setSelectedMedications([...selectedMedications, newMedication]);
       setNewMedication('');
     }
@@ -74,7 +74,7 @@ export default function MedicationManageForm({ onSubmit }: MedicationManageFormP
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
         <div className="mt-2 flex flex-wrap gap-2">
-          {medicationList.map((medication, index) => (
+          {medicationEnumList.map((medication, index) => (
             <button
               key={index}
               type="button"

@@ -8,7 +8,6 @@ import MedicationManageForm from './../components/forms/MedicationManageForm';
 import IncidentManageForm from '../components/forms/IncidentManageForm';
 import TriggerManageForm from '../components/forms/TriggerManageForm';
 import SymptomManageForm from '../components/forms/SymptomManageForm';
-import { useListsContext } from './../context/ListsContext';
 import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
 
@@ -24,7 +23,6 @@ export default function Profile() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const { medicationList } = useListsContext();
   const [activeModal, setActiveModal] = useState<
     'symptom' | 'medication' | 'incident' | 'trigger' | null
   >(null);
@@ -192,11 +190,6 @@ export default function Profile() {
                       label="Manage Medications"
                       onClick={() => setActiveModal('medication')}
                     />
-                    <ul className="list-disc list-inside">
-                      {medicationList.map((medication, index) => (
-                        <li key={index}>{medication}</li>
-                      ))}
-                    </ul>
                   </div>
 
                   <div>

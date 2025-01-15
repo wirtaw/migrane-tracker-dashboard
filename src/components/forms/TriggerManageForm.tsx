@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
-import { useListsContext } from '../../context/ListsContext';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface TriggerManageFormProps {
   onSubmit: () => void;
 }
 
 export default function TriggerManageForm({ onSubmit }: TriggerManageFormProps) {
-  const { triggerList, setTriggerList } = useListsContext();
-  const [selectedTriggers, setSelectedTriggers] = useState<string[]>([...triggerList]);
+  const { triggerEnumList, setTriggerEnumList } = useProfileDataContext();
+  const [selectedTriggers, setSelectedTriggers] = useState<string[]>([...triggerEnumList]);
   const [newTrigger, setNewTrigger] = useState('');
 
   const handleItemClick = (trigger: string) => {
     if (!selectedTriggers.includes(trigger)) {
       setSelectedTriggers([...selectedTriggers, trigger]);
-      setTriggerList([...selectedTriggers, trigger]);
+      setTriggerEnumList([...selectedTriggers, trigger]);
     }
   };
 
   const handleRemoveItem = (trigger: string) => {
     setSelectedTriggers(selectedTriggers.filter(item => item !== trigger));
-    setTriggerList([...selectedTriggers.filter(item => item !== trigger)]);
+    setTriggerEnumList([...selectedTriggers.filter(item => item !== trigger)]);
   };
 
   const handleAddNewItem = () => {
-    if (newTrigger && !triggerList.includes(newTrigger)) {
-      setTriggerList([...triggerList, newTrigger]);
+    if (newTrigger && !triggerEnumList.includes(newTrigger)) {
+      setTriggerEnumList([...triggerEnumList, newTrigger]);
       setSelectedTriggers([...selectedTriggers, newTrigger]);
       setNewTrigger('');
     }
@@ -75,7 +75,7 @@ export default function TriggerManageForm({ onSubmit }: TriggerManageFormProps) 
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
         <div className="mt-2 flex flex-wrap gap-2">
-          {triggerList.map((trigger, index) => (
+          {triggerEnumList.map((trigger, index) => (
             <button
               key={index}
               type="button"

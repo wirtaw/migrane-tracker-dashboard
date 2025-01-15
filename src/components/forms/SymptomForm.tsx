@@ -1,12 +1,12 @@
 import React from 'react';
-import { useListsContext } from './../../context/ListsContext';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface SymptomFormProps {
   onSubmit: () => void;
 }
 
 export default function SymptomForm({ onSubmit }: SymptomFormProps) {
-  const { symptomList } = useListsContext();
+  const { symptomEnumList } = useProfileDataContext();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +30,7 @@ export default function SymptomForm({ onSubmit }: SymptomFormProps) {
           <option value="" disabled>
             Select a symptom
           </option>
-          {symptomList.map((option, index) => (
+          {symptomEnumList.map((option, index) => (
             <option key={index} value={option}>
               {option}
             </option>

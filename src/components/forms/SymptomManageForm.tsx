@@ -1,30 +1,30 @@
 import React, { useState } from 'react';
-import { useListsContext } from '../../context/ListsContext';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface SymptomManageFormProps {
   onSubmit: () => void;
 }
 
 export default function SymptomManageForm({ onSubmit }: SymptomManageFormProps) {
-  const { symptomList, setSymptomList } = useListsContext();
-  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([...symptomList]);
+  const { symptomEnumList, setSymptomEnumList } = useProfileDataContext();
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([...symptomEnumList]);
   const [newSymptom, setNewSymptom] = useState('');
 
   const handleItemClick = (symptom: string) => {
     if (!selectedSymptoms.includes(symptom)) {
       setSelectedSymptoms([...selectedSymptoms, symptom]);
-      setSymptomList([...selectedSymptoms, symptom]);
+      setSymptomEnumList([...selectedSymptoms, symptom]);
     }
   };
 
   const handleRemoveItem = (symptom: string) => {
     setSelectedSymptoms(selectedSymptoms.filter(item => item !== symptom));
-    setSymptomList([...selectedSymptoms.filter(item => item !== symptom)]);
+    setSymptomEnumList([...selectedSymptoms.filter(item => item !== symptom)]);
   };
 
   const handleAddNewItem = () => {
-    if (newSymptom && !symptomList.includes(newSymptom)) {
-      setSymptomList([...symptomList, newSymptom]);
+    if (newSymptom && !symptomEnumList.includes(newSymptom)) {
+      setSymptomEnumList([...symptomEnumList, newSymptom]);
       setSelectedSymptoms([...selectedSymptoms, newSymptom]);
       setNewSymptom('');
     }
@@ -75,7 +75,7 @@ export default function SymptomManageForm({ onSubmit }: SymptomManageFormProps) 
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
         <div className="mt-2 flex flex-wrap gap-2">
-          {symptomList.map((symptom, index) => (
+          {symptomEnumList.map((symptom, index) => (
             <button
               key={index}
               type="button"
