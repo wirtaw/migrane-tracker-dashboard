@@ -39,3 +39,47 @@ export interface Medication {
   createdAt: Date;
   updateAt: Date;
 }
+
+export interface Weight {
+  id: number;
+  userId: string;
+  weight: number;
+  notes: string;
+  datetimeAt: Date;
+}
+
+export interface Height {
+  id: number;
+  userId: string;
+  height: number;
+  notes: string;
+  datetimeAt: Date;
+}
+
+export interface BloodPressure {
+  id: number;
+  userId: string;
+  systolic: number;
+  diastolic: number;
+  notes: string;
+  datetimeAt: Date;
+}
+
+export interface Location {
+  latitude: number;
+  longitude: number;
+  forecast: {
+    description: string;
+    temperature: number;
+    pressure: number;
+    humidity: number;
+    windSpeed: number;
+  };
+  solar: {
+    kIndex: number;
+    aIndex: number;
+    bIndex: number;
+    flareProbability: number;
+  };
+  datetimeAt: Date;
+}

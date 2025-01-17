@@ -4,11 +4,14 @@ import Modal from './Modal';
 import SymptomForm from './forms/SymptomForm';
 import MedicationForm from './forms/MedicationForm';
 import IncidentForm from './forms/IncidentForm';
+import WeightForm from './forms/WeightForm';
+import HeightForm from './forms/HeightForm';
+import BloodPressureForm from './forms/BloodPressureForm';
 
 export default function TrackingButtons() {
-  const [activeModal, setActiveModal] = useState<'symptom' | 'medication' | 'incident' | null>(
-    null
-  );
+  const [activeModal, setActiveModal] = useState<
+    'symptom' | 'medication' | 'incident' | 'weight' | 'height' | 'bloodPressure' | null
+  >(null);
 
   return (
     <>
@@ -18,6 +21,12 @@ export default function TrackingButtons() {
           <AddButton label="Add Symptom" onClick={() => setActiveModal('symptom')} />
           <AddButton label="Add Medication" onClick={() => setActiveModal('medication')} />
           <AddButton label="Record Incident" onClick={() => setActiveModal('incident')} />
+          <AddButton label="Record Weight" onClick={() => setActiveModal('weight')} />
+          <AddButton
+            label="Record Blood pressure"
+            onClick={() => setActiveModal('bloodPressure')}
+          />
+          <AddButton label="Record Height" onClick={() => setActiveModal('height')} />
         </div>
       </div>
 
@@ -43,6 +52,30 @@ export default function TrackingButtons() {
         title="Record Incident"
       >
         <IncidentForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+
+      <Modal
+        isOpen={activeModal === 'weight'}
+        onClose={() => setActiveModal(null)}
+        title="Manage Weight"
+      >
+        <WeightForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+
+      <Modal
+        isOpen={activeModal === 'height'}
+        onClose={() => setActiveModal(null)}
+        title="Manage Height"
+      >
+        <HeightForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+
+      <Modal
+        isOpen={activeModal === 'bloodPressure'}
+        onClose={() => setActiveModal(null)}
+        title="Manage Blood Pressure"
+      >
+        <BloodPressureForm onSubmit={() => setActiveModal(null)} />
       </Modal>
     </>
   );

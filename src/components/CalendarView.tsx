@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Modal from './../components/Modal';
 import { useProfileDataContext } from '../context/ProfileDataContext';
+import { getIsoDate } from '../lib/utils.ts';
 
 interface CalendarItem {
   type: 'Incident' | 'Medication' | 'Trigger';
@@ -27,8 +28,6 @@ const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, 
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [modalContent, setModalContent] = useState<ModalContent | null>(null);
-
-  const getIsoDate = (date: Date): string => date.toISOString().split('T')[0] || '';
 
   const handleDayClick = (date: string) => {
     const incidentItems: CalendarItem[] = incidentList

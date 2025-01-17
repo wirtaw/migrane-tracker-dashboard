@@ -1,6 +1,14 @@
 // ProfileDataContext.tsx
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { Trigger, Incident, Medication, Symptom } from '../models/profileData.types';
+import {
+  Trigger,
+  Incident,
+  Medication,
+  Symptom,
+  Weight,
+  Height,
+  BloodPressure,
+} from '../models/profileData.types';
 import { useAuth } from './AuthContext';
 
 interface ProfileDataContextProps {
@@ -20,6 +28,12 @@ interface ProfileDataContextProps {
   setIncidentEnumList: React.Dispatch<React.SetStateAction<string[]>>;
   triggerEnumList: string[];
   setTriggerEnumList: React.Dispatch<React.SetStateAction<string[]>>;
+  weightList: Weight[];
+  setWeightList: React.Dispatch<React.SetStateAction<Weight[]>>;
+  heightList: Height[];
+  setHeightList: React.Dispatch<React.SetStateAction<Height[]>>;
+  bloodPressureList: BloodPressure[];
+  setBloodPressureList: React.Dispatch<React.SetStateAction<BloodPressure[]>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -159,6 +173,59 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     'Medication',
   ]);
 
+  const [weightList, setWeightList] = useState<Weight[]>([
+    {
+      id: 1,
+      userId,
+      weight: 70,
+      notes: 'Normal weight',
+      datetimeAt: new Date('2025-01-01'),
+    },
+    {
+      id: 2,
+      userId,
+      weight: 72,
+      notes: 'Normal weight',
+      datetimeAt: new Date('2025-01-07'),
+    },
+  ]);
+
+  const [heightList, setHeightList] = useState<Height[]>([
+    {
+      id: 1,
+      userId,
+      height: 172,
+      notes: 'Normal height',
+      datetimeAt: new Date('2025-01-01'),
+    },
+    {
+      id: 2,
+      userId,
+      height: 172,
+      notes: 'Normal height',
+      datetimeAt: new Date('2025-01-07'),
+    },
+  ]);
+
+  const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([
+    {
+      id: 1,
+      userId,
+      systolic: 120,
+      diastolic: 80,
+      notes: 'Normal blood pressure',
+      datetimeAt: new Date('2025-01-01'),
+    },
+    {
+      id: 2,
+      userId,
+      systolic: 130,
+      diastolic: 90,
+      notes: 'Normal blood pressure',
+      datetimeAt: new Date('2025-01-07'),
+    },
+  ]);
+
   return (
     <ProfileDataContext.Provider
       value={{
@@ -178,6 +245,12 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setIncidentEnumList,
         triggerEnumList,
         setTriggerEnumList,
+        weightList,
+        setWeightList,
+        heightList,
+        setHeightList,
+        bloodPressureList,
+        setBloodPressureList,
       }}
     >
       {children}
