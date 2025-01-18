@@ -1,35 +1,45 @@
 import React, { useState } from 'react';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
+import { BloodPressure } from '../../models/profileData.types';
+import { getIsoDate } from '../../lib/utils.ts';
 
 interface BloodPressureFormProps {
-  onSubmit: (systolic: number, diastolic: number) => void;
+  onSubmit: () => void;
 }
 
 const BloodPressureForm: React.FC<BloodPressureFormProps> = ({ onSubmit }) => {
+  const { bloodPressureList, setBloodPressureList } = useProfileDataContext();
+
+  const [selectedBloodPressure, setSelectedBloodPressure] = useState<BloodPressure[]>([
+    ...bloodPressureList,
+  ]);
   const [systolic, setSystolic] = useState<number | ''>('');
   const [diastolic, setDiastolic] = useState<number | ''>('');
   const [dateTime, setDateTime] = useState<string>('');
+  const [notes, setNotes] = useState<string | ''>('');
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (systolic !== '' && diastolic !== '') {
-      onSubmit(systolic, diastolic);
-      setSystolic('');
-      setDiastolic('');
-    }
+  const handleItemClick = (id: number) => {
+    setSelectedBloodPressure(selectedBloodPressure.filter(item => item.id !== id));
+    setBloodPressureList(selectedBloodPressure.filter(item => item.id !== id));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit();
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label
-          htmlFor="start"
+          htmlFor="dateTime"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           DateTime
         </label>
         <input
-          type="date-local"
-          id="start"
+          type="datetime-local"
+          id="dateTime"
           value={dateTime}
           onChange={e => setDateTime(e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
@@ -56,6 +66,58 @@ const BloodPressureForm: React.FC<BloodPressureFormProps> = ({ onSubmit }) => {
           onChange={e => setDiastolic(Number(e.target.value))}
           required
         />
+      </div>
+      <div>
+        <label htmlFor="notes">Notes:</label>
+        <textarea
+          id="notes"
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+        ></textarea>
+      </div>
+      <div>
+        <button
+          type="button"
+          onClick={() => {
+            const item: BloodPressure = {
+              id: Math.max(...bloodPressureList.map(item => item.id)) + 1,
+              userId: '1',
+              systolic: systolic as number,
+              diastolic: diastolic as number,
+              notes: notes as string,
+              datetimeAt: new Date(dateTime),
+            };
+            setSelectedBloodPressure([...selectedBloodPressure, item]);
+            setBloodPressureList([...selectedBloodPressure, item]);
+          }}
+          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Add Blood Pressure
+        </button>
+      </div>
+      <div>
+        <label
+          htmlFor="bloodPressureList"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
+          Blood Pressure List
+        </label>
+        <ul
+          id="bloodPressureList"
+          className="mt-1 divide-y divide-gray-200 dark:divide-gray-700 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+        >
+          {bloodPressureList.map(({ id, systolic, diastolic, datetimeAt }: BloodPressure) => (
+            <li key={id} className="flex justify-between">
+              <span>
+                {systolic}/{diastolic} - {getIsoDate(datetimeAt)}
+              </span>
+              <button type="button" onClick={() => handleItemClick(id)} className="text-red-500">
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
       <div className="flex justify-end gap-3">
         <button

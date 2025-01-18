@@ -83,3 +83,14 @@ export interface Location {
   };
   datetimeAt: Date;
 }
+
+export interface ProfileSettingsData {
+  userId: string;
+  longitude: string;
+  latitude: string;
+  birthDate: string;
+  emailNotifications: boolean;
+  dailySummary: boolean;
+  personalHealthData: boolean;
+  securitySetup: boolean;
+}

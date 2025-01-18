@@ -84,14 +84,19 @@ export default function WeightForm({ onSubmit }: WeightFormProps) {
         </label>
         <div className="mt-2 flex flex-wrap gap-2">
           {selectedWeight.map(({ id, weight, datetimeAt }, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => handleItemClick(id)}
-              className={`inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
-            >
-              {weight} {getIsoDate(datetimeAt)}
-            </button>
+            <li key={id} className="flex justify-between">
+              <span>
+                {weight} - {getIsoDate(datetimeAt)}
+              </span>
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleItemClick(id)}
+                className={`inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-200 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+              >
+                Remove
+              </button>
+            </li>
           ))}
         </div>
       </div>

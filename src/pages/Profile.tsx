@@ -10,21 +10,20 @@ import TriggerManageForm from '../components/forms/TriggerManageForm';
 import SymptomManageForm from '../components/forms/SymptomManageForm';
 import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
+import { useProfileDataContext } from '../context/ProfileDataContext';
+import SecuritySetupForm from '../components/forms/SecuritySetupForm';
 
 export default function Profile() {
+  const { profileSettingsData, setProfileSettingsData } = useProfileDataContext();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    birthDate: env.BIRTH_DATE,
-    latitude: env.LATITUDE.toString(),
-    longitude: env.LONGITUDE.toString(),
-    emailNotifications: false,
-    dailySummary: false,
+    ...profileSettingsData,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeModal, setActiveModal] = useState<
-    'symptom' | 'medication' | 'incident' | 'trigger' | null
+    'symptom' | 'medication' | 'incident' | 'trigger' | 'securitySetup' | null
   >(null);
 
   useEffect(() => {
@@ -67,6 +66,7 @@ export default function Profile() {
     e.preventDefault();
     setIsSaving(true);
     setSaveStatus('idle');
+    setProfileSettingsData(formData);
 
     try {
       if (supabase && user?.id) {
@@ -241,6 +241,18 @@ export default function Profile() {
                   <label className="flex items-center gap-3">
                     <input
                       type="checkbox"
+                      name="personalHealthData"
+                      checked={formData.personalHealthData}
+                      onChange={handleInputChange}
+                      className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
+                    />
+                    <span className="text-gray-700 dark:text-gray-300">
+                      Enable personal health data storage
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
                       name="dailySummary"
                       checked={formData.dailySummary}
                       onChange={handleInputChange}
@@ -259,6 +271,21 @@ export default function Profile() {
                   </label>
                 </div>
               </div>
+
+              {!profileSettingsData?.securitySetup && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                      Security
+                    </h2>
+                  </div>
+                  <AddButton
+                    label="Setup Security"
+                    onClick={() => setActiveModal('securitySetup')}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-end gap-4">
@@ -310,6 +337,13 @@ export default function Profile() {
         title="Manage Triggers"
       >
         <TriggerManageForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+      <Modal
+        isOpen={activeModal === 'securitySetup'}
+        onClose={() => setActiveModal(null)}
+        title="Setup Security"
+      >
+        <SecuritySetupForm onSubmit={() => setActiveModal(null)} />
       </Modal>
     </>
   );

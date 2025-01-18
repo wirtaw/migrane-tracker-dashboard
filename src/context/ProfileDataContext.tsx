@@ -8,8 +8,10 @@ import {
   Weight,
   Height,
   BloodPressure,
+  ProfileSettingsData,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
+import { env } from '../config/env';
 
 interface ProfileDataContextProps {
   triggerList: Trigger[];
@@ -34,6 +36,8 @@ interface ProfileDataContextProps {
   setHeightList: React.Dispatch<React.SetStateAction<Height[]>>;
   bloodPressureList: BloodPressure[];
   setBloodPressureList: React.Dispatch<React.SetStateAction<BloodPressure[]>>;
+  profileSettingsData: ProfileSettingsData;
+  setProfileSettingsData: React.Dispatch<React.SetStateAction<ProfileSettingsData>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -226,6 +230,17 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     },
   ]);
 
+  const [profileSettingsData, setProfileSettingsData] = useState<ProfileSettingsData>({
+    birthDate: env.BIRTH_DATE,
+    latitude: env.LATITUDE.toString(),
+    longitude: env.LONGITUDE.toString(),
+    emailNotifications: false,
+    dailySummary: false,
+    personalHealthData: true,
+    userId,
+    securitySetup: false,
+  });
+
   return (
     <ProfileDataContext.Provider
       value={{
@@ -251,6 +266,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setHeightList,
         bloodPressureList,
         setBloodPressureList,
+        profileSettingsData,
+        setProfileSettingsData,
       }}
     >
       {children}

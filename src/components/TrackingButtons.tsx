@@ -7,8 +7,10 @@ import IncidentForm from './forms/IncidentForm';
 import WeightForm from './forms/WeightForm';
 import HeightForm from './forms/HeightForm';
 import BloodPressureForm from './forms/BloodPressureForm';
+import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export default function TrackingButtons() {
+  const { profileSettingsData } = useProfileDataContext();
   const [activeModal, setActiveModal] = useState<
     'symptom' | 'medication' | 'incident' | 'weight' | 'height' | 'bloodPressure' | null
   >(null);
@@ -21,12 +23,16 @@ export default function TrackingButtons() {
           <AddButton label="Add Symptom" onClick={() => setActiveModal('symptom')} />
           <AddButton label="Add Medication" onClick={() => setActiveModal('medication')} />
           <AddButton label="Record Incident" onClick={() => setActiveModal('incident')} />
-          <AddButton label="Record Weight" onClick={() => setActiveModal('weight')} />
-          <AddButton
-            label="Record Blood pressure"
-            onClick={() => setActiveModal('bloodPressure')}
-          />
-          <AddButton label="Record Height" onClick={() => setActiveModal('height')} />
+          {profileSettingsData?.personalHealthData && (
+            <>
+              <AddButton label="Record Weight" onClick={() => setActiveModal('weight')} />
+              <AddButton
+                label="Record Blood pressure"
+                onClick={() => setActiveModal('bloodPressure')}
+              />
+              <AddButton label="Record Height" onClick={() => setActiveModal('height')} />
+            </>
+          )}
         </div>
       </div>
 
