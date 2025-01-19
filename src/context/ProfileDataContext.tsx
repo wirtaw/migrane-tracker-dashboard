@@ -9,6 +9,7 @@ import {
   Height,
   BloodPressure,
   ProfileSettingsData,
+  ProfileSecurityData,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
 import { env } from '../config/env';
@@ -38,6 +39,8 @@ interface ProfileDataContextProps {
   setBloodPressureList: React.Dispatch<React.SetStateAction<BloodPressure[]>>;
   profileSettingsData: ProfileSettingsData;
   setProfileSettingsData: React.Dispatch<React.SetStateAction<ProfileSettingsData>>;
+  profileSecurityData: ProfileSecurityData;
+  setProfileSecurityData: React.Dispatch<React.SetStateAction<ProfileSecurityData>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -241,6 +244,14 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     securitySetup: false,
   });
 
+  const [profileSecurityData, setProfileSecurityData] = useState<ProfileSecurityData>({
+    password: '',
+    salt: '',
+    key: '',
+    userId,
+    isInit: false,
+  });
+
   return (
     <ProfileDataContext.Provider
       value={{
@@ -268,6 +279,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setBloodPressureList,
         profileSettingsData,
         setProfileSettingsData,
+        profileSecurityData,
+        setProfileSecurityData,
       }}
     >
       {children}

@@ -6,6 +6,7 @@ interface EnvConfig {
   BIRTH_DATE: string;
   SUPBASE_URL: string;
   SUPBASE_KEY: string;
+  REACT_APP_APPWRITE_PROJECT_ID: string;
 }
 
 export const env: EnvConfig = {
@@ -16,4 +17,5 @@ export const env: EnvConfig = {
   BIRTH_DATE: import.meta.env.VITE_BIRTH_DATE || '',
   SUPBASE_URL: import.meta.env.VITE_SUPBASE_URL || '',
   SUPBASE_KEY: import.meta.env.VITE_SUPBASE_KEY || '',
+  REACT_APP_APPWRITE_PROJECT_ID: import.meta.env.VITE_REACT_APP_APPWRITE_PROJECT_ID || '',
 };

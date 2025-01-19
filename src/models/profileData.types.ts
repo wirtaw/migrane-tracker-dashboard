@@ -94,3 +94,11 @@ export interface ProfileSettingsData {
   personalHealthData: boolean;
   securitySetup: boolean;
 }
+
+export interface ProfileSecurityData {
+  userId: string;
+  password: string;
+  salt: string;
+  key: string;
+  isInit: boolean;
+}
