@@ -93,6 +93,8 @@ export interface ProfileSettingsData {
   dailySummary: boolean;
   personalHealthData: boolean;
   securitySetup: boolean;
+  salt: string;
+  key: string;
 }
 
 export interface ProfileSecurityData {

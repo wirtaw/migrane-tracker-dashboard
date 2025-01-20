@@ -12,15 +12,25 @@ import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import SecuritySetupForm from '../components/forms/SecuritySetupForm';
+import { UserUpdateDAO } from '../models/user.types';
 
 export default function Profile() {
-  const { profileSettingsData, setProfileSettingsData } = useProfileDataContext();
+  const {
+    profileSettingsData,
+    setProfileSettingsData,
+    profileSecurityData,
+    setProfileSecurityData,
+  } = useProfileDataContext();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     ...profileSettingsData,
+    salt: profileSecurityData.salt,
+    key: profileSecurityData.key,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [aggrementSaveSalt, setAggrementSaveSalt] = useState(false);
+  const [aggrementSaveKey, setAggrementSaveKey] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeModal, setActiveModal] = useState<
     'symptom' | 'medication' | 'incident' | 'trigger' | 'securitySetup' | null
@@ -31,7 +41,7 @@ export default function Profile() {
       if (supabase && user?.id) {
         const { data, error } = await supabase
           .from('migrane_tracker-users')
-          .select('birthdate, latitude, longitude')
+          .select('birthdate, latitude, longitude, salt, key, isSecurityFinished')
           .eq('user_id', user.id)
           .single();
 
@@ -47,12 +57,28 @@ export default function Profile() {
             latitude: data.latitude?.toString() || env.LATITUDE.toString(),
             longitude: data.longitude?.toString() || env.LONGITUDE.toString(),
           }));
+          setProfileSettingsData({
+            ...profileSettingsData,
+            securitySetup: data.isSecurityFinished,
+          });
+          setProfileSecurityData({
+            ...profileSecurityData,
+            isInit: data.isSecurityFinished || false,
+            salt: data.salt || '',
+            key: data.key || '',
+          });
         }
       }
     }
 
     fetchUserData();
-  }, [user?.id]);
+  }, [
+    user?.id,
+    profileSettingsData,
+    setProfileSettingsData,
+    profileSecurityData,
+    setProfileSecurityData,
+  ]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -70,13 +96,30 @@ export default function Profile() {
 
     try {
       if (supabase && user?.id) {
+        const payload: UserUpdateDAO = {
+          birthdate: formData.birthDate,
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+          salt: null,
+          key: null,
+          isSecurityFinished: null,
+        };
+
+        if (aggrementSaveSalt) {
+          payload.salt = profileSecurityData.salt;
+        }
+
+        if (aggrementSaveKey) {
+          payload.key = profileSecurityData.key;
+        }
+
+        if (profileSettingsData.securitySetup) {
+          payload.isSecurityFinished = true;
+        }
+
         const { data, error } = await supabase
           .from('migrane_tracker-users')
-          .update({
-            birthdate: formData.birthDate,
-            latitude: formData.latitude,
-            longitude: formData.longitude,
-          })
+          .update(payload)
           .eq('user_id', user.id)
           .select();
 
@@ -173,6 +216,80 @@ export default function Profile() {
                       placeholder="e.g., -0.1278"
                     />
                   </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {!profileSecurityData?.isInit && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-indigo-500" />
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                      Security
+                    </h2>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  {!profileSecurityData?.isInit && profileSecurityData.salt && (
+                    <div>
+                      <label
+                        htmlFor="salt"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Salt
+                      </label>
+                      <input
+                        type="text"
+                        id="salt"
+                        name="salt"
+                        value={profileSecurityData.salt}
+                        readOnly
+                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2"
+                        autoComplete="off"
+                      />
+                      <label className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          name="aggrementSaveSalt"
+                          checked={aggrementSaveSalt}
+                          onChange={() => setAggrementSaveSalt(!aggrementSaveSalt)}
+                          className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
+                        />
+                        <span className="text-gray-700 dark:text-gray-300">
+                          I agree to save the salt
+                        </span>
+                      </label>
+                    </div>
+                  )}
+                  {!profileSecurityData?.isInit && profileSecurityData.key && (
+                    <div>
+                      <label
+                        htmlFor="key"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Key
+                      </label>
+                      <input
+                        type="text"
+                        id="key"
+                        name="key"
+                        value={profileSecurityData.key}
+                        readOnly
+                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2"
+                        autoComplete="off"
+                      />
+                      <label className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          name="aggrementSaveKey"
+                          checked={aggrementSaveKey}
+                          onChange={() => setAggrementSaveKey(!aggrementSaveKey)}
+                          className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
+                        />
+                        <span className="text-gray-700 dark:text-gray-300">
+                          I agree to save the key
+                        </span>
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -272,20 +389,21 @@ export default function Profile() {
                 </div>
               </div>
 
-              {!profileSettingsData?.securitySetup && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Settings className="w-5 h-5 text-indigo-500" />
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      Security
-                    </h2>
+              {!profileSettingsData?.securitySetup &&
+                (!profileSecurityData.salt || !profileSecurityData.key) && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Settings className="w-5 h-5 text-indigo-500" />
+                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                        Security
+                      </h2>
+                    </div>
+                    <AddButton
+                      label="Setup Security"
+                      onClick={() => setActiveModal('securitySetup')}
+                    />
                   </div>
-                  <AddButton
-                    label="Setup Security"
-                    onClick={() => setActiveModal('securitySetup')}
-                  />
-                </div>
-              )}
+                )}
             </div>
 
             <div className="flex items-center justify-end gap-4">

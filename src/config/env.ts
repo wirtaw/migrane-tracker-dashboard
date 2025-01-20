@@ -7,6 +7,10 @@ interface EnvConfig {
   SUPBASE_URL: string;
   SUPBASE_KEY: string;
   REACT_APP_APPWRITE_PROJECT_ID: string;
+  SJCL_KEY_STRENGTH_FACTOR: number;
+  SJCL_KEY_SIZE: number;
+  SJCL_GENERATE_SALT_WORDS: number;
+  SJCL_GENERATE_SALT_PARANOIA: number;
 }
 
 export const env: EnvConfig = {
@@ -18,4 +22,9 @@ export const env: EnvConfig = {
   SUPBASE_URL: import.meta.env.VITE_SUPBASE_URL || '',
   SUPBASE_KEY: import.meta.env.VITE_SUPBASE_KEY || '',
   REACT_APP_APPWRITE_PROJECT_ID: import.meta.env.VITE_REACT_APP_APPWRITE_PROJECT_ID || '',
+  SJCL_KEY_STRENGTH_FACTOR: Number.parseInt(import.meta.env.VITE_SJCL_KEY_STRENGTH_FACTOR) || 10000,
+  SJCL_KEY_SIZE: Number.parseInt(import.meta.env.VITE_SJCL_KEY_SIZE) || 256,
+  SJCL_GENERATE_SALT_WORDS: Number.parseInt(import.meta.env.VITE_SJCL_GENERATE_SALT_WORDS) || 2,
+  SJCL_GENERATE_SALT_PARANOIA:
+    Number.parseInt(import.meta.env.VITE_SJCL_GENERATE_SALT_PARANOIA) || 0,
 };

@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { ProfileSecurityData } from '../../models/profileData.types';
+import { env } from '../../config/env';
 
 interface SecuritySetupFormProps {
   onSubmit: () => void;
 }
 
-function generateSalt(words: number, paranoia: number): string {
-  const salt: string = sjcl.random.randomWords(words, paranoia).toString();
+function generateSalt(words: number, paranoia: number): sjcl.BitArray {
+  const salt: sjcl.BitArray = sjcl.random.randomWords(words, paranoia);
 
   return salt;
 }
@@ -45,17 +46,15 @@ export default function SecuritySetupForm({ onSubmit }: SecuritySetupFormProps) 
     setProfileSecurityData,
   } = useProfileDataContext();
   const [password, setPassword] = useState<string>(decryptProfilePassword(profileSecurityData));
-  const [salt, setSalt] = useState<string>(profileSecurityData.salt);
+  const [salt, setSalt] = useState<sjcl.BitArray>(sjcl.codec.hex.toBits(profileSecurityData.salt));
 
-  const handleHashEncryption = () => {
+  const handleSubmit = (e: React.FormEvent) => {
     try {
       if (!sjcl) {
         throw new Error('sjcl not available');
       }
 
-      setSalt(generateSalt(2, 0));
-
-      const key = sjcl.misc.pbkdf2(password, salt, 10000, 256);
+      const key = sjcl.misc.pbkdf2(password, salt, env.SJCL_KEY_STRENGTH_FACTOR, env.SJCL_KEY_SIZE);
 
       localStorage.setItem(
         'encryptedProfile',
@@ -66,19 +65,17 @@ export default function SecuritySetupForm({ onSubmit }: SecuritySetupFormProps) 
       setProfileSecurityData({
         ...profileSecurityData,
         password: encryptProfilePassword(profileSecurityData, password),
-        salt,
+        salt: sjcl.codec.hex.fromBits(salt),
         key: sjcl.codec.hex.fromBits(key),
         isInit: true,
       });
     } catch (error) {
       console.error(error);
+    } finally {
+      setProfileSettingsData({ ...profileSettingsData, securitySetup: true });
+      e.preventDefault();
+      onSubmit();
     }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    setProfileSettingsData({ ...profileSettingsData, securitySetup: true });
-    e.preventDefault();
-    onSubmit();
   };
 
   return (
@@ -100,10 +97,12 @@ export default function SecuritySetupForm({ onSubmit }: SecuritySetupFormProps) 
         />
         <button
           type="button"
-          onClick={handleHashEncryption}
+          onClick={() =>
+            setSalt(generateSalt(env.SJCL_GENERATE_SALT_WORDS, env.SJCL_GENERATE_SALT_PARANOIA))
+          }
           className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Generate Key
+          Generate salt
         </button>
       </div>
       <div>
@@ -115,7 +114,7 @@ export default function SecuritySetupForm({ onSubmit }: SecuritySetupFormProps) 
         </label>
         <input
           id="newSalt"
-          value={salt}
+          value={sjcl.codec.hex.fromBits(salt)}
           readOnly
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />

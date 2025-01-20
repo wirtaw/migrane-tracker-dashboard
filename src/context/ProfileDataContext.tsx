@@ -242,6 +242,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     personalHealthData: true,
     userId,
     securitySetup: false,
+    salt: '',
+    key: '',
   });
 
   const [profileSecurityData, setProfileSecurityData] = useState<ProfileSecurityData>({
