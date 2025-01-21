@@ -13,6 +13,18 @@ export function Footer() {
           </div>
           <nav className="flex gap-6 text-sm">
             <Link
+              to="/data-management"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Data Management
+            </Link>
+            <Link
+              to="/docs"
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            >
+              Documentation
+            </Link>
+            <Link
               to="/legal"
               className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
             >

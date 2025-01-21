@@ -8,8 +8,11 @@ import Main from './pages/Main';
 import Legal from './pages/Legal';
 import Privacy from './pages/Privacy';
 import SignIn from './pages/SignIn';
+import Documentation from './pages/Documentation';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
+import NotFound from './pages/NotFound';
+import DataManagement from './pages/DataManagement';
 
 export function App() {
   return (
@@ -31,6 +34,9 @@ export function App() {
             <Route path="profile" element={<Profile />} />
             <Route path="legal" element={<Legal />} />
             <Route path="privacy" element={<Privacy />} />
+            <Route path="docs" element={<Documentation />} />
+            <Route path="data-management" element={<DataManagement />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </Router>
