@@ -30,6 +30,7 @@ export default function UploadIncidentsForm({ onSubmit }: UploadIncidentsFormPro
       }
       const jsonData = JSON.parse(e.target.result);
       const incidents: Incident[] = [];
+      let maxId = Math.max(...incidentList.map(({ id }) => id));
       for (const incident of jsonData) {
         const {
           id,
@@ -73,8 +74,10 @@ export default function UploadIncidentsForm({ onSubmit }: UploadIncidentsFormPro
           return;
         }
 
+        const setId = id || maxId + 1;
+
         incidents.push({
-          id: id || incidents.length + 1,
+          id: setId,
           userId: userId.toString(),
           datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
           type,
@@ -84,6 +87,10 @@ export default function UploadIncidentsForm({ onSubmit }: UploadIncidentsFormPro
           createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
           notes: notes || '',
         });
+
+        if (setId > maxId) {
+          maxId = setId;
+        }
       }
 
       setNewIncidents(incidents);

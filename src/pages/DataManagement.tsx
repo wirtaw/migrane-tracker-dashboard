@@ -26,17 +26,17 @@ export default function DataManagement() {
                   Import JSON data into the application. The data will be stored in the
                   localstorage, encrypted with your key and can be accessed from the dashboard.
                   Format of the JSON data should be as follows:
-                  <pre>
-                    {JSON.stringify([
-                      {
-                        id: 1,
-                        date: '2023-01-01',
-                        description: 'Sample incident',
-                        severity: 5,
-                      },
-                    ])}
-                  </pre>
                 </p>
+                <pre>
+                  {JSON.stringify([
+                    {
+                      id: 1,
+                      date: '2023-01-01',
+                      description: 'Sample incident',
+                      severity: 5,
+                    },
+                  ])}
+                </pre>
               </div>
             </section>
             <section className="space-y-4">
