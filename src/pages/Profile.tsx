@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { User, Calendar, MapPin, Settings } from 'lucide-react';
+import { User, Calendar, MapPin, Settings, EarthLock, Shield } from 'lucide-react';
 import { env } from '../config/env';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
-import MedicationManageForm from './../components/forms/MedicationManageForm';
-import IncidentManageForm from '../components/forms/IncidentManageForm';
-import TriggerManageForm from '../components/forms/TriggerManageForm';
-import SymptomManageForm from '../components/forms/SymptomManageForm';
 import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
 import { useProfileDataContext } from '../context/ProfileDataContext';
@@ -32,9 +28,7 @@ export default function Profile() {
   const [aggrementSaveSalt, setAggrementSaveSalt] = useState(false);
   const [aggrementSaveKey, setAggrementSaveKey] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [activeModal, setActiveModal] = useState<
-    'symptom' | 'medication' | 'incident' | 'trigger' | 'securitySetup' | null
-  >(null);
+  const [activeModal, setActiveModal] = useState<'securitySetup' | null>(null);
 
   useEffect(() => {
     async function fetchUserData() {
@@ -221,7 +215,7 @@ export default function Profile() {
               <div className="space-y-4">
                 {!profileSecurityData?.isInit && (
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-indigo-500" />
+                    <Shield className="w-5 h-5 text-indigo-500" />
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                       Security
                     </h2>
@@ -295,48 +289,6 @@ export default function Profile() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-indigo-500" />
-                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Info</h2>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 space-y-4">
-                      Medications
-                    </h2>
-                    <AddButton
-                      label="Manage Medications"
-                      onClick={() => setActiveModal('medication')}
-                    />
-                  </div>
-
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      Symptoms
-                    </h2>
-                    <AddButton label="Manage Symptoms" onClick={() => setActiveModal('symptom')} />
-                  </div>
-
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      Incidents
-                    </h2>
-                    <AddButton
-                      label="Manage Incidents"
-                      onClick={() => setActiveModal('incident')}
-                    />
-                  </div>
-
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      Potential Triggers
-                    </h2>
-                    <AddButton label="Manage Triggers" onClick={() => setActiveModal('trigger')} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-indigo-500" />
                   <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                     Preferences
@@ -393,7 +345,7 @@ export default function Profile() {
                 (!profileSecurityData.salt || !profileSecurityData.key) && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <Settings className="w-5 h-5 text-indigo-500" />
+                      <EarthLock className="w-5 h-5 text-indigo-500" />
                       <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                         Security
                       </h2>
@@ -428,34 +380,6 @@ export default function Profile() {
           </form>
         </div>
       </main>
-      <Modal
-        isOpen={activeModal === 'medication'}
-        onClose={() => setActiveModal(null)}
-        title="Manage Medication"
-      >
-        <MedicationManageForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
-      <Modal
-        isOpen={activeModal === 'symptom'}
-        onClose={() => setActiveModal(null)}
-        title="Manage Symptoms"
-      >
-        <SymptomManageForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
-      <Modal
-        isOpen={activeModal === 'incident'}
-        onClose={() => setActiveModal(null)}
-        title="Manage Incidents"
-      >
-        <IncidentManageForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
-      <Modal
-        isOpen={activeModal === 'trigger'}
-        onClose={() => setActiveModal(null)}
-        title="Manage Triggers"
-      >
-        <TriggerManageForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
       <Modal
         isOpen={activeModal === 'securitySetup'}
         onClose={() => setActiveModal(null)}

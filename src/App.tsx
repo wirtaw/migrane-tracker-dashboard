@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import NotFound from './pages/NotFound';
 import DataManagement from './pages/DataManagement';
+import Settings from './pages/Settings';
 
 export function App() {
   return (
@@ -36,6 +37,7 @@ export function App() {
             <Route path="privacy" element={<Privacy />} />
             <Route path="docs" element={<Documentation />} />
             <Route path="data-management" element={<DataManagement />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

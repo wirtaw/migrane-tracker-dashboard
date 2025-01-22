@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Calendar, LineChart, Users } from 'lucide-react';
+import { Activity, Calendar, LineChart, FileText, FolderKanban, Settings } from 'lucide-react';
 
 export default function Main() {
   return (
@@ -20,6 +20,10 @@ export default function Main() {
             icon: <Activity className="w-8 h-8 text-indigo-500" />,
             title: 'Track Symptoms',
             description: 'Log your migraine symptoms and intensity',
+            link: {
+              title: 'Go to Dashboard',
+              path: '/dashboard',
+            },
           },
           {
             icon: <Calendar className="w-8 h-8 text-pink-500" />,
@@ -32,9 +36,31 @@ export default function Main() {
             description: 'Identify triggers and patterns over time',
           },
           {
-            icon: <Users className="w-8 h-8 text-purple-500" />,
-            title: 'Share Reports',
-            description: 'Generate reports for healthcare providers',
+            icon: <FileText className="w-8 h-8 text-grey-800" />,
+            title: 'Documentation & Guides',
+            description: 'Description of the application and how to use it',
+            link: {
+              title: 'Get Started',
+              path: '/docs',
+            },
+          },
+          {
+            icon: <FolderKanban className="w-8 h-8 text-green-500" />,
+            title: 'Data Management',
+            description: 'Import and manage your data',
+            link: {
+              title: 'Get Started',
+              path: '/data-management',
+            },
+          },
+          {
+            icon: <Settings className="w-8 h-8 text-yellow-800" />,
+            title: 'Settings',
+            description: 'Configure your application settings',
+            link: {
+              title: 'Manage Settings',
+              path: '/settings',
+            },
           },
         ].map((feature, index) => (
           <div
@@ -47,6 +73,14 @@ export default function Main() {
                 {feature.title}
               </h3>
               <p className="mt-2 text-gray-600 dark:text-gray-300">{feature.description}</p>
+              {feature?.link && feature.link?.path && (
+                <Link
+                  to={feature.link.path}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                  {feature.link.title}
+                </Link>
+              )}
             </div>
           </div>
         ))}

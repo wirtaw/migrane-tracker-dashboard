@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Variable } from 'lucide-react';
 import AddButton from './AddButton';
 import Modal from './Modal';
 import SymptomForm from './forms/SymptomForm';
@@ -18,7 +19,10 @@ export default function TrackingButtons() {
   return (
     <>
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">Track Health</h2>
+        <div className="flex items-center gap-2 mb-6">
+          <Variable className="w-5 h-5 text-red-500" />
+          <h2 className="text-lg font-semibold dark:text-white">Track Health</h2>
+        </div>
         <div className="flex flex-col gap-3">
           <AddButton label="Add Symptom" onClick={() => setActiveModal('symptom')} />
           <AddButton label="Add Medication" onClick={() => setActiveModal('medication')} />
