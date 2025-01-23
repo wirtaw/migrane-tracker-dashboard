@@ -37,7 +37,11 @@ export default function Settings() {
               <h2 className="mt-4 mb-5 text-lg font-semibold text-gray-900 dark:text-white">
                 Medications
               </h2>
-              <AddButton label="Manage Medications" onClick={() => setActiveModal('medication')} />
+              <AddButton
+                id="manageMedication"
+                label="Manage Medications"
+                onClick={() => setActiveModal('medication')}
+              />
             </div>
           </div>
 
@@ -46,7 +50,11 @@ export default function Settings() {
               <h2 className="mt-4 mb-5 text-lg font-semibold text-gray-900 dark:text-white">
                 Symptoms
               </h2>
-              <AddButton label="Manage Symptoms" onClick={() => setActiveModal('symptom')} />
+              <AddButton
+                id="manageSyptomsTypes"
+                label="Manage Symptoms"
+                onClick={() => setActiveModal('symptom')}
+              />
             </div>
           </div>
 
@@ -55,7 +63,11 @@ export default function Settings() {
               <h2 className="mt-4 mb-5 text-lg font-semibold text-gray-900 dark:text-white">
                 Incidents
               </h2>
-              <AddButton label="Manage Incidents" onClick={() => setActiveModal('incident')} />
+              <AddButton
+                id="manageIncidentsTypes"
+                label="Manage Incidents"
+                onClick={() => setActiveModal('incident')}
+              />
             </div>
           </div>
 
@@ -64,7 +76,11 @@ export default function Settings() {
               <h2 className="mt-4 mb-5 text-lg font-semibold text-gray-900 dark:text-white">
                 Potential Triggers
               </h2>
-              <AddButton label="Manage Triggers" onClick={() => setActiveModal('trigger')} />
+              <AddButton
+                id="managePotentialTriggers"
+                label="Manage Triggers"
+                onClick={() => setActiveModal('trigger')}
+              />
             </div>
           </div>
         </div>

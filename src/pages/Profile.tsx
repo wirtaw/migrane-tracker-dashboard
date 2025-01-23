@@ -352,6 +352,7 @@ export default function Profile() {
                     </div>
                     <AddButton
                       label="Setup Security"
+                      id="securitySetup"
                       onClick={() => setActiveModal('securitySetup')}
                     />
                   </div>

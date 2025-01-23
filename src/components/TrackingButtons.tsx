@@ -24,17 +24,38 @@ export default function TrackingButtons() {
           <h2 className="text-lg font-semibold dark:text-white">Track Health</h2>
         </div>
         <div className="flex flex-col gap-3">
-          <AddButton label="Add Symptom" onClick={() => setActiveModal('symptom')} />
-          <AddButton label="Add Medication" onClick={() => setActiveModal('medication')} />
-          <AddButton label="Record Incident" onClick={() => setActiveModal('incident')} />
+          <AddButton
+            id="addSymptom"
+            label="Add Symptom"
+            onClick={() => setActiveModal('symptom')}
+          />
+          <AddButton
+            id="addMedication"
+            label="Add Medication"
+            onClick={() => setActiveModal('medication')}
+          />
+          <AddButton
+            id="recordIcident"
+            label="Record Incident"
+            onClick={() => setActiveModal('incident')}
+          />
           {profileSettingsData?.personalHealthData && (
             <>
-              <AddButton label="Record Weight" onClick={() => setActiveModal('weight')} />
               <AddButton
+                id="addSymptom"
+                label="Record Weight"
+                onClick={() => setActiveModal('weight')}
+              />
+              <AddButton
+                id="recordBloodPressure"
                 label="Record Blood pressure"
                 onClick={() => setActiveModal('bloodPressure')}
               />
-              <AddButton label="Record Height" onClick={() => setActiveModal('height')} />
+              <AddButton
+                id="recordHeight"
+                label="Record Height"
+                onClick={() => setActiveModal('height')}
+              />
             </>
           )}
         </div>

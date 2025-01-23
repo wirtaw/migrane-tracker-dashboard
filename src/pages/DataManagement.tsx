@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { FolderKanban } from 'lucide-react';
 import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
-import UploadIncidentsForm from './../components/forms/UploadIncidentsForm';
+import UploadDataForm from './../components/forms/UploadDataForm';
+import DownloadDataForm from '../components/forms/DownloadDataForm';
 
 export default function DataManagement() {
-  const [activeModal, setActiveModal] = useState<'uploadIncidents' | null>(null);
+  const [activeModal, setActiveModal] = useState<'uploadJSON' | 'exportJSON' | null>(null);
+  const [importWithDecode, setImportWithDecode] = useState<boolean>(false);
+  const [exportWithDecode, setExportWithDecode] = useState<boolean>(false);
 
   return (
     <>
@@ -27,39 +30,172 @@ export default function DataManagement() {
                   localstorage, encrypted with your key and can be accessed from the dashboard.
                   Format of the JSON data should be as follows:
                 </p>
-                <pre>
-                  {JSON.stringify([
+                <pre className="bg-gray-100 p-4 rounded-md">
+                  {JSON.stringify(
                     {
-                      id: 1,
-                      date: '2023-01-01',
-                      description: 'Sample incident',
-                      severity: 5,
+                      type: 'object',
+                      properties: {
+                        incidents: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'number' },
+                              userId: { type: 'string' },
+                              datetimeAt: { type: 'string', format: 'date-time' },
+                              type: { type: 'string' },
+                              startTime: { type: 'string', format: 'date-time' },
+                              durationHours: { type: 'number' },
+                              triggers: {
+                                type: 'array',
+                                items: { type: 'string' },
+                              },
+                              notes: { type: 'string' },
+                              createdAt: { type: 'string', format: 'date-time' },
+                            },
+                            required: [
+                              'userId',
+                              'datetimeAt',
+                              'type',
+                              'startTime',
+                              'durationHours',
+                            ],
+                          },
+                        },
+                        triggers: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'number' },
+                              userId: { type: 'string' },
+                              datetimeAt: { type: 'string', format: 'date-time' },
+                              type: { type: 'string' },
+                              note: { type: 'string' },
+                              createdAt: { type: 'string', format: 'date-time' },
+                            },
+                            required: ['userId', 'datetimeAt', 'type'],
+                          },
+                        },
+                        medications: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'number' },
+                              userId: { type: 'string' },
+                              datetimeAt: { type: 'string', format: 'date-time' },
+                              title: { type: 'string' },
+                              dosage: { type: 'string' },
+                              notes: { type: 'string' },
+                              createdAt: { type: 'string', format: 'date-time' },
+                              updateAt: { type: 'string', format: 'date-time' },
+                            },
+                            required: ['userId', 'datetimeAt', 'title', 'dosage'],
+                          },
+                        },
+                        symptoms: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'number' },
+                              userId: { type: 'string' },
+                              datetimeAt: { type: 'string', format: 'date-time' },
+                              type: { type: 'string' },
+                              severity: { type: 'number' },
+                              notes: { type: 'string' },
+                              createdAt: { type: 'string', format: 'date-time' },
+                            },
+                            required: ['userId', 'datetimeAt', 'type', 'severity'],
+                          },
+                        },
+                      },
+                      required: ['incidents', 'triggers', 'medications', 'symptoms'],
                     },
-                  ])}
+                    null,
+                    2
+                  )}
                 </pre>
               </div>
             </section>
             <section className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Buttons</h2>
-              <div className="prose dark:prose-invert max-w-none">
-                <p className="text-gray-600 dark:text-gray-300">
-                  Click the button below to select a JSON file to import.
-                </p>
-                <AddButton
-                  label="Upload Incidents"
-                  onClick={() => setActiveModal('uploadIncidents')}
-                />
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                <div className="prose dark:prose-invert max-w-none">
+                  <div>
+                    <label className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        name="aggrementSaveSalt"
+                        checked={importWithDecode}
+                        onChange={() => setImportWithDecode(!importWithDecode)}
+                        className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">
+                        Check this box to import data with decoding.
+                      </span>
+                    </label>
+                  </div>
+                  <div>
+                    <label htmlFor="uploadJSON" className="text-gray-600 dark:text-gray-300">
+                      <AddButton
+                        id="uploadJSON"
+                        label="Upload JSON File"
+                        onClick={() => setActiveModal('uploadJSON')}
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">
+                        Click the button below to select a JSON file to import.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+                <div className="prose dark:prose-invert max-w-none">
+                  <div>
+                    <label className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        name="exportWithDecode"
+                        checked={exportWithDecode}
+                        onChange={() => setExportWithDecode(!exportWithDecode)}
+                        className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">
+                        Check this box to export data with decoding.
+                      </span>
+                    </label>
+                  </div>
+                  <div>
+                    <label htmlFor="exportJSON" className="text-gray-600 dark:text-gray-300">
+                      <AddButton
+                        id="exportJSON"
+                        label="Export JSON File"
+                        onClick={() => setActiveModal('exportJSON')}
+                      />
+                      <span className="text-gray-700 dark:text-gray-300">
+                        Click the button below to select a JSON file to export.
+                      </span>
+                    </label>
+                  </div>
+                </div>
               </div>
             </section>
           </div>
         </div>
       </main>
       <Modal
-        isOpen={activeModal === 'uploadIncidents'}
+        isOpen={activeModal === 'uploadJSON'}
         onClose={() => setActiveModal(null)}
-        title="Upload Incidents"
+        title="Upload JSON Data"
       >
-        <UploadIncidentsForm onSubmit={() => setActiveModal(null)} />
+        <UploadDataForm onSubmit={() => setActiveModal(null)} decode={importWithDecode} />
+      </Modal>
+      <Modal
+        isOpen={activeModal === 'exportJSON'}
+        onClose={() => setActiveModal(null)}
+        title="Export JSON Data"
+      >
+        <DownloadDataForm onSubmit={() => setActiveModal(null)} decode={exportWithDecode} />
       </Modal>
     </>
   );
