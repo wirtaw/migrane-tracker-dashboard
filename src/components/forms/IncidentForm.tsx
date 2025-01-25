@@ -1,16 +1,56 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
+import { useAuth } from '../../context/AuthContext';
+import {
+  Incident,
+} from '../../models/profileData.types';
 
 interface IncidentFormProps {
   onSubmit: () => void;
 }
 
+const isValidIncident = (formData: Incident) => {
+  if (!formData?.type) {
+    return false;
+  }
+
+  if (!formData?.durationHours) {
+    return false;
+  }
+
+  if (!formData?.triggers.length) {
+    return false;
+  }
+
+  return true;
+};
+
 export default function IncidentForm({ onSubmit }: IncidentFormProps) {
+  const { user } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { incidentEnumList, triggerEnumList } = useProfileDataContext();
+  const { incidentEnumList, triggerEnumList, incidentList, setIncidentList } = useProfileDataContext();
+  const maxId = Math.max(...incidentList.map(({ id }) => id));
+  const userId: string = user?.id || '1';
+
+  const [formData, setFormData] = useState<Incident>({
+    id: maxId + 1,
+    userId,
+    type: '',
+    startTime: new Date(),
+    durationHours: 0.5,
+    triggers: [],
+    notes: '',
+    createdAt: new Date(),
+    datetimeAt: new Date()
+  });
 
   const handleTagClick = (tag: string) => {
-    setTriggers([...new Set([...triggers, tag])]);
+    const triggerList : string[] = [...new Set([...triggers, tag])];
+    setTriggers(triggerList);
+    setFormData({
+      ...formData,
+      triggers: triggerList,
+    });
   };
 
   const handleClearTriggers = () => {
@@ -18,8 +58,50 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit();
+    if (isValidIncident(formData)) {
+      incidentList.push(formData);
+      setIncidentList(incidentList);
+
+      e.preventDefault();
+      onSubmit();
+    } else {
+      console.log('Invalid incident form');
+    }
+  };
+
+  const handleNumberChange = (event: { target: { value: string | number | Date; }; }) => {
+    setFormData({
+      ...formData,
+      durationHours: Number(event.target.value),
+    });
+  };
+
+  const handleTextChange = (event: { target: { value: string | number | Date; }; }) => {
+    setFormData({
+      ...formData,
+      triggers: event.target.value.toString().split(','),
+    });
+  };
+
+  const handleDateChange = (event: { target: { value: string | number | Date; }; }) => {
+    setFormData({
+      ...formData,
+      startTime: new Date(event.target.value),
+    });
+  };
+
+  const handleSelectChange = (event: { target: { value: string | number | Date; }; }) => {
+    setFormData({
+      ...formData,
+      type: event.target.value.toString(),
+    });
+  };
+
+  const handleTextareaChange = (event: { target: { value: string | number | Date; }; }) => {
+    setFormData({
+      ...formData,
+      notes: event.target.value.toString(),
+    });
   };
 
   return (
@@ -35,6 +117,8 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           id="type"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
           defaultValue=""
+          value={formData.type}
+          onChange={handleSelectChange}
         >
           <option value="" disabled>
             Select a type
@@ -58,6 +142,8 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           type="datetime-local"
           id="start"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+          value={formData.startTime.toISOString()}
+          onChange={handleDateChange}
         />
       </div>
 
@@ -71,9 +157,9 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
         <input
           type="number"
           id="duration"
-          min="0"
-          step="0.5"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+          value={formData.durationHours}
+          onChange={handleNumberChange}
         />
       </div>
 
@@ -88,6 +174,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           type="text"
           id="triggers"
           value={triggers.join(', ')}
+          onChange={handleTextChange}
           readOnly
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
@@ -123,6 +210,8 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           id="notes"
           rows={3}
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+          value={formData.notes}
+          onChange={handleTextareaChange}
         />
       </div>
 
