@@ -1,56 +1,52 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import {
-  Incident,
-} from '../../models/profileData.types';
+import { Incident } from '../../models/profileData.types';
+import { getIsoDateTimeLocal } from '../../lib/utils.ts';
+import { FormEvent } from '../../models/forms.types.ts';
 
 interface IncidentFormProps {
   onSubmit: () => void;
 }
 
-const isValidIncident = (formData: Incident) => {
-  if (!formData?.type) {
-    return false;
-  }
-
-  if (!formData?.durationHours) {
-    return false;
-  }
-
-  if (!formData?.triggers.length) {
-    return false;
-  }
-
-  return true;
-};
-
 export default function IncidentForm({ onSubmit }: IncidentFormProps) {
   const { user } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { incidentEnumList, triggerEnumList, incidentList, setIncidentList } = useProfileDataContext();
-  const maxId = Math.max(...incidentList.map(({ id }) => id));
-  const userId: string = user?.id || '1';
+  const {
+    incidentEnumList,
+    triggerEnumList,
+    incidentList,
+    setIncidentList,
+    profileSettingsData,
+    setFormErrorMessage,
+  } = useProfileDataContext();
 
-  const [formData, setFormData] = useState<Incident>({
-    id: maxId + 1,
-    userId,
-    type: '',
-    startTime: new Date(),
-    durationHours: 0.5,
-    triggers: [],
-    notes: '',
-    createdAt: new Date(),
-    datetimeAt: new Date()
-  });
+  const userId: string = user?.id || '1';
+  const [typeValue, setTypeValue] = useState<string>('');
+  const [durationHoursValue, setDurationHoursValue] = useState<number>(0.5);
+  const [startTimeValue, setStartTimeValue] = useState<Date>(new Date());
+  const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
+  const [notesValue, setNotesValue] = useState<string>('');
+
+  const isValidIncident = (incident: Incident) => {
+    if (!incident?.type) {
+      return false;
+    }
+
+    if (!incident?.durationHours) {
+      return false;
+    }
+
+    if (!incident?.triggers.length) {
+      return false;
+    }
+
+    return true;
+  };
 
   const handleTagClick = (tag: string) => {
-    const triggerList : string[] = [...new Set([...triggers, tag])];
+    const triggerList: string[] = [...new Set([...triggers, tag])];
     setTriggers(triggerList);
-    setFormData({
-      ...formData,
-      triggers: triggerList,
-    });
   };
 
   const handleClearTriggers = () => {
@@ -58,50 +54,45 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    if (isValidIncident(formData)) {
-      incidentList.push(formData);
-      setIncidentList(incidentList);
+    const maxId = Math.max(...incidentList.map(({ id }) => id));
+    const incident: Incident = {
+      id: maxId + 1,
+      userId,
+      durationHours: durationHoursValue,
+      type: typeValue,
+      startTime: startTimeValue,
+      createdAt: new Date(),
+      datetimeAt: datetimeAtValue,
+      triggers,
+      notes: notesValue,
+    };
 
-      e.preventDefault();
-      onSubmit();
+    if (isValidIncident(incident)) {
+      setIncidentList([...incidentList, incident]);
     } else {
-      console.log('Invalid incident form');
+      console.error('Invalid incident form');
+      setFormErrorMessage({ showModal: true, message: 'Invalid incident form' });
     }
+
+    e.preventDefault();
+    onSubmit();
   };
 
-  const handleNumberChange = (event: { target: { value: string | number | Date; }; }) => {
-    setFormData({
-      ...formData,
-      durationHours: Number(event.target.value),
-    });
+  const handleNumberChange = (event: FormEvent) => {
+    setDurationHoursValue(Number(event.target.value));
   };
 
-  const handleTextChange = (event: { target: { value: string | number | Date; }; }) => {
-    setFormData({
-      ...formData,
-      triggers: event.target.value.toString().split(','),
-    });
+  const handleDateChange = (event: FormEvent) => {
+    setStartTimeValue(new Date(event.target.value));
+    setDatetimeAtValue(new Date(event.target.value));
   };
 
-  const handleDateChange = (event: { target: { value: string | number | Date; }; }) => {
-    setFormData({
-      ...formData,
-      startTime: new Date(event.target.value),
-    });
+  const handleSelectChange = (event: FormEvent) => {
+    setTypeValue(event.target.value.toString());
   };
 
-  const handleSelectChange = (event: { target: { value: string | number | Date; }; }) => {
-    setFormData({
-      ...formData,
-      type: event.target.value.toString(),
-    });
-  };
-
-  const handleTextareaChange = (event: { target: { value: string | number | Date; }; }) => {
-    setFormData({
-      ...formData,
-      notes: event.target.value.toString(),
-    });
+  const handleTextareaChange = (event: FormEvent) => {
+    setNotesValue(event.target.value.toString());
   };
 
   return (
@@ -116,8 +107,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
         <select
           id="type"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-          defaultValue=""
-          value={formData.type}
+          value={typeValue}
           onChange={handleSelectChange}
         >
           <option value="" disabled>
@@ -142,8 +132,10 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           type="datetime-local"
           id="start"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-          value={formData.startTime.toISOString()}
+          value={getIsoDateTimeLocal(startTimeValue)}
           onChange={handleDateChange}
+          min={getIsoDateTimeLocal(new Date(profileSettingsData?.birthDate))}
+          max={getIsoDateTimeLocal(new Date())}
         />
       </div>
 
@@ -158,7 +150,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           type="number"
           id="duration"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-          value={formData.durationHours}
+          value={durationHoursValue}
           onChange={handleNumberChange}
         />
       </div>
@@ -174,7 +166,6 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           type="text"
           id="triggers"
           value={triggers.join(', ')}
-          onChange={handleTextChange}
           readOnly
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
@@ -210,7 +201,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
           id="notes"
           rows={3}
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-          value={formData.notes}
+          value={notesValue}
           onChange={handleTextareaChange}
         />
       </div>

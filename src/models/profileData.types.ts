@@ -104,3 +104,8 @@ export interface ProfileSecurityData {
   key: string;
   isInit: boolean;
 }
+
+export interface ErrorMessage {
+  showModal: boolean;
+  message: string;
+}

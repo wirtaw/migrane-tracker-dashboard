@@ -10,6 +10,7 @@ import {
   BloodPressure,
   ProfileSettingsData,
   ProfileSecurityData,
+  ErrorMessage,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
 import { env } from '../config/env';
@@ -41,6 +42,8 @@ interface ProfileDataContextProps {
   setProfileSettingsData: React.Dispatch<React.SetStateAction<ProfileSettingsData>>;
   profileSecurityData: ProfileSecurityData;
   setProfileSecurityData: React.Dispatch<React.SetStateAction<ProfileSecurityData>>;
+  formErrorMessage: ErrorMessage;
+  setFormErrorMessage: React.Dispatch<React.SetStateAction<ErrorMessage>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -254,6 +257,11 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     isInit: false,
   });
 
+  const [formErrorMessage, setFormErrorMessage] = useState<ErrorMessage>({
+    showModal: false,
+    message: '',
+  });
+
   return (
     <ProfileDataContext.Provider
       value={{
@@ -283,6 +291,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setProfileSettingsData,
         profileSecurityData,
         setProfileSecurityData,
+        formErrorMessage,
+        setFormErrorMessage,
       }}
     >
       {children}

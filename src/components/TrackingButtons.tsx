@@ -11,7 +11,7 @@ import BloodPressureForm from './forms/BloodPressureForm';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export default function TrackingButtons() {
-  const { profileSettingsData } = useProfileDataContext();
+  const { profileSettingsData, formErrorMessage, setFormErrorMessage } = useProfileDataContext();
   const [activeModal, setActiveModal] = useState<
     'symptom' | 'medication' | 'incident' | 'weight' | 'height' | 'bloodPressure' | null
   >(null);
@@ -107,6 +107,16 @@ export default function TrackingButtons() {
         title="Manage Blood Pressure"
       >
         <BloodPressureForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+
+      <Modal
+        isOpen={formErrorMessage.showModal === true}
+        onClose={() => setFormErrorMessage({ showModal: false, message: '' })}
+        title="Error message"
+      >
+        <div className="text-red-500 text-sm mt-1 dark:text-white">
+          <p>{formErrorMessage.message}</p>
+        </div>
       </Modal>
     </>
   );
