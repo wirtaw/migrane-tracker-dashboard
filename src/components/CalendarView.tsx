@@ -5,7 +5,7 @@ import { useProfileDataContext } from '../context/ProfileDataContext';
 import { getIsoDate } from '../lib/utils.ts';
 
 interface CalendarItem {
-  type: 'Incident' | 'Medication' | 'Trigger';
+  type: 'Incident' | 'Medication' | 'Trigger' | 'Symptom';
   name: string;
   userId: string;
 }
@@ -24,7 +24,7 @@ interface CalendarViewProps {
 const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, days }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [activeModal, setActiveModal] = useState<'details' | null>(null);
-  const { incidentList, medicationList, triggerList } = useProfileDataContext();
+  const { incidentList, medicationList, triggerList, symptomList } = useProfileDataContext();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [modalContent, setModalContent] = useState<ModalContent | null>(null);
 
@@ -38,8 +38,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, 
     const triggerItems: CalendarItem[] = triggerList
       .filter(item => getIsoDate(item.datetimeAt) === date)
       .map(({ type, userId }) => ({ type: 'Trigger', name: type, userId }));
+    const symptomItems: CalendarItem[] = symptomList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ type, userId }) => ({ type: 'Symptom', name: type, userId }));
 
-    const items: CalendarItem[] | [] = [...incidentItems, ...medicationItems, ...triggerItems];
+    const items: CalendarItem[] | [] = [
+      ...incidentItems,
+      ...medicationItems,
+      ...triggerItems,
+      ...symptomItems,
+    ];
 
     if (items.length > 0) {
       setSelectedDate(date);
@@ -103,6 +111,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, 
           const hasIncident = incidentList.some(item => getIsoDate(item.datetimeAt) === date);
           const hasMedication = medicationList.some(item => getIsoDate(item.datetimeAt) === date);
           const hasTrigger = triggerList.some(item => getIsoDate(item.datetimeAt) === date);
+          const hasSymptom = symptomList.some(item => getIsoDate(item.datetimeAt) === date);
 
           return (
             <div
@@ -115,6 +124,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, 
                 {hasIncident && <span className="w-2 h-2 bg-red-500 rounded-full" />}
                 {hasMedication && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
                 {hasTrigger && <span className="w-2 h-2 bg-yellow-500 rounded-full" />}
+                {hasSymptom && <span className="w-2 h-2 bg-green-500 rounded-full" />}
               </div>
             </div>
           );

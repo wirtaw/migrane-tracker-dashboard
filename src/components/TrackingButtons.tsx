@@ -8,12 +8,13 @@ import IncidentForm from './forms/IncidentForm';
 import WeightForm from './forms/WeightForm';
 import HeightForm from './forms/HeightForm';
 import BloodPressureForm from './forms/BloodPressureForm';
+import TriggerForm from './forms/TriggerForm';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export default function TrackingButtons() {
   const { profileSettingsData, formErrorMessage, setFormErrorMessage } = useProfileDataContext();
   const [activeModal, setActiveModal] = useState<
-    'symptom' | 'medication' | 'incident' | 'weight' | 'height' | 'bloodPressure' | null
+    'symptom' | 'medication' | 'trigger' | 'incident' | 'weight' | 'height' | 'bloodPressure' | null
   >(null);
 
   return (
@@ -26,13 +27,18 @@ export default function TrackingButtons() {
         <div className="flex flex-col gap-3">
           <AddButton
             id="addSymptom"
-            label="Add Symptom"
+            label="Record Symptom"
             onClick={() => setActiveModal('symptom')}
           />
           <AddButton
             id="addMedication"
-            label="Add Medication"
+            label="Record Medication"
             onClick={() => setActiveModal('medication')}
+          />
+          <AddButton
+            id="addTrigger"
+            label="Record Trigger"
+            onClick={() => setActiveModal('trigger')}
           />
           <AddButton
             id="recordIcident"
@@ -72,9 +78,17 @@ export default function TrackingButtons() {
       <Modal
         isOpen={activeModal === 'medication'}
         onClose={() => setActiveModal(null)}
-        title="Add Medication"
+        title="Record Medication"
       >
         <MedicationForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+
+      <Modal
+        isOpen={activeModal === 'trigger'}
+        onClose={() => setActiveModal(null)}
+        title="Record Trigger"
+      >
+        <TriggerForm onSubmit={() => setActiveModal(null)} />
       </Modal>
 
       <Modal

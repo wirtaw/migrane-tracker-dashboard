@@ -1,41 +1,30 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Medication } from '../../models/profileData.types';
+import { Trigger } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
 import { FormEvent } from '../../models/forms.types.ts';
 
-interface MedicationFormProps {
+interface TriggerFormProps {
   onSubmit: () => void;
 }
 
-export default function MedicationForm({ onSubmit }: MedicationFormProps) {
+export default function TriggerForm({ onSubmit }: TriggerFormProps) {
   const { user } = useAuth();
-  const {
-    medicationEnumList,
-    medicationList,
-    setMedicationList,
-    setFormErrorMessage,
-    profileSettingsData,
-  } = useProfileDataContext();
+  const { triggerEnumList, triggerList, setTriggerList, setFormErrorMessage, profileSettingsData } =
+    useProfileDataContext();
 
   const userId: string = user?.id || '1';
-  const [titleValue, setTitleValue] = useState<string>('');
-  const [dosageValue, setDosageValue] = useState<number>(0);
-  const [dosageMetricValue, setDosageMetricValue] = useState<string>('mg');
+  const [typeValue, setTypeValue] = useState<string>('');
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
-  const [notesValue, setNotesValue] = useState<string>('');
+  const [noteValue, setNoteValue] = useState<string>('');
 
-  const isValidMedication = (medication: Medication) => {
-    if (!medication?.title) {
+  const isValidTrigger = (trigger: Trigger) => {
+    if (!trigger?.type) {
       return false;
     }
 
-    if (!medication?.dosage) {
-      return false;
-    }
-
-    if (!medication?.datetimeAt) {
+    if (!trigger?.datetimeAt) {
       return false;
     }
 
@@ -43,23 +32,21 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    const maxId = Math.max(...medicationList.map(({ id }) => id));
-    const medication: Medication = {
+    const maxId = Math.max(...triggerList.map(({ id }) => id));
+    const trigger: Trigger = {
       id: maxId + 1,
       userId,
-      title: titleValue,
-      dosage: `${dosageValue}${dosageMetricValue}`,
-      notes: notesValue,
+      type: typeValue,
+      note: noteValue,
       createdAt: new Date(),
       datetimeAt: datetimeAtValue,
-      updateAt: new Date(),
     };
 
-    if (isValidMedication(medication)) {
-      setMedicationList([...medicationList, medication]);
+    if (isValidTrigger(trigger)) {
+      setTriggerList([...triggerList, trigger]);
     } else {
-      console.error('Invalid medication form');
-      setFormErrorMessage({ showModal: true, message: 'Invalid medication form' });
+      console.error('Invalid trigger form');
+      setFormErrorMessage({ showModal: true, message: 'Invalid trigger form' });
     }
 
     e.preventDefault();
@@ -67,19 +54,11 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
   };
 
   const handleSelectChange = (event: FormEvent) => {
-    setTitleValue(event.target.value.toString());
-  };
-
-  const handleNumberChange = (event: FormEvent) => {
-    setDosageValue(Number(event.target.value));
-  };
-
-  const handleSelectMetricChange = (event: FormEvent) => {
-    setDosageMetricValue(event.target.value.toString());
+    setTypeValue(event.target.value.toString());
   };
 
   const handleTextareaChange = (event: FormEvent) => {
-    setNotesValue(event.target.value.toString());
+    setNoteValue(event.target.value.toString());
   };
 
   const handleDateChange = (event: FormEvent) => {
@@ -90,23 +69,23 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label
-          htmlFor="medication"
+          htmlFor="trigger"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
-          Medication Title
+          Trigger Type
         </label>
         <select
-          id="medication"
+          id="trigger"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-          value={titleValue}
+          value={typeValue}
           onChange={handleSelectChange}
         >
           <option value="" disabled>
-            Select a medication
+            Select a type
           </option>
-          {medicationEnumList.map((medication, index) => (
-            <option key={index} value={medication}>
-              {medication}
+          {triggerEnumList.map((type, index) => (
+            <option key={index} value={type}>
+              {type}
             </option>
           ))}
         </select>
@@ -114,37 +93,10 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
 
       <div>
         <label
-          htmlFor="dosage"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Dosage
-        </label>
-        <div className="mt-1 flex gap-2">
-          <input
-            type="number"
-            id="dosageValue"
-            value={dosageValue}
-            onChange={handleNumberChange}
-            className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-          />
-          <select
-            value={dosageMetricValue}
-            onChange={handleSelectMetricChange}
-            className="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-          >
-            <option value="mg">mg</option>
-            <option value="ml">ml</option>
-            <option value="g">g</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label
           htmlFor="time"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
-          Time Taken
+          Date
         </label>
         <input
           type="datetime-local"
@@ -162,12 +114,12 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
           htmlFor="notes"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
-          Notes
+          Note
         </label>
         <textarea
           id="notes"
           rows={3}
-          value={notesValue}
+          value={noteValue}
           onChange={handleTextareaChange}
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
