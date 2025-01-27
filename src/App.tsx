@@ -14,6 +14,7 @@ import { AuthProvider } from './context/AuthContext';
 import NotFound from './pages/NotFound';
 import DataManagement from './pages/DataManagement';
 import Settings from './pages/Settings';
+import ReportPage from './pages/ReportPage';
 
 export function App() {
   return (
@@ -38,6 +39,7 @@ export function App() {
             <Route path="docs" element={<Documentation />} />
             <Route path="data-management" element={<DataManagement />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="report-page" element={<ReportPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

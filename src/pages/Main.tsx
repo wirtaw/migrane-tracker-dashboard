@@ -36,6 +36,15 @@ export default function Main() {
             description: 'Identify triggers and patterns over time',
           },
           {
+            icon: <LineChart className="w-8 h-8 text-blue-500" />,
+            title: 'Report',
+            description: 'Historical data report',
+            link: {
+              title: 'View',
+              path: '/report-page',
+            },
+          },
+          {
             icon: <FileText className="w-8 h-8 text-grey-800" />,
             title: 'Documentation & Guides',
             description: 'Description of the application and how to use it',
