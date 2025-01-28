@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
-import { getIsoDate } from '../lib/utils.ts';
+import { getIsoDate, getIsoTime } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
 import { Incident, Trigger, Medication, Symptom } from '../models/profileData.types.ts';
 
@@ -158,63 +158,131 @@ export default function ReportPage() {
             </div>
             <div className="timeline-content pl-8 mt-4">
               {item.incidents.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 dark:text-white">Incidents</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {item.incidents.map((incident, i) => (
-                      <div
-                        key={i}
-                        className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white"
-                      >
-                        <p>Type: {incident.type} </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {item.incidents.map((incident, i) => (
+                    <div
+                      key={i}
+                      className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white border-r-4 border-red-500"
+                    >
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Incident Details</h3>
                       </div>
-                    ))}
-                  </div>
+                      <div className="mt-2">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Type:</strong> {incident.type}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Start Time:</strong> {getIsoTime(incident.startTime)}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Duration:</strong> {incident.durationHours} hours
+                        </p>
+                        {incident.notes && (
+                          <p className="text-gray-600 dark:text-gray-300">
+                            <strong>Notes:</strong> {incident.notes}
+                          </p>
+                        )}
+                        {incident.triggers.length > 0 && (
+                          <div>
+                            <p className="text-gray-600 dark:text-gray-300">
+                              <strong>Triggers:</strong>
+                            </p>
+                            <ul className="list-disc list-inside">
+                              {incident.triggers.map((trigger, index) => (
+                                <li key={index} className="text-gray-600 dark:text-gray-300">
+                                  {trigger}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
               {item.triggers.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 dark:text-white">Triggers</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {item.triggers.map((trigger, i) => (
-                      <div
-                        key={i}
-                        className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white"
-                      >
-                        <p>Type: {trigger.type} </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                  {item.triggers.map((trigger, i) => (
+                    <div
+                      key={i}
+                      className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white border-r-4 border-yellow-500"
+                    >
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Trigger Details</h3>
                       </div>
-                    ))}
-                  </div>
+                      <div className="mt-2">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Type:</strong> {trigger.type}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Start Time:</strong> {getIsoTime(trigger.datetimeAt)}
+                        </p>
+                        {trigger.note && (
+                          <p className="text-gray-600 dark:text-gray-300">
+                            <strong>Notes:</strong> {trigger.note}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
               {item.symptoms.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 dark:text-white">Symptoms</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {item.symptoms.map((symptom, i) => (
-                      <div
-                        key={i}
-                        className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white"
-                      >
-                        <p>Type: {symptom.type} </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                  {item.symptoms.map((symptom, i) => (
+                    <div
+                      key={i}
+                      className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white border-r-4 border-green-500"
+                    >
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Symptom Details</h3>
                       </div>
-                    ))}
-                  </div>
+                      <div className="mt-2">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Type:</strong> {symptom.type}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Start Time:</strong> {getIsoTime(symptom.createdAt)}
+                        </p>
+                        {symptom.notes && (
+                          <p className="text-gray-600 dark:text-gray-300">
+                            <strong>Notes:</strong> {symptom.notes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
               {item.medications.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 dark:text-white">Medications</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {item.medications.map((medication, i) => (
-                      <div
-                        key={i}
-                        className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white"
-                      >
-                        <p>Type: {medication.title} </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                  {item.medications.map((medication, i) => (
+                    <div
+                      key={i}
+                      className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md dark:text-white border-r-4 border-blue-500"
+                    >
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">Medication Details</h3>
                       </div>
-                    ))}
-                  </div>
+                      <div className="mt-2">
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Title:</strong> {medication.title}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Start Time:</strong> {getIsoTime(medication.datetimeAt)}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300">
+                          <strong>Dosage:</strong> {medication.dosage}
+                        </p>
+                        {medication.notes && (
+                          <p className="text-gray-600 dark:text-gray-300">
+                            <strong>Notes:</strong> {medication.notes}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
