@@ -59,9 +59,9 @@ export interface GeophysicalWeatherData {
   nextWeather: { level: string };
 }
 
-const OPEN_WEATHER_BASE_URL: string = 'https://api.openweathermap.org/data/3.0';
-const NOAA_GOV_CURRENT_BASE_URL: string = 'https://services.swpc.noaa.gov/text/wwv.txt';
-const OPEN_METEO_BASE_URL: string = 'https://api.open-meteo.com/v1/forecast';
+const OPEN_WEATHER_BASE_URL: string = env.OPEN_WEATHER_BASE_URL;
+const NOAA_GOV_CURRENT_BASE_URL: string = env.NOAA_GOV_CURRENT_BASE_URL;
+const OPEN_METEO_BASE_URL: string = env.OPEN_METEO_BASE_URL;
 
 function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
   const result: GeophysicalWeatherData = {

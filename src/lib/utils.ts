@@ -1,5 +1,16 @@
 export const getIsoDate = (date: Date): string => date.toISOString().split('T')[0] || '';
 
+export const getIsoTime = (date: Date): string => {
+  let parts: string[] = [];
+  parts = date.toISOString().split('T');
+
+  if (parts[1]) {
+    return parts[1].replace(':00.000Z', '') || '';
+  }
+
+  return '';
+};
+
 export const getIsoDateTimeLocal = (date: Date): string => {
   // Ensure the input is a valid Date object
   if (!(date instanceof Date)) {

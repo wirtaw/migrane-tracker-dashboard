@@ -44,6 +44,8 @@ interface ProfileDataContextProps {
   setProfileSecurityData: React.Dispatch<React.SetStateAction<ProfileSecurityData>>;
   formErrorMessage: ErrorMessage;
   setFormErrorMessage: React.Dispatch<React.SetStateAction<ErrorMessage>>;
+  currentMonth: Date;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -51,99 +53,10 @@ const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(un
 export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const userId: string = user?.id || '1';
-  const [triggerList, setTriggerList] = useState<Trigger[]>([
-    {
-      id: 1,
-      userId,
-      type: 'Stress',
-      note: 'Work stress',
-      createdAt: new Date('2025-01-01'),
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      type: 'Lack of Sleep',
-      note: 'Work stress',
-      createdAt: new Date('2025-01-07'),
-      datetimeAt: new Date('2025-01-07'),
-    },
-  ]);
-  const [incidentList, setIncidentList] = useState<Incident[]>([
-    {
-      id: 1,
-      userId,
-      type: 'Migraine Attack',
-      startTime: new Date('2025-01-01'),
-      durationHours: 5,
-      notes: 'Severe headache',
-      triggers: ['Stress'],
-      createdAt: new Date('2025-01-01'),
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      type: 'Tension Headache',
-      startTime: new Date('2025-01-05'),
-      durationHours: 3,
-      notes: 'Mild headache',
-      triggers: ['Lack of Sleep'],
-      createdAt: new Date('2025-01-05'),
-      datetimeAt: new Date('2025-01-05'),
-    },
-  ]);
-  const [medicationList, setMedicationList] = useState<Medication[]>([
-    {
-      id: 1,
-      userId,
-      title: 'Aspirin',
-      dosage: '500mg',
-      notes: 'Take with food',
-      datetimeAt: new Date('2025-01-01'),
-      createdAt: new Date('2025-01-01'),
-      updateAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      title: 'Ibuprofen',
-      dosage: '400mg',
-      notes: 'Take with food',
-      datetimeAt: new Date('2025-01-06'),
-      createdAt: new Date('2025-01-06'),
-      updateAt: new Date('2025-01-06'),
-    },
-  ]);
-  const [symptomList, setSymptomList] = useState<Symptom[]>([
-    {
-      id: 1,
-      userId,
-      type: 'Nausea',
-      severity: 3,
-      notes: 'Vomiting',
-      createdAt: new Date('2025-01-01'),
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      type: 'Dizziness',
-      severity: 2,
-      notes: 'Fainting',
-      createdAt: new Date('2025-01-01'),
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 3,
-      userId,
-      type: 'Dizziness',
-      severity: 2,
-      notes: 'Fainting',
-      createdAt: new Date('2025-01-04'),
-      datetimeAt: new Date('2025-01-04'),
-    },
-  ]);
+  const [triggerList, setTriggerList] = useState<Trigger[]>([]);
+  const [incidentList, setIncidentList] = useState<Incident[]>([]);
+  const [medicationList, setMedicationList] = useState<Medication[]>([]);
+  const [symptomList, setSymptomList] = useState<Symptom[]>([]);
 
   const [medicationEnumList, setMedicationEnumList] = useState<string[]>([
     'Aspirin',
@@ -183,58 +96,11 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     'Medication',
   ]);
 
-  const [weightList, setWeightList] = useState<Weight[]>([
-    {
-      id: 1,
-      userId,
-      weight: 70,
-      notes: 'Normal weight',
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      weight: 72,
-      notes: 'Normal weight',
-      datetimeAt: new Date('2025-01-07'),
-    },
-  ]);
+  const [weightList, setWeightList] = useState<Weight[]>([]);
 
-  const [heightList, setHeightList] = useState<Height[]>([
-    {
-      id: 1,
-      userId,
-      height: 172,
-      notes: 'Normal height',
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      height: 172,
-      notes: 'Normal height',
-      datetimeAt: new Date('2025-01-07'),
-    },
-  ]);
+  const [heightList, setHeightList] = useState<Height[]>([]);
 
-  const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([
-    {
-      id: 1,
-      userId,
-      systolic: 120,
-      diastolic: 80,
-      notes: 'Normal blood pressure',
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      systolic: 130,
-      diastolic: 90,
-      notes: 'Normal blood pressure',
-      datetimeAt: new Date('2025-01-07'),
-    },
-  ]);
+  const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([]);
 
   const [profileSettingsData, setProfileSettingsData] = useState<ProfileSettingsData>({
     birthDate: env.BIRTH_DATE,
@@ -261,6 +127,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     showModal: false,
     message: '',
   });
+
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   return (
     <ProfileDataContext.Provider
@@ -293,6 +161,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setProfileSecurityData,
         formErrorMessage,
         setFormErrorMessage,
+        currentMonth,
+        setCurrentMonth
       }}
     >
       {children}
