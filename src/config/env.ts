@@ -1,4 +1,5 @@
 interface EnvConfig {
+  REDIRECT_URL: string;
   OPEN_WEATHER_API_KEY: string;
   OPEN_WEATHER_BASE_URL: string;
   NOAA_GOV_CURRENT_BASE_URL: string;
@@ -17,6 +18,7 @@ interface EnvConfig {
 }
 
 export const env: EnvConfig = {
+  REDIRECT_URL: import.meta.env.VITE_REDIRECT_URL,
   OPEN_WEATHER_API_KEY: import.meta.env.VITE_OPEN_WEATHER_API_KEY,
   OPEN_WEATHER_BASE_URL: import.meta.env.VITE_OPEN_WEATHER_BASE_URL,
   NOAA_GOV_CURRENT_BASE_URL: import.meta.env.VITE_NOAA_GOV_CURRENT_BASE_URL,
