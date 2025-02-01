@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Brain, PowerOff } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
@@ -9,8 +9,8 @@ export function Header() {
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `px-4 py-2 rounded-lg transition-colors ${
       isActive
-      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
+        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
     }`;
   const { signOut } = useAuth();
 
@@ -40,7 +40,12 @@ export function Header() {
               stroke="currentColor"
               aria-hidden="true"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
             <svg
               className="hidden h-6 w-6"
@@ -50,11 +55,16 @@ export function Header() {
               stroke="currentColor"
               aria-hidden="true"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
-          <nav className={`items-center gap-4 ${isMobileMenuOpen? 'block': 'hidden'} md:flex`}>
-            <NavLink to="/" className={navLinkClass} end>
+          <nav className={`items-center gap-4 ${isMobileMenuOpen ? 'block' : 'hidden'} md:flex`}>
+            <NavLink to="/index" className={navLinkClass} end>
               Home
             </NavLink>
             <NavLink to="/dashboard" className={navLinkClass}>

@@ -15,12 +15,14 @@ import NotFound from './pages/NotFound';
 import DataManagement from './pages/DataManagement';
 import Settings from './pages/Settings';
 import ReportPage from './pages/ReportPage';
+import DescriptionFeaturesPricing from './pages/DescriptionFeaturesPricing';
 
 export function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<DescriptionFeaturesPricing />} />
           <Route path="/signin" element={<SignIn />} />
           <Route
             path="/"
@@ -30,7 +32,7 @@ export function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Main />} />
+            <Route index path="index" element={<Main />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="about" element={<About />} />
             <Route path="profile" element={<Profile />} />
