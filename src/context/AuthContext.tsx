@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           console.dir(users);
         }
-
+        window.location.href = '/index';
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
         // handle sign out event
@@ -102,10 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: window.location.origin + '/index',
-      },
+      provider: 'github'
     });
   };
 
