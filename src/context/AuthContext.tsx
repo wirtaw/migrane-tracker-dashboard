@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
+import { env } from '../config/env';
 
 interface AuthContextType {
   user: User | null;
@@ -61,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const users = await userExists(supabase, session?.user.id);
 
         if (!users?.length) {
-          const { data: inserted, error: error2 } = await supabase
+          const { error: error2 } = await supabase
             .from('migrane_tracker-users')
             .insert([
               {
@@ -75,11 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             throw error2;
           }
 
-          console.dir(inserted);
-        } else {
-          console.dir(users);
+          //console.dir(inserted);
         }
-        window.location.href = '/index';
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
         // handle sign out event
@@ -103,9 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     await supabase.auth.signInWithOAuth({
       provider: 'github',
-      options : {
-        redirectTo: window.location.origin 
-      }
+      options: {
+        redirectTo: env.REDIRECT_URL,
+      },
     });
   };
 
