@@ -44,6 +44,8 @@ interface ProfileDataContextProps {
   setProfileSecurityData: React.Dispatch<React.SetStateAction<ProfileSecurityData>>;
   formErrorMessage: ErrorMessage;
   setFormErrorMessage: React.Dispatch<React.SetStateAction<ErrorMessage>>;
+  currentMonth: Date;
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -94,73 +96,11 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     'Medication',
   ]);
 
-  const [weightList, setWeightList] = useState<Weight[]>([
-    {
-      id: 1,
-      userId,
-      weight: 69,
-      notes: 'Less weight',
-      datetimeAt: new Date('2021-01-01'),
-    },
-    {
-      id: 3,
-      userId,
-      weight: 78,
-      notes: 'Over weight',
-      datetimeAt: new Date('2024-01-07'),
-    },
-    {
-      id: 4,
-      userId,
-      weight: 75,
-      notes: 'Normal weight',
-      datetimeAt: new Date('2025-01-28'),
-    },
-  ]);
+  const [weightList, setWeightList] = useState<Weight[]>([]);
 
-  const [heightList, setHeightList] = useState<Height[]>([
-    {
-      id: 1,
-      userId,
-      height: 172,
-      notes: 'Normal height',
-      datetimeAt: new Date('2024-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      height: 172,
-      notes: 'Normal height',
-      datetimeAt: new Date('2025-01-07'),
-    },
-  ]);
+  const [heightList, setHeightList] = useState<Height[]>([]);
 
-  const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([
-    {
-      id: 1,
-      userId,
-      systolic: 120,
-      diastolic: 80,
-      notes: 'Normal blood pressure',
-      datetimeAt: new Date('2025-01-01'),
-    },
-    {
-      id: 2,
-      userId,
-      systolic: 120,
-      diastolic: 90,
-      notes: 'Normal blood pressure',
-      datetimeAt: new Date('2024-06-07'),
-    },
-    {
-      id: 3,
-      userId,
-      systolic: 110,
-      diastolic: 67,
-      notes: 'Lower blood pressure',
-      datetimeAt: new Date('2025-01-28'),
-    },
-  ]);
+  const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([]);
 
   const [profileSettingsData, setProfileSettingsData] = useState<ProfileSettingsData>({
     birthDate: env.BIRTH_DATE,
@@ -187,6 +127,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     showModal: false,
     message: '',
   });
+
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   return (
     <ProfileDataContext.Provider
@@ -219,6 +161,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setProfileSecurityData,
         formErrorMessage,
         setFormErrorMessage,
+        currentMonth,
+        setCurrentMonth
       }}
     >
       {children}

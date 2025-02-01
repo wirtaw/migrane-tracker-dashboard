@@ -8,11 +8,12 @@ import TrackingButtons from '../components/TrackingButtons';
 import { env } from '../config/env';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
+import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [birthDate, setBirthDate] = useState(new Date(env.BIRTH_DATE));
-  const currentMonth = new Date();
+  const { currentMonth } = useProfileDataContext();
 
   const daysInMonth = new Date(
     currentMonth.getFullYear(),

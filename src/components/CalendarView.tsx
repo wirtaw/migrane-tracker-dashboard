@@ -22,9 +22,8 @@ interface CalendarViewProps {
 }
 
 const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, days }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [activeModal, setActiveModal] = useState<'details' | null>(null);
-  const { incidentList, medicationList, triggerList, symptomList } = useProfileDataContext();
+  const { incidentList, medicationList, triggerList, symptomList, currentMonth, setCurrentMonth } = useProfileDataContext();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [modalContent, setModalContent] = useState<ModalContent | null>(null);
 

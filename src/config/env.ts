@@ -1,5 +1,8 @@
 interface EnvConfig {
   OPEN_WEATHER_API_KEY: string;
+  OPEN_WEATHER_BASE_URL: string;
+  NOAA_GOV_CURRENT_BASE_URL: string;
+  OPEN_METEO_BASE_URL: string;
   WEATHER_UNITS: 'metric' | 'imperial';
   LATITUDE: number;
   LONGITUDE: number;
@@ -15,6 +18,9 @@ interface EnvConfig {
 
 export const env: EnvConfig = {
   OPEN_WEATHER_API_KEY: import.meta.env.VITE_OPEN_WEATHER_API_KEY,
+  OPEN_WEATHER_BASE_URL: import.meta.env.VITE_OPEN_WEATHER_BASE_URL,
+  NOAA_GOV_CURRENT_BASE_URL: import.meta.env.VITE_NOAA_GOV_CURRENT_BASE_URL,
+  OPEN_METEO_BASE_URL: import.meta.env.VITE_OPEN_METEO_BASE_URL,
   WEATHER_UNITS: import.meta.env.VITE_WEATHER_UNITS as 'metric' | 'imperial',
   LATITUDE: Number.parseFloat(import.meta.env.VITE_LATITUDE) || 51.5074,
   LONGITUDE: Number.parseFloat(import.meta.env.VITE_LONGITUDE) || -0.1278,
