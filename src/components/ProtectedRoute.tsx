@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/index" replace />;
   }
 
   return <ProfileDataProvider>{children}</ProfileDataProvider>;

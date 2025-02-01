@@ -83,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
         // handle sign out event
+        window.location.href = '/';
       } else if (_event === 'PASSWORD_RECOVERY') {
         // handle password recovery event
       } else if (_event === 'TOKEN_REFRESHED') {
@@ -103,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: window.location.origin + '/index',
       },
     });
   };
@@ -125,7 +126,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Problem to connect supbase');
     }
 
-    await supabase.auth.signOut();
+    const response = await supabase.auth.signOut();
+    if (response?.error) {
+      throw new Error('Problem to connect supbase');
+    }
+
+    window.location.href = '/';
   };
 
   return (

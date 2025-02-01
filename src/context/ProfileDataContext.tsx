@@ -162,7 +162,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         formErrorMessage,
         setFormErrorMessage,
         currentMonth,
-        setCurrentMonth
+        setCurrentMonth,
       }}
     >
       {children}
