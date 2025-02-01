@@ -102,7 +102,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     await supabase.auth.signInWithOAuth({
-      provider: 'github'
+      provider: 'github',
+      options : {
+        redirectTo: window.location.origin 
+      }
     });
   };
 
@@ -127,8 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (response?.error) {
       throw new Error('Problem to connect supbase');
     }
-
-    window.location.href = '/';
   };
 
   return (
