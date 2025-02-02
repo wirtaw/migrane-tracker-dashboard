@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import { Incident, Trigger, Medication, Symptom } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
-import { Construction } from 'lucide-react';
 
 interface UploadDataFormProps {
   onSubmit: () => void;
@@ -307,10 +306,16 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
         setIsFinished(true);
         setErrorMessage('');
         setWarnMessage('');
-      } catch (err) {
-        const { message } = err;
+      } catch (error: unknown) {
         setIsFinished(false);
-        setErrorMessage(`Error occurred process ${message || ''}`);
+        if (error instanceof Error) {
+          setErrorMessage(`Error occurred process  ${error.message || ''}`);
+        } else if (typeof error === 'string') {
+          setErrorMessage(`Error occurred process  ${error || ''}`);
+        } else {
+          setErrorMessage('An unknown error occurred.'); // Generic error message if no message can be extracted.
+          console.error('Unknown error:', error); // Log the full error for debugging
+        }
       } finally {
         setIsloading(false);
       }

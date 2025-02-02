@@ -100,11 +100,18 @@ export default function DownloadDataForm({ onSubmit, decode }: DownloadDataFormP
       setIsFinished(true);
       setErrorMessage('');
       setWarnMessage('');
-    } catch (error) {
-      const { message } = error;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(`Error during download ${error.message || ''}. Please try again.`);
+      } else if (typeof error === 'string') {
+        setErrorMessage(`Error during download ${error || ''}. Please try again.`);
+      } else {
+        setErrorMessage('An unknown error occurred.'); // Generic error message if no message can be extracted.
+        console.error('Unknown error:', error); // Log the full error for debugging
+      }
+
       setIsFinished(false);
       setIsloading(false);
-      setErrorMessage(`Error during download ${message || ''}. Please try again.`);
     }
   };
 
