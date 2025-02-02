@@ -11,12 +11,8 @@ import SecuritySetupForm from '../components/forms/SecuritySetupForm';
 import { UserUpdateDAO } from '../models/user.types';
 
 export default function Profile() {
-  const {
-    profileSettingsData,
-    setProfileSettingsData,
-    profileSecurityData,
-    setProfileSecurityData,
-  } = useProfileDataContext();
+  const { profileSettingsData, setProfileSettingsData, profileSecurityData } =
+    useProfileDataContext();
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -51,28 +47,12 @@ export default function Profile() {
             latitude: data.latitude?.toString() || env.LATITUDE.toString(),
             longitude: data.longitude?.toString() || env.LONGITUDE.toString(),
           }));
-          setProfileSettingsData({
-            ...profileSettingsData,
-            securitySetup: data.isSecurityFinished,
-          });
-          setProfileSecurityData({
-            ...profileSecurityData,
-            isInit: data.isSecurityFinished || false,
-            salt: data.salt || '',
-            key: data.key || '',
-          });
         }
       }
     }
 
     fetchUserData();
-  }, [
-    user?.id,
-    profileSettingsData,
-    setProfileSettingsData,
-    profileSecurityData,
-    setProfileSecurityData,
-  ]);
+  }, [user?.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -213,14 +193,15 @@ export default function Profile() {
                 </div>
               </div>
               <div className="space-y-4">
-                {!profileSecurityData?.isInit && (
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-indigo-500" />
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                      Security
-                    </h2>
-                  </div>
-                )}
+                {!profileSecurityData?.isInit &&
+                  (profileSecurityData.salt || profileSecurityData.key) && (
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-indigo-500" />
+                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                        Security
+                      </h2>
+                    </div>
+                  )}
                 <div className="grid grid-cols-2 gap-4">
                   {!profileSecurityData?.isInit && profileSecurityData.salt && (
                     <div>
@@ -342,6 +323,7 @@ export default function Profile() {
               </div>
 
               {!profileSettingsData?.securitySetup &&
+                aggrementSaveSalt &&
                 (!profileSecurityData.salt || !profileSecurityData.key) && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">

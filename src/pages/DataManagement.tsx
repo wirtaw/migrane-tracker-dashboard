@@ -30,100 +30,102 @@ export default function DataManagement() {
                   localstorage, encrypted with your key and can be accessed from the dashboard.
                   Format of the JSON data should be as follows:
                 </p>
-                <pre className="bg-gray-100 p-4 rounded-md">
-                  {JSON.stringify(
-                    {
-                      type: 'object',
-                      properties: {
-                        incidents: {
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            properties: {
-                              id: { type: 'number' },
-                              userId: { type: 'string' },
-                              datetimeAt: { type: 'string', format: 'date-time' },
-                              type: { type: 'string' },
-                              startTime: { type: 'string', format: 'date-time' },
-                              durationHours: { type: 'number' },
-                              triggers: {
-                                type: 'array',
-                                items: { type: 'string' },
+                <details className="text-gray-600 dark:text-gray-300">
+                  <pre className="bg-gray-100 p-4 rounded-md text-black">
+                    {JSON.stringify(
+                      {
+                        type: 'object',
+                        properties: {
+                          incidents: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                id: { type: 'number' },
+                                userId: { type: 'string' },
+                                datetimeAt: { type: 'string', format: 'date-time' },
+                                type: { type: 'string' },
+                                startTime: { type: 'string', format: 'date-time' },
+                                durationHours: { type: 'number' },
+                                triggers: {
+                                  type: 'array',
+                                  items: { type: 'string' },
+                                },
+                                notes: { type: 'string' },
+                                createdAt: { type: 'string', format: 'date-time' },
                               },
-                              notes: { type: 'string' },
-                              createdAt: { type: 'string', format: 'date-time' },
+                              required: [
+                                'userId',
+                                'datetimeAt',
+                                'type',
+                                'startTime',
+                                'durationHours',
+                              ],
                             },
-                            required: [
-                              'userId',
-                              'datetimeAt',
-                              'type',
-                              'startTime',
-                              'durationHours',
-                            ],
+                          },
+                          triggers: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                id: { type: 'number' },
+                                userId: { type: 'string' },
+                                datetimeAt: { type: 'string', format: 'date-time' },
+                                type: { type: 'string' },
+                                note: { type: 'string' },
+                                createdAt: { type: 'string', format: 'date-time' },
+                              },
+                              required: ['userId', 'datetimeAt', 'type'],
+                            },
+                          },
+                          medications: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                id: { type: 'number' },
+                                userId: { type: 'string' },
+                                datetimeAt: { type: 'string', format: 'date-time' },
+                                title: { type: 'string' },
+                                dosage: { type: 'string' },
+                                notes: { type: 'string' },
+                                createdAt: { type: 'string', format: 'date-time' },
+                                updateAt: { type: 'string', format: 'date-time' },
+                              },
+                              required: ['userId', 'datetimeAt', 'title', 'dosage'],
+                            },
+                          },
+                          symptoms: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                id: { type: 'number' },
+                                userId: { type: 'string' },
+                                datetimeAt: { type: 'string', format: 'date-time' },
+                                type: { type: 'string' },
+                                severity: { type: 'number' },
+                                notes: { type: 'string' },
+                                createdAt: { type: 'string', format: 'date-time' },
+                              },
+                              required: ['userId', 'datetimeAt', 'type', 'severity'],
+                            },
                           },
                         },
-                        triggers: {
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            properties: {
-                              id: { type: 'number' },
-                              userId: { type: 'string' },
-                              datetimeAt: { type: 'string', format: 'date-time' },
-                              type: { type: 'string' },
-                              note: { type: 'string' },
-                              createdAt: { type: 'string', format: 'date-time' },
-                            },
-                            required: ['userId', 'datetimeAt', 'type'],
-                          },
-                        },
-                        medications: {
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            properties: {
-                              id: { type: 'number' },
-                              userId: { type: 'string' },
-                              datetimeAt: { type: 'string', format: 'date-time' },
-                              title: { type: 'string' },
-                              dosage: { type: 'string' },
-                              notes: { type: 'string' },
-                              createdAt: { type: 'string', format: 'date-time' },
-                              updateAt: { type: 'string', format: 'date-time' },
-                            },
-                            required: ['userId', 'datetimeAt', 'title', 'dosage'],
-                          },
-                        },
-                        symptoms: {
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            properties: {
-                              id: { type: 'number' },
-                              userId: { type: 'string' },
-                              datetimeAt: { type: 'string', format: 'date-time' },
-                              type: { type: 'string' },
-                              severity: { type: 'number' },
-                              notes: { type: 'string' },
-                              createdAt: { type: 'string', format: 'date-time' },
-                            },
-                            required: ['userId', 'datetimeAt', 'type', 'severity'],
-                          },
-                        },
+                        required: ['incidents', 'triggers', 'medications', 'symptoms'],
                       },
-                      required: ['incidents', 'triggers', 'medications', 'symptoms'],
-                    },
-                    null,
-                    2
-                  )}
-                </pre>
+                      null,
+                      2
+                    )}
+                  </pre>
+                </details>
               </div>
             </section>
             <section className="space-y-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Buttons</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 <div className="prose dark:prose-invert max-w-none">
-                  <div>
+                  <div className="hidden">
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"
@@ -151,7 +153,7 @@ export default function DataManagement() {
                   </div>
                 </div>
                 <div className="prose dark:prose-invert max-w-none">
-                  <div>
+                  <div className="hidden">
                     <label className="flex items-center gap-3">
                       <input
                         type="checkbox"

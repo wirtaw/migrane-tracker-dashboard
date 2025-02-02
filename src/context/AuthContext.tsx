@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const signInWithEmail = async () => {
+  /*const signInWithEmail = async () => {
     if (!supabase) {
       throw new Error('Problem to connect supbase');
     }
@@ -117,21 +117,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         captchaToken: 'test',
       },
     });
-  };
+  };*/
 
   const signOut = async () => {
     if (!supabase) {
       throw new Error('Problem to connect supbase');
     }
 
-    const response = await supabase.auth.signOut();
-    if (response?.error) {
+    const { error } = await supabase.auth.signOut({ scope: 'local' });
+    if (error) {
       throw new Error('Problem to connect supbase');
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGithub, signInWithEmail, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGithub, signOut }}>
       {children}
     </AuthContext.Provider>
   );

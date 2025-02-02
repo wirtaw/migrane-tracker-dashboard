@@ -76,7 +76,7 @@ export default function Documentation() {
                 </li>
               </ul>
               <p className="text-gray-600 dark:text-gray-300 dark:text-white mt-5">
-                <b>Generate Encrypt Key</b>
+                <b>Generate Encrypt Key (Featured)</b>
               </p>
               <ul className="text-gray-600 dark:text-gray-300 dark:text-white mt-5">
                 <li>
@@ -84,14 +84,11 @@ export default function Documentation() {
                   key used to encrypt your personal data, ensuring that only you can access it.
                 </li>
                 <li>
-                  <b>How to Generate:</b> Go to the{' '}
-                  <Link to="/profile" className="text-blue-500 dark:text-blue-500 underline">
-                    "Profile"
-                  </Link>{' '}
-                  section. Look for an option labeled "Setup Security" or something similar.
-                  Clicking this will generate your unique key. Important: Store this key in a safe
-                  place, such as a password manager. If you lose it, you will lose access to your
-                  encrypted data. The application should provide a clear warning about this.
+                  <b>How to Generate:</b>
+                  Look for an option labeled "Setup Security" or something similar. Clicking this
+                  will generate your unique key. Important: Store this key in a safe place, such as
+                  a password manager. If you lose it, you will lose access to your encrypted data.
+                  The application should provide a clear warning about this.
                 </li>
               </ul>
             </div>
