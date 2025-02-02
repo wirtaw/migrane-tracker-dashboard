@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Brain, Moon, Sun } from 'lucide-react';
-import ThemeContextMain, { ThemeProviderMain } from './../context/ThemeContextMain'; // Import the context
+import ThemeContextMain, { ThemeProviderMain } from './../context/ThemeContextMain';
 
 const Header = () => {
   const { theme, toggleTheme } = useContext(ThemeContextMain);
@@ -15,7 +15,7 @@ const Header = () => {
     `px-4 py-2 rounded-lg transition-colors ${
       isActive
         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+        : 'text-white hover:bg-blue-500 dark:text-gray-300 dark:hover:bg-gray-800'
     }`;
 
   return (
@@ -70,7 +70,7 @@ const Header = () => {
           </NavLink>
           <button
             onClick={toggleTheme}
-            className="group relative w-full flex justify-center border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+            className="group relative w-full flex justify-center border border-transparent text-sm font-medium rounded-md bg-white text-blue-500 dark:text-white dark:bg-gray-800 hover:bg-blue-500 dark:hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (
