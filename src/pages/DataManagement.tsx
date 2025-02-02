@@ -139,14 +139,14 @@ export default function DataManagement() {
                       </span>
                     </label>
                   </div>
-                  <div>
+                  <div className="mt-5">
                     <label htmlFor="uploadJSON" className="text-gray-600 dark:text-gray-300">
                       <AddButton
                         id="uploadJSON"
                         label="Upload JSON File"
                         onClick={() => setActiveModal('uploadJSON')}
                       />
-                      <span className="text-gray-700 dark:text-gray-300">
+                      <span className="text-gray-700 dark:text-gray-300 mt-5">
                         Click the button below to select a JSON file to import.
                       </span>
                     </label>
@@ -167,14 +167,14 @@ export default function DataManagement() {
                       </span>
                     </label>
                   </div>
-                  <div>
+                  <div className="mt-5">
                     <label htmlFor="exportJSON" className="text-gray-600 dark:text-gray-300">
                       <AddButton
                         id="exportJSON"
                         label="Export JSON File"
                         onClick={() => setActiveModal('exportJSON')}
                       />
-                      <span className="text-gray-700 dark:text-gray-300">
+                      <span className="text-gray-700 dark:text-gray-300 mt-5">
                         Click the button below to select a JSON file to export.
                       </span>
                     </label>

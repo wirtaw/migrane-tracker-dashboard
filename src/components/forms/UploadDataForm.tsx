@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import { Incident, Trigger, Medication, Symptom } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
+import { Construction } from 'lucide-react';
 
 interface UploadDataFormProps {
   onSubmit: () => void;
@@ -213,6 +214,10 @@ const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): Symptom[] | [
 };
 
 export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps) {
+  const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [isLoading, setIsloading] = useState<boolean>(false);
+  const [warnMessage, setWarnMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [newIncidents, setNewIncidents] = useState<Incident[]>([]);
   const [newTriggers, setNewTriggers] = useState<Trigger[]>([]);
   const [newMedications, setNewMedications] = useState<Medication[]>([]);
@@ -232,66 +237,89 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
     if (!file) {
-      console.log('No file selected');
+      setWarnMessage('No file selected');
       return;
     }
 
     const reader = new FileReader();
 
+    reader.onloadstart = (): void => {
+      setIsloading(true);
+      setWarnMessage('');
+      setErrorMessage('');
+    };
+
     reader.onload = (e: ProgressEvent<FileReader>): void => {
       if (!e?.target?.result) {
-        console.log('No file selected');
+        setErrorMessage('No file selected');
         return;
       }
       if (typeof e.target.result !== 'string') {
-        console.log('File is not a string');
+        setErrorMessage('File is not a string');
         return;
       }
-      let data;
-      if (decode && profileSecurityData?.key) {
-        const decoded: string = decrypt(e.target.result, profileSecurityData?.key);
-        if (!decoded) {
-          console.log('File is not base64 encoded');
-          return;
+      try {
+        let data;
+        if (decode && profileSecurityData?.key) {
+          const decoded: string = decrypt(e.target.result, profileSecurityData?.key);
+          if (!decoded) {
+            setErrorMessage('File is not base64 encoded');
+            return;
+          }
+          data = JSON.parse(decoded);
+        } else {
+          data = JSON.parse(e.target.result);
         }
-        data = JSON.parse(decoded);
-      } else {
-        data = JSON.parse(e.target.result);
+        const {
+          incidents: jsonDataIncidents,
+          triggers: jsonDataTriggers,
+          medications: jsonDataMedications,
+          symptoms: jsonDataSymptoms,
+        } = data;
+
+        // Incidents
+        let maxId = Math.max(...incidentList.map(({ id }) => id));
+        const incidents: Incident[] = mapIncidentList(jsonDataIncidents, maxId);
+
+        setNewIncidents(incidents);
+        setIncidentList([...incidentList, ...incidents]);
+
+        // Triggers
+        maxId = Math.max(...triggerList.map(({ id }) => id));
+        const triggers: Trigger[] = mapTriggerList(jsonDataTriggers, maxId);
+
+        setNewTriggers(triggers);
+        setTriggerList([...triggerList, ...triggers]);
+
+        // Medications
+        maxId = Math.max(...medicationList.map(({ id }) => id));
+        const medications: Medication[] = mapMedicationList(jsonDataMedications, maxId);
+
+        setNewMedications(medications);
+        setMedicationList([...medicationList, ...medications]);
+
+        // Symptoms
+        maxId = Math.max(...symptomList.map(({ id }) => id));
+        const symptoms: Symptom[] = mapSymptomList(jsonDataSymptoms, maxId);
+
+        setNewSymptoms(symptoms);
+        setSymptomList([...symptomList, ...symptoms]);
+        setIsFinished(true);
+        setErrorMessage('');
+        setWarnMessage('');
+      } catch (err) {
+        const { message } = err;
+        setIsFinished(false);
+        setErrorMessage(`Error occurred process ${message || ''}`);
+      } finally {
+        setIsloading(false);
       }
-      const {
-        incidents: jsonDataIncidents,
-        triggers: jsonDataTriggers,
-        medications: jsonDataMedications,
-        symptoms: jsonDataSymptoms,
-      } = data;
+    };
 
-      // Incidents
-      let maxId = Math.max(...incidentList.map(({ id }) => id));
-      const incidents: Incident[] = mapIncidentList(jsonDataIncidents, maxId);
-
-      setNewIncidents(incidents);
-      setIncidentList([...incidentList, ...incidents]);
-
-      // Triggers
-      maxId = Math.max(...triggerList.map(({ id }) => id));
-      const triggers: Trigger[] = mapTriggerList(jsonDataTriggers, maxId);
-
-      setNewTriggers(triggers);
-      setTriggerList([...triggerList, ...triggers]);
-
-      // Medications
-      maxId = Math.max(...medicationList.map(({ id }) => id));
-      const medications: Medication[] = mapMedicationList(jsonDataMedications, maxId);
-
-      setNewMedications(medications);
-      setMedicationList([...medicationList, ...medications]);
-
-      // Symptoms
-      maxId = Math.max(...symptomList.map(({ id }) => id));
-      const symptoms: Symptom[] = mapSymptomList(jsonDataSymptoms, maxId);
-
-      setNewSymptoms(symptoms);
-      setSymptomList([...symptomList, ...symptoms]);
+    reader.onerror = (): void => {
+      setIsFinished(false);
+      setIsloading(false);
+      setErrorMessage(`Error occurred reading file: ${file.name}`);
     };
 
     reader.readAsText(file);
@@ -319,6 +347,43 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
         />
       </div>
 
+      <div className="relative p-6 flex-auto">
+        {isLoading && <div>Loading</div>}
+
+        {isFinished && warnMessage === '' && errorMessage === '' && (
+          <div
+            id="success-message"
+            className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <strong className="font-bold">Success!</strong>
+            <span className="block sm:inline">File uploaded successfully.</span>
+          </div>
+        )}
+
+        {warnMessage !== '' && (
+          <div
+            id="warning-message"
+            className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <strong className="font-bold">Warning!</strong>
+            <span className="block sm:inline">{warnMessage}</span>
+          </div>
+        )}
+
+        {errorMessage !== '' && (
+          <div
+            id="error-message"
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <strong className="font-bold">Error!</strong>
+            <span className="block sm:inline">{errorMessage}</span>
+          </div>
+        )}
+      </div>
+
       <div className="text-gray-900 dark:text-white">
         {JSON.stringify([
           { type: 'Incidents', count: newIncidents.length },
@@ -333,7 +398,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
           type="submit"
           className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Submit
+          Close
         </button>
       </div>
     </form>
