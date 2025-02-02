@@ -276,7 +276,7 @@ export default function Profile() {
                   </h2>
                 </div>
                 <div className="space-y-4">
-                  <label className="flex items-center gap-3">
+                  <label className="flex items-center gap-3 hidden">
                     <input
                       type="checkbox"
                       name="emailNotifications"
@@ -288,7 +288,7 @@ export default function Profile() {
                       Enable email notifications
                     </span>
                   </label>
-                  <label className="flex items-center gap-3">
+                  <label className="flex items-center gap-3 hidden">
                     <input
                       type="checkbox"
                       name="personalHealthData"
@@ -300,7 +300,7 @@ export default function Profile() {
                       Enable personal health data storage
                     </span>
                   </label>
-                  <label className="flex items-center gap-3">
+                  <label className="flex items-center gap-3 hidden">
                     <input
                       type="checkbox"
                       name="dailySummary"

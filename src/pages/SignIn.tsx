@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Navigate, NavLink } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { Github, Chrome, Brain, Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ThemeContextMain, { ThemeProviderMain } from './../context/ThemeContextMain';
@@ -46,15 +46,6 @@ export default function SignIn() {
 
       return () => window.removeEventListener('resize', handleResize);
     }, []);
-
-    const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-      `py-2 rounded-lg transition-colors flex items-center ${
-        isMobileMenuOpen || isMobileNavActive ? 'w-full' : 'px-4'
-      } ${
-        isActive
-          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-          : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-      }`;
 
     return (
       <header
@@ -105,9 +96,6 @@ export default function SignIn() {
           <nav
             className={`items-center gap-4 ${isMobileMenuOpen && isMobileNavActive ? 'flex-col' : 'hidden'} md:flex`}
           >
-            <NavLink to="/signin" className={navLinkClass}>
-              Sign In
-            </NavLink>
             <button
               onClick={toggleTheme}
               className={`group relative flex justify-center border border-transparent text-sm font-medium rounded-md bg-white text-blue-500 dark:text-white dark:bg-gray-800 hover:bg-blue-500 dark:hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors ${isMobileMenuOpen && isMobileNavActive ? 'w-full py-6' : ''}`}
