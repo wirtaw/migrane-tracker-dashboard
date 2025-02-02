@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signInWithGithub: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -122,6 +123,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   };*/
 
+  const signInWithGoogle = async () => {
+    if (!supabase) {
+      throw new Error('Problem to connect supbase');
+    }
+
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+  };
+
   const signOut = async () => {
     if (!supabase) {
       throw new Error('Problem to connect supbase');
@@ -138,7 +149,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signInWithGithub, signOut }}>
+    <AuthContext.Provider
+      value={{ user, session, loading, signInWithGithub, signInWithGoogle, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
