@@ -15,10 +15,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const userExists = async (supabase: SupabaseClient, userId: string) => {
-  if (!supabase) {
-    throw new Error('Problem to connect supbase');
-  }
-
   const { data: users, error } = await supabase
     .from('migrane_tracker-users')
     .select('user_id,email,username')

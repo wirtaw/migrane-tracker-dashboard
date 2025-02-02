@@ -1,21 +1,51 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Brain, Moon, Sun } from 'lucide-react';
 import ThemeContextMain, { ThemeProviderMain } from './../context/ThemeContextMain';
+import { System } from './../config/constants';
 
 const Header = () => {
   const { theme, toggleTheme } = useContext(ThemeContextMain);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isInitiallyMobile, setIsInitiallyMobile] = useState<boolean>(
+    window.innerWidth < System.MobileWidth
+  );
+  const [isMobileNavActive, setIsMobileNavActive] = useState<boolean>(
+    window.innerWidth < System.MobileWidth
+  );
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    setIsMobileNavActive(!isMobileNavActive);
   };
 
+  useEffect(() => {
+    const handleResize = () => {
+      const isCurrentlyMobile = window.innerWidth < System.MobileWidth;
+      setIsInitiallyMobile(isCurrentlyMobile);
+      if (!isCurrentlyMobile && isMobileNavActive) {
+        setIsMobileNavActive(false);
+        setIsMobileMenuOpen(false);
+      } else if (isCurrentlyMobile && !isMobileNavActive && isMobileMenuOpen) {
+        setIsMobileNavActive(true);
+      } else if (isCurrentlyMobile && isInitiallyMobile) {
+        setIsMobileNavActive(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `px-4 py-2 rounded-lg transition-colors ${
+    `py-2 rounded-lg transition-colors flex items-center ${
+      isMobileMenuOpen || isMobileNavActive ? 'w-full' : 'px-4'
+    } ${
       isActive
         ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-        : 'text-white hover:bg-blue-500 dark:text-gray-300 dark:hover:bg-gray-800'
+        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
     }`;
 
   return (
@@ -25,7 +55,7 @@ const Header = () => {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Brain className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
-          <h1 className="text-2xl font-bold">Migraine Tracker</h1>
+          <h1 className="text-2xl font-bold">{System.Content.Title}</h1>
         </div>
         <button
           type="button"
@@ -64,13 +94,15 @@ const Header = () => {
             />
           </svg>
         </button>
-        <nav className={`items-center gap-4 ${isMobileMenuOpen ? 'block' : 'hidden'} md:flex`}>
+        <nav
+          className={`items-center gap-4 ${isMobileMenuOpen && isMobileNavActive ? 'flex-col' : 'hidden'} md:flex`}
+        >
           <NavLink to="/signin" className={navLinkClass}>
             Sign In
           </NavLink>
           <button
             onClick={toggleTheme}
-            className="group relative w-full flex justify-center border border-transparent text-sm font-medium rounded-md bg-white text-blue-500 dark:text-white dark:bg-gray-800 hover:bg-blue-500 dark:hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+            className={`group relative flex justify-center border border-transparent text-sm font-medium rounded-md bg-white text-blue-500 dark:text-white dark:bg-gray-800 hover:bg-blue-500 dark:hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors ${isMobileMenuOpen && isMobileNavActive ? 'w-full py-6' : ''}`}
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? (
