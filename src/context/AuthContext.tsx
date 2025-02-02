@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, SupabaseClient } from '@supabase/supabase-js';
+import { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   signInWithGithub: () => Promise<void>;
-  signInWithEmail: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -32,6 +32,7 @@ const userExists = async (supabase: SupabaseClient, userId: string) => {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -50,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      setSession(session);
       setLoading(false);
 
       if (!supabase) {
@@ -102,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: env.REDIRECT_URL,
+        redirectTo: env.REDIRECT_URL || window.location.origin + '/index',
       },
     });
   };
@@ -124,6 +127,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Problem to connect supbase');
     }
 
+    if (!session) {
+      throw new Error('Problem find the session');
+    }
+
     const { error } = await supabase.auth.signOut({ scope: 'local' });
     if (error) {
       throw new Error('Problem to connect supbase');
@@ -131,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGithub, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signInWithGithub, signOut }}>
       {children}
     </AuthContext.Provider>
   );
