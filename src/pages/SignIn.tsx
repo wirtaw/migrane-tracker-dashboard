@@ -45,7 +45,7 @@ export default function SignIn() {
       handleResize();
 
       return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [isMobileNavActive, isInitiallyMobile, isMobileMenuOpen]);
 
     return (
       <header

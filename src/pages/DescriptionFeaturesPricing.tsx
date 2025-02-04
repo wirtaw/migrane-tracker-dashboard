@@ -37,7 +37,7 @@ const Header = () => {
     handleResize();
 
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [isMobileNavActive, isInitiallyMobile, isMobileMenuOpen]);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `py-2 rounded-lg transition-colors flex items-center ${

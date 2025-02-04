@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
-import { Incident, Trigger, Medication, Symptom } from '../../models/profileData.types';
+import {
+  Incident,
+  Trigger,
+  Medication,
+  Symptom,
+  BrokenTrigger,
+  BrokenIncident,
+  BrokenMedication,
+  BrokenSymptom,
+} from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface UploadDataFormProps {
@@ -12,6 +21,11 @@ const decrypt = (data: string | SjclCipherEncrypted, key: string) => {
   return JSON.parse(sjcl.decrypt(key, data));
 };
 
+const brokenIncidents: BrokenIncident[] = [];
+const brokenTriggers: BrokenTrigger[] = [];
+const brokenMedications: BrokenMedication[] = [];
+const brokenSymptoms: BrokenSymptom[] = [];
+
 const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): Incident[] | [] => {
   if (!jsonDataIncidents || !Array.isArray(jsonDataIncidents)) {
     return [];
@@ -22,32 +36,98 @@ const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): Incident[] 
       incident;
 
     if (!userId) {
-      console.log('Incident missing userId');
+      brokenIncidents.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        startTime: typeof startTime === 'string' ? new Date(startTime) : startTime,
+        durationHours,
+        triggers,
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        notes: notes || '',
+        warning: 'Incident missing userId',
+      });
       continue;
     }
 
     if (!datetimeAt) {
-      console.log('Incident missing datetimeAt');
+      brokenIncidents.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        startTime: typeof startTime === 'string' ? new Date(startTime) : startTime,
+        durationHours,
+        triggers,
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        notes: notes || '',
+        warning: 'Incident missing datetimeAt',
+      });
       continue;
     }
 
     if (!type) {
-      console.log('Incident missing type');
+      brokenIncidents.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        startTime: typeof startTime === 'string' ? new Date(startTime) : startTime,
+        durationHours,
+        triggers,
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        notes: notes || '',
+        warning: 'Incident missing type',
+      });
       continue;
     }
 
     if (!startTime) {
-      console.log('Incident missing startTime');
+      brokenIncidents.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        startTime: typeof startTime === 'string' ? new Date(startTime) : startTime,
+        durationHours,
+        triggers,
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        notes: notes || '',
+        warning: 'Incident missing startTime',
+      });
       continue;
     }
 
     if (!durationHours) {
-      console.log('Incident missing durationHours');
+      brokenIncidents.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        startTime: typeof startTime === 'string' ? new Date(startTime) : startTime,
+        durationHours,
+        triggers,
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        notes: notes || '',
+        warning: 'Incident missing durationHours',
+      });
       continue;
     }
 
     if (triggers && !Array.isArray(triggers)) {
-      console.log('Incident triggers is not an array');
+      brokenIncidents.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        startTime: typeof startTime === 'string' ? new Date(startTime) : startTime,
+        durationHours,
+        triggers,
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        notes: notes || '',
+        warning: 'Incident triggers is not an array',
+      });
       continue;
     }
 
@@ -82,17 +162,41 @@ const mapTriggerList = (jsonDataTriggers: unknown, maxId: number): Trigger[] | [
     const { id, userId, datetimeAt, type, note, createdAt } = trigger;
 
     if (!userId) {
-      console.log('Trigger missing userId');
+      brokenTriggers.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        note: note || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        warning: 'Trigger missing userId',
+      });
       continue;
     }
 
     if (!datetimeAt) {
-      console.log('Trigger missing datetimeAt');
+      brokenTriggers.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        note: note || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        warning: 'Trigger missing datetimeAt',
+      });
       continue;
     }
 
     if (!type) {
-      console.log('Trigger missing type');
+      brokenTriggers.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        note: note || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        warning: 'Trigger missing type',
+      });
       continue;
     }
 
@@ -124,22 +228,62 @@ const mapMedicationList = (jsonDataMedications: unknown, maxId: number): Medicat
     const { id, userId, datetimeAt, title, dosage, notes, createdAt, updateAt } = medication;
 
     if (!userId) {
-      console.log('Medication missing userId');
+      brokenMedications.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        title,
+        dosage,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        updateAt: typeof updateAt === 'string' ? new Date(updateAt) : new Date(),
+        warning: 'Medication missing userId',
+      });
       continue;
     }
 
     if (!datetimeAt) {
-      console.log('Medication missing datetimeAt');
+      brokenMedications.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        title,
+        dosage,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        updateAt: typeof updateAt === 'string' ? new Date(updateAt) : new Date(),
+        warning: 'Medication missing datetimeAt',
+      });
       continue;
     }
 
     if (!title) {
-      console.log('Medication missing title');
+      brokenMedications.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        title,
+        dosage,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        updateAt: typeof updateAt === 'string' ? new Date(updateAt) : new Date(),
+        warning: 'Medication missing title',
+      });
       continue;
     }
 
     if (!dosage) {
-      console.log('Medication missing dosage');
+      brokenMedications.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        title,
+        dosage,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        updateAt: typeof updateAt === 'string' ? new Date(updateAt) : new Date(),
+        warning: 'Medication missing dosage',
+      });
       continue;
     }
 
@@ -173,22 +317,58 @@ const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): Symptom[] | [
     const { id, userId, datetimeAt, type, severity, notes, createdAt } = symptom;
 
     if (!userId) {
-      console.log('Symptom missing userId');
+      brokenSymptoms.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        severity,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        warning: 'Symptom missing userId',
+      });
       continue;
     }
 
     if (!datetimeAt) {
-      console.log('Symptom missing datetimeAt');
+      brokenSymptoms.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        severity,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        warning: 'Symptom missing datetimeAt',
+      });
       continue;
     }
 
     if (!type) {
-      console.log('Symptom missing type');
+      brokenSymptoms.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        severity,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        warning: 'Symptom missing type',
+      });
       continue;
     }
 
     if (!severity) {
-      console.log('Symptom missing severity');
+      brokenSymptoms.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        type,
+        severity,
+        notes: notes || '',
+        createdAt: typeof createdAt === 'string' ? new Date(createdAt) : new Date(),
+        warning: 'Symptom missing severity',
+      });
       continue;
     }
 
@@ -231,6 +411,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
     symptomList,
     setSymptomList,
     profileSecurityData,
+    setBrokenImportData,
   } = useProfileDataContext();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -306,6 +487,13 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
         setIsFinished(true);
         setErrorMessage('');
         setWarnMessage('');
+
+        setBrokenImportData({
+          incidents: brokenIncidents.length > 0 ? brokenIncidents : null,
+          triggers: brokenTriggers.length > 0 ? brokenTriggers : null,
+          symptoms: brokenSymptoms.length > 0 ? brokenSymptoms : null,
+          medications: brokenMedications.length > 0 ? brokenMedications : null,
+        });
       } catch (error: unknown) {
         setIsFinished(false);
         if (error instanceof Error) {

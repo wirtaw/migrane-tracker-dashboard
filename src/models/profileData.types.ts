@@ -109,3 +109,56 @@ export interface ErrorMessage {
   showModal: boolean;
   message: string;
 }
+
+export interface BrokenTrigger {
+  id: number;
+  userId: string;
+  type: string;
+  note: string;
+  createdAt: Date;
+  datetimeAt: Date;
+  warning: string;
+}
+
+export interface BrokenSymptom {
+  id: number;
+  userId: string;
+  type: string;
+  severity: number;
+  notes: string;
+  createdAt: Date;
+  datetimeAt: Date;
+  warning: string;
+}
+
+export interface BrokenIncident {
+  id: number;
+  userId: string;
+  type: string;
+  startTime: Date;
+  durationHours: number;
+  notes: string;
+  triggers: string[];
+  createdAt: Date;
+  datetimeAt: Date;
+  warning: string;
+}
+
+export interface BrokenMedication {
+  id: number;
+  userId: string;
+  title: string;
+  dosage: string;
+  notes: string;
+  datetimeAt: Date;
+  createdAt: Date;
+  updateAt: Date;
+  warning: string;
+}
+
+export interface BrokenData {
+  triggers: BrokenTrigger[] | unknown;
+  incidents: BrokenIncident[] | unknown;
+  symptoms: BrokenSymptom[] | unknown;
+  medications: BrokenMedication[] | unknown;
+}

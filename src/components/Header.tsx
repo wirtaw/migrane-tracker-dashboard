@@ -47,7 +47,7 @@ export function Header() {
     handleResize();
 
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [isMobileNavActive, isInitiallyMobile, isMobileMenuOpen]);
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm">

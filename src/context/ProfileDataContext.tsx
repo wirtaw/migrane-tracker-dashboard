@@ -11,6 +11,7 @@ import {
   ProfileSettingsData,
   ProfileSecurityData,
   ErrorMessage,
+  BrokenData,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
 import { env } from '../config/env';
@@ -46,6 +47,8 @@ interface ProfileDataContextProps {
   setFormErrorMessage: React.Dispatch<React.SetStateAction<ErrorMessage>>;
   currentMonth: Date;
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
+  brokenImportData: BrokenData;
+  setBrokenImportData: React.Dispatch<React.SetStateAction<BrokenData>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -130,6 +133,13 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
 
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
+  const [brokenImportData, setBrokenImportData] = useState<BrokenData>({
+    triggers: null,
+    incidents: null,
+    symptoms: null,
+    medications: null,
+  });
+
   return (
     <ProfileDataContext.Provider
       value={{
@@ -163,6 +173,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setFormErrorMessage,
         currentMonth,
         setCurrentMonth,
+        brokenImportData,
+        setBrokenImportData,
       }}
     >
       {children}

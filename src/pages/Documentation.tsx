@@ -214,6 +214,10 @@ export default function Documentation() {
                   JSON schema it uses for import/export. This schema defines the structure and
                   format of the data. Located in a "Data Management" section
                 </li>
+                <li className="mt-5">
+                  <b>Problem with data import:</b> The application should provide detailed
+                  information about broken(not imported) items.
+                </li>
               </ul>
             </div>
           </section>
