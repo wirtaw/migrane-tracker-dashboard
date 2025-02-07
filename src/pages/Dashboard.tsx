@@ -5,6 +5,7 @@ import LifeMetrics from '../components/LifeMetrics';
 import WeatherWidget from '../components/WeatherWidget';
 import GeoMagneticWidget from '../components/GeoMagneticWidget';
 import TrackingButtons from '../components/TrackingButtons';
+import MostRecentData from '../components/MostRecentData';
 import { env } from '../config/env';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
@@ -59,6 +60,9 @@ export default function Dashboard() {
         </div>
         <div>
           <GeoMagneticWidget />
+        </div>
+        <div>
+          <MostRecentData />
         </div>
         <div>
           <TrackingButtons />
