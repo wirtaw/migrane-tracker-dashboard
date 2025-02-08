@@ -16,6 +16,7 @@ import DataManagement from './pages/DataManagement';
 import Settings from './pages/Settings';
 import ReportPage from './pages/ReportPage';
 import DescriptionFeaturesPricing from './pages/DescriptionFeaturesPricing';
+import { ProfileDataProvider } from './context/ProfileDataContext';
 
 export function App() {
   return (
@@ -28,7 +29,9 @@ export function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <Layout />
+                <ProfileDataProvider>
+                  <Layout />
+                </ProfileDataProvider>
               </ProtectedRoute>
             }
           >

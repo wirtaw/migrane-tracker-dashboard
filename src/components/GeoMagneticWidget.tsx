@@ -1,6 +1,7 @@
 import React from 'react';
 import { Zap, Waves, Activity, Clock, AlertTriangle } from 'lucide-react';
 import { useGeoMagneticWeather } from '../hooks/useGeoMagneticWeather.ts';
+import { env } from '../config/env';
 
 interface GeomagneticData {
   solarFlux: number;
@@ -155,6 +156,19 @@ export default function GeoMagneticWidget() {
             </div>
             <SpaceWeatherIndicator level={currentGeomagneticData.nextWeather.level} />
           </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6">
+        <div className="text-sm text-gray-600 dark:text-gray-400">Source: </div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          <a
+            href={env.NOAA_GOV_CURRENT_RESOURCE_URL}
+            target="_blank"
+            className="text-blue-600 visited:text-purple-600 underline "
+          >
+            {env.NOAA_GOV_CURRENT_RESOURCE_TITLE}
+          </a>
         </div>
       </div>
     </div>

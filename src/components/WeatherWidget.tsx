@@ -9,6 +9,7 @@ import {
   UmbrellaIcon,
 } from 'lucide-react';
 import { useWeather } from '../hooks/useWeather';
+import { env } from '../config/env';
 
 function UVIndexIndicator({ uvi }: { uvi: number }) {
   const getUVIColor = (uvi: number) => {
@@ -150,6 +151,19 @@ export default function WeatherWidget() {
               <div className="text-xl font-semibold dark:text-white">{currentWeather.clouds}%</div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6">
+        <div className="text-sm text-gray-600 dark:text-gray-400">Source: </div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          <a
+            href={env.OPEN_METEO_RESOURCE_URL}
+            target="_blank"
+            className="text-blue-600 visited:text-purple-600 underline "
+          >
+            {env.OPEN_METEO_RESOURCE_TITLE}
+          </a>
         </div>
       </div>
     </div>

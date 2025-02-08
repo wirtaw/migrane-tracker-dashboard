@@ -1,7 +1,6 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ProfileDataProvider } from '../context/ProfileDataContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,6 +8,16 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
+  const location = useLocation();
+
+  /*const userHasRequiredData = () => {
+    // Replace with your actual logic to check if birthdate, latitude, and longitude are set
+    const birthdate = localStorage.getItem('birthdate');
+    const latitude = localStorage.getItem('latitude');
+    const longitude = localStorage.getItem('longitude');
+
+    return !!birthdate && !!latitude && !!longitude;
+  };*/
 
   if (loading) {
     return (
@@ -19,8 +28,9 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!user) {
+    sessionStorage.setItem('redirectAfterLogin', location.pathname);
     return <Navigate to="/index" replace />;
   }
 
-  return <ProfileDataProvider>{children}</ProfileDataProvider>;
+  return children;
 }

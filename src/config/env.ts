@@ -15,6 +15,10 @@ interface EnvConfig {
   SJCL_KEY_SIZE: number;
   SJCL_GENERATE_SALT_WORDS: number;
   SJCL_GENERATE_SALT_PARANOIA: number;
+  NOAA_GOV_CURRENT_RESOURCE_URL: string;
+  NOAA_GOV_CURRENT_RESOURCE_TITLE: string;
+  OPEN_METEO_RESOURCE_URL: string;
+  OPEN_METEO_RESOURCE_TITLE: string;
 }
 
 export const env: EnvConfig = {
@@ -35,4 +39,8 @@ export const env: EnvConfig = {
   SJCL_GENERATE_SALT_WORDS: Number.parseInt(import.meta.env.VITE_SJCL_GENERATE_SALT_WORDS) || 2,
   SJCL_GENERATE_SALT_PARANOIA:
     Number.parseInt(import.meta.env.VITE_SJCL_GENERATE_SALT_PARANOIA) || 0,
+  NOAA_GOV_CURRENT_RESOURCE_URL: import.meta.env.VITE_NOAA_GOV_CURRENT_RESOURCE_URL || '',
+  NOAA_GOV_CURRENT_RESOURCE_TITLE: import.meta.env.VITE_NOAA_GOV_CURRENT_RESOURCE_TITLE || '',
+  OPEN_METEO_RESOURCE_URL: import.meta.env.VITE_OPEN_METEO_RESOURCE_URL || '',
+  OPEN_METEO_RESOURCE_TITLE: import.meta.env.VITE_OPEN_METEO_RESOURCE_TITLE || '',
 };
