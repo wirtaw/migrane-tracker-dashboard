@@ -42,8 +42,19 @@ const getDeltaText = (current: number, next: number): string => {
 };
 
 export default function BiorhythmChart({ birthDate, targetDate = new Date() }: BiorhythmProps) {
-  if (!birthDate) {
-    return '';
+  if (!birthDate || typeof birthDate !== 'object' || birthDate.toString() === 'Invalid Date') {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div className="flex items-center gap-2 mb-6">
+          <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-lg font-semibold dark:text-white">Biorhythm Analysis</h2>
+        </div>
+
+        <div className="space-y-6">
+          <div className="font-semibold dark:text-white"> No provided birthdate </div>
+        </div>
+      </div>
+    );
   }
 
   const tomorrow = new Date(targetDate);

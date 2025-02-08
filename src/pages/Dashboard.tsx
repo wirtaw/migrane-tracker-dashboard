@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import BiorhythmChart from '../components/BiorhythmChart';
 import CalendarView from '../components/CalendarView';
 import LifeMetrics from '../components/LifeMetrics';
@@ -6,15 +7,19 @@ import WeatherWidget from '../components/WeatherWidget';
 import GeoMagneticWidget from '../components/GeoMagneticWidget';
 import TrackingButtons from '../components/TrackingButtons';
 import MostRecentData from '../components/MostRecentData';
-import { env } from '../config/env';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase.ts';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const [birthDate, setBirthDate] = useState(new Date(env.BIRTH_DATE));
-  const { currentMonth } = useProfileDataContext();
+  const { currentMonth, profileSettingsData } = useProfileDataContext();
+  const [birthDate] = useState(new Date(profileSettingsData.birthDate));
+
+  if (
+    birthDate.toString() === 'Invalid Date' ||
+    !profileSettingsData.latitude ||
+    !profileSettingsData.longitude
+  ) {
+    return <Navigate to="/profile" replace />;
+  }
 
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
@@ -25,29 +30,6 @@ export default function Dashboard() {
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-  useEffect(() => {
-    async function fetchUserData() {
-      if (supabase && user?.id) {
-        const { data, error } = await supabase
-          .from('migrane_tracker-users')
-          .select('birthdate, latitude, longitude')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching user data:', error);
-          return;
-        }
-
-        if (data) {
-          setBirthDate(new Date(data.birthdate));
-        }
-      }
-    }
-
-    fetchUserData();
-  }, [user?.id]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">

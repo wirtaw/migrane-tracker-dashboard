@@ -10,15 +10,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  /*const userHasRequiredData = () => {
-    // Replace with your actual logic to check if birthdate, latitude, and longitude are set
-    const birthdate = localStorage.getItem('birthdate');
-    const latitude = localStorage.getItem('latitude');
-    const longitude = localStorage.getItem('longitude');
-
-    return !!birthdate && !!latitude && !!longitude;
-  };*/
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">

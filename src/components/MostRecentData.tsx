@@ -123,7 +123,7 @@ export default function MostRecentData({ targetDate = new Date() }: MostRecentDa
                         </thead>
                         <tbody>
                           {filterData.incidents.map(incident => (
-                            <tr>
+                            <tr key={'incident-' + incident.id}>
                               <td className="text-left">{incident.type}</td>
                               <td className="text-center">
                                 {getIsoDate(incident.startTime)} {getIsoTime(incident.startTime)}
@@ -154,7 +154,7 @@ export default function MostRecentData({ targetDate = new Date() }: MostRecentDa
                         </thead>
                         <tbody>
                           {filterData.triggers.map(trigger => (
-                            <tr>
+                            <tr key={'trigger-' + trigger.id}>
                               <td className="text-left">{trigger.type}</td>
                               <td className="text-center">
                                 {getIsoDate(trigger.datetimeAt)} {getIsoTime(trigger.datetimeAt)}
@@ -184,7 +184,7 @@ export default function MostRecentData({ targetDate = new Date() }: MostRecentDa
                         </thead>
                         <tbody>
                           {filterData.symptoms.map(symptom => (
-                            <tr>
+                            <tr key={'symptom-' + symptom.id}>
                               <td className="text-left">{symptom.type}</td>
                               <td className="text-center">
                                 {getIsoDate(symptom.datetimeAt)} {getIsoTime(symptom.datetimeAt)}
@@ -215,7 +215,7 @@ export default function MostRecentData({ targetDate = new Date() }: MostRecentDa
                         </thead>
                         <tbody>
                           {filterData.medications.map(medication => (
-                            <tr>
+                            <tr key={'medication-' + medication.id}>
                               <td className="text-left">{medication.title}</td>
                               <td className="text-center">
                                 {getIsoDate(medication.datetimeAt)}{' '}

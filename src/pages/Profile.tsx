@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { User, Calendar, MapPin, Settings, EarthLock, Shield } from 'lucide-react';
-import { env } from '../config/env';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
@@ -9,6 +8,12 @@ import AddButton from './../components/AddButton';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import SecuritySetupForm from '../components/forms/SecuritySetupForm';
 import { UserUpdateDAO } from '../models/user.types';
+
+interface Location {
+  latitude: number | null;
+  longitude: number | null;
+  error: string | null;
+}
 
 export default function Profile() {
   const { profileSettingsData, setProfileSettingsData, profileSecurityData } =
@@ -25,34 +30,11 @@ export default function Profile() {
   const [aggrementSaveKey, setAggrementSaveKey] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeModal, setActiveModal] = useState<'securitySetup' | null>(null);
-
-  useEffect(() => {
-    async function fetchUserData() {
-      if (supabase && user?.id) {
-        const { data, error } = await supabase
-          .from('migrane_tracker-users')
-          .select('birthdate, latitude, longitude, salt, key, isSecurityFinished')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching user data:', error);
-          return;
-        }
-
-        if (data) {
-          setFormData(prev => ({
-            ...prev,
-            birthDate: data.birthdate || env.BIRTH_DATE,
-            latitude: data.latitude?.toString() || env.LATITUDE.toString(),
-            longitude: data.longitude?.toString() || env.LONGITUDE.toString(),
-          }));
-        }
-      }
-    }
-
-    fetchUserData();
-  }, [user?.id]);
+  const [location, setLocation] = useState<Location>({
+    latitude: null,
+    longitude: null,
+    error: '',
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -66,7 +48,6 @@ export default function Profile() {
     e.preventDefault();
     setIsSaving(true);
     setSaveStatus('idle');
-    setProfileSettingsData(formData);
 
     try {
       if (supabase && user?.id) {
@@ -102,12 +83,72 @@ export default function Profile() {
         }
         setSaveStatus('success');
         console.log('Saved:', data);
+        setProfileSettingsData({
+          ...formData,
+          fetchDataErrors: {
+            magneticWeather: '',
+            forecast: '',
+          },
+        });
       }
     } catch (error) {
       console.error(error);
       setSaveStatus('error');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            error: '',
+          });
+          setFormData({
+            ...formData,
+            latitude: position.coords.latitude.toString(),
+            longitude: position.coords.longitude.toString(),
+          });
+        },
+        error => {
+          let codeError: string = 'An unknown error occurred.';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              console.error('User denied the request for Geolocation.');
+              codeError = 'User denied the request for Geolocation.';
+              // Display a message to the user explaining why you need their location
+              // and how to enable it in their browser settings.
+              break;
+            case error.POSITION_UNAVAILABLE:
+              console.error('Location information is unavailable.');
+              codeError = 'Location information is unavailable.';
+              break;
+            case error.TIMEOUT:
+              console.error('The request to get user location timed out.');
+              codeError = 'The request to get user location timed out.';
+              break;
+            default:
+              console.error('An unknown error occurred.');
+              break;
+          }
+
+          setLocation({
+            latitude: null,
+            longitude: null,
+            error: `${error.message}. ${codeError}`,
+          });
+        }
+      );
+    } else {
+      setLocation({
+        latitude: null,
+        longitude: null,
+        error: 'Geolocation is not supported by your browser.',
+      });
     }
   };
 
@@ -190,6 +231,30 @@ export default function Profile() {
                       placeholder="e.g., -0.1278"
                     />
                   </div>
+                </div>
+                <div className="container mx-auto flex justify-between items-center">
+                  <button
+                    onClick={getLocation}
+                    type="button"
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                  >
+                    Get My Location
+                  </button>
+                  {location.latitude && (
+                    <p>
+                      Latitude: {location.latitude}, Longitude: {location.longitude}
+                    </p>
+                  )}
+                  {location.error !== '' && (
+                    <div
+                      id="location-error-message"
+                      className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                      role="alert"
+                    >
+                      <strong className="font-bold">Error!</strong>
+                      <span className="block sm:inline">{location.error}</span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="space-y-4">

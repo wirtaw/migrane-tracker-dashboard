@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { GeophysicalWeatherData, fetchGeophysicalWeatherData } from '../services/weather.ts';
+import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export function useGeoMagneticWeather() {
+  const { profileSettingsData, setProfileSettingsData } = useProfileDataContext();
   const [geophysicalweather, setGeophysicalWeather] = useState<GeophysicalWeatherData>({
     solarFlux: 0,
     aIndex: 0,
@@ -10,12 +12,31 @@ export function useGeoMagneticWeather() {
     nextWeather: { level: '' },
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    profileSettingsData.fetchDataErrors.magneticWeather
+  );
   const [canGetGeophysicalWeather, setCanGetGeophysicalWeather] = useState<boolean | null>(true);
+  const [latitude] = useState<number>(parseFloat(profileSettingsData.latitude) || 0);
+  const [longitude] = useState<number>(parseFloat(profileSettingsData.longitude) || 0);
 
   useEffect(() => {
     async function getWeatherData() {
       try {
+        if (!latitude && !longitude) {
+          setCanGetGeophysicalWeather(false);
+          setLoading(false);
+          const errMessage: string =
+            'Failed to fetch geomagnetic activity data. No provided coordinates';
+          setError(errMessage);
+          setProfileSettingsData({
+            ...profileSettingsData,
+            fetchDataErrors: {
+              magneticWeather: errMessage,
+              forecast: profileSettingsData.fetchDataErrors.forecast,
+            },
+          });
+          return;
+        }
         setLoading(true);
         let data = null;
 
@@ -29,7 +50,15 @@ export function useGeoMagneticWeather() {
         }
         setError(null);
       } catch (err) {
-        setError(`Failed to fetch weather data. ${JSON.stringify(err)}`);
+        const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
+        setError(errMessage);
+        setProfileSettingsData({
+          ...profileSettingsData,
+          fetchDataErrors: {
+            magneticWeather: errMessage,
+            forecast: profileSettingsData.fetchDataErrors.forecast,
+          },
+        });
         console.error(err);
       } finally {
         setCanGetGeophysicalWeather(false);
@@ -37,7 +66,9 @@ export function useGeoMagneticWeather() {
       }
     }
 
-    getWeatherData();
+    if (!profileSettingsData.fetchDataErrors.magneticWeather) {
+      getWeatherData();
+    }
   });
 
   return { geophysicalweather, loading, error };

@@ -73,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .select();
 
           if (error2) {
+            setSession(null);
             throw error2;
           }
 
@@ -81,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
         // handle sign out event
+        setSession(null);
         window.location.href = '/';
       } else if (_event === 'PASSWORD_RECOVERY') {
         // handle password recovery event

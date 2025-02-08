@@ -59,6 +59,11 @@ export interface GeophysicalWeatherData {
   nextWeather: { level: string };
 }
 
+interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
 const OPEN_WEATHER_BASE_URL: string = env.OPEN_WEATHER_BASE_URL;
 const NOAA_GOV_CURRENT_BASE_URL: string = env.NOAA_GOV_CURRENT_BASE_URL;
 const OPEN_METEO_BASE_URL: string = env.OPEN_METEO_BASE_URL;
@@ -153,11 +158,14 @@ export async function fetchWeatherData(): Promise<WeatherData> {
 const range = (start: number, stop: number, step: number) =>
   Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);
 
-export async function fetchOpenMeteoWeatherData(): Promise<WeatherData> {
+export async function fetchOpenMeteoWeatherData({
+  latitude,
+  longitude,
+}: Coordinates): Promise<WeatherData> {
   try {
     const params: OpenMeteoParams = {
-      latitude: env.LATITUDE,
-      longitude: env.LONGITUDE,
+      latitude: latitude,
+      longitude: longitude,
       current: [
         'temperature_2m',
         'relative_humidity_2m',

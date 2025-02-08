@@ -65,6 +65,15 @@ export interface BloodPressure {
   datetimeAt: Date;
 }
 
+export interface Sleep {
+  id: number;
+  userId: string;
+  rate: number;
+  notes: string;
+  startedAt: Date;
+  datetimeAt: Date;
+}
+
 export interface Location {
   latitude: number;
   longitude: number;
@@ -95,6 +104,10 @@ export interface ProfileSettingsData {
   securitySetup: boolean;
   salt: string;
   key: string;
+  fetchDataErrors: {
+    forecast: string;
+    magneticWeather: string;
+  };
 }
 
 export interface ProfileSecurityData {
@@ -161,4 +174,20 @@ export interface BrokenData {
   incidents: BrokenIncident[] | unknown;
   symptoms: BrokenSymptom[] | unknown;
   medications: BrokenMedication[] | unknown;
+}
+
+export interface JSONData {
+  triggers: Trigger[];
+  incidents: Incident[];
+  symptoms: Symptom[];
+  medications: Medication[];
+  logsForecast: Location[] | unknown;
+  logHealth:
+    | {
+        weight: Weight[] | unknown;
+        height: Height[] | unknown;
+        bloodPresure: BloodPressure[] | unknown;
+        sleep: Sleep[] | unknown;
+      }
+    | unknown;
 }

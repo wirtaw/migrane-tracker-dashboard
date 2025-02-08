@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Waves, Activity, Clock, AlertTriangle } from 'lucide-react';
+import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle } from 'lucide-react';
 import { useGeoMagneticWeather } from '../hooks/useGeoMagneticWeather.ts';
 import { env } from '../config/env';
 
@@ -94,6 +94,12 @@ export default function GeoMagneticWidget() {
       <div className="flex items-center gap-2 mb-6">
         <Zap className="w-5 h-5 text-amber-500" />
         <h2 className="text-lg font-semibold dark:text-white">Geomagnetic Activity</h2>
+        {error && (
+          <div className="flex items-center gap-1 text-amber-500 text-sm">
+            <AlertCircle className="w-4 h-4" />
+            <span>Using default data</span>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6">

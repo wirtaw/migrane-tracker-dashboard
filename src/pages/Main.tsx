@@ -1,18 +1,8 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Activity, Calendar, LineChart, FileText, FolderKanban, Settings } from 'lucide-react';
 
 export default function Main() {
-  const navigate = useNavigate();
-  //... inside your handleSubmit function after successful login
-  const storedRedirect = sessionStorage.getItem('redirectAfterLogin');
-  if (storedRedirect) {
-    sessionStorage.removeItem('redirectAfterLogin');
-    navigate(storedRedirect);
-  } else {
-    navigate('/dashboard');
-  }
-
   return (
     <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
