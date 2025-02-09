@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import { Incident, Trigger, Medication, Symptom } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
+import Loader from '../Loader';
 
 interface DownloadDataFormProps {
   onSubmit: () => void;
@@ -143,7 +144,7 @@ export default function DownloadDataForm({ onSubmit, decode }: DownloadDataFormP
       </div>
 
       <div className="relative p-6 flex-auto">
-        {isLoading && <div>Loading</div>}
+        {isLoading && <Loader />}
 
         {isFinished && warnMessage === '' && errorMessage === '' && (
           <div

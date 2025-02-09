@@ -2,6 +2,7 @@ import React from 'react';
 import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle } from 'lucide-react';
 import { useGeoMagneticWeather } from '../hooks/useGeoMagneticWeather.ts';
 import { env } from '../config/env';
+import Loader from '../components/Loader';
 
 interface GeomagneticData {
   solarFlux: number;
@@ -72,17 +73,7 @@ export default function GeoMagneticWidget() {
   };
 
   if (loading) {
-    return (
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   const currentGeomagneticData = error

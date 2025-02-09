@@ -11,6 +11,7 @@ import {
   BrokenSymptom,
 } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
+import Loader from '../Loader';
 
 interface UploadDataFormProps {
   onSubmit: () => void;
@@ -541,7 +542,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
       </div>
 
       <div className="relative p-6 flex-auto">
-        {isLoading && <div>Loading</div>}
+        {isLoading && <Loader />}
 
         {isFinished && warnMessage === '' && errorMessage === '' && (
           <div

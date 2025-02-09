@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useWeather } from '../hooks/useWeather';
 import { env } from '../config/env';
+import Loader from '../components/Loader';
 
 function UVIndexIndicator({ uvi }: { uvi: number }) {
   const getUVIColor = (uvi: number) => {
@@ -40,20 +41,7 @@ export default function WeatherWidget() {
   const { weather, loading, error } = useWeather();
 
   if (loading) {
-    return (
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
-          <div className="space-y-3">
-            <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   const defaultWeather = {
