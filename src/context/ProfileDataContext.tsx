@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 import {
   Trigger,
   Incident,
@@ -13,7 +13,6 @@ import {
   BrokenData,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
-import { supabase } from '../lib/supabase.ts';
 
 interface ProfileDataContextProps {
   triggerList: Trigger[];
@@ -53,7 +52,7 @@ interface ProfileDataContextProps {
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
 
 export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
+  const { user, profileSettingsData: signProfileSettingsData } = useAuth();
   const userId: string = user?.id || '1';
   const [triggerList, setTriggerList] = useState<Trigger[]>([]);
   const [incidentList, setIncidentList] = useState<Incident[]>([]);
@@ -105,16 +104,17 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([]);
 
   const [profileSettingsData, setProfileSettingsData] = useState<ProfileSettingsData>({
-    birthDate: '',
-    latitude: '',
-    longitude: '',
+    birthDate: signProfileSettingsData?.birthDate || '',
+    latitude: signProfileSettingsData?.latitude || '',
+    longitude: signProfileSettingsData?.longitude || '',
     emailNotifications: false,
     dailySummary: false,
     personalHealthData: true,
     userId,
     securitySetup: false,
-    salt: '',
-    key: '',
+    profileFilled: !!signProfileSettingsData,
+    salt: signProfileSettingsData?.salt || '',
+    key: signProfileSettingsData?.key || '',
     fetchDataErrors: {
       forecast: '',
       magneticWeather: '',
@@ -142,40 +142,6 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     symptoms: null,
     medications: null,
   });
-
-  useEffect(() => {
-    async function getUserData() {
-      if (supabase && user?.id) {
-        const { data, error } = await supabase
-          .from('migrane_tracker-users')
-          .select('birthdate, latitude, longitude, salt, key, isSecurityFinished')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching user data:', error);
-          return;
-        }
-
-        if (data) {
-          setProfileSettingsData({
-            ...profileSettingsData,
-            birthDate: data.birthdate || '',
-            latitude: data.latitude || '',
-            longitude: data.longitude || '',
-          });
-        }
-      }
-    }
-
-    if (
-      !profileSettingsData.birthDate ||
-      !profileSettingsData.latitude ||
-      !profileSettingsData.longitude
-    ) {
-      getUserData();
-    }
-  }, [profileSettingsData, setProfileSettingsData, user?.id]);
 
   return (
     <ProfileDataContext.Provider

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
-
+import { ProfileSettingsData } from '../models/profileData.types';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -10,6 +10,9 @@ interface AuthContextType {
   signInWithGithub: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  profileSettingsData: ProfileSettingsData;
+  setProfileSettingsData: React.Dispatch<React.SetStateAction<ProfileSettingsData>>;
+  profileLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,10 +30,43 @@ const userExists = async (supabase: SupabaseClient, userId: string) => {
   return users;
 };
 
+const fetchUserData = async (supabase: SupabaseClient, userId: string) => {
+  const { data, error } = await supabase
+    .from('migrane_tracker-users')
+    .select('birthdate, latitude, longitude, salt, key, isSecurityFinished')
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error fetching user data:', error);
+    return null; // Return null to indicate an error
+  }
+
+  return data;
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileSettingsData, setProfileSettingsData] = useState<ProfileSettingsData>({
+    birthDate: '',
+    latitude: '',
+    longitude: '',
+    emailNotifications: false,
+    dailySummary: false,
+    personalHealthData: true,
+    userId: '',
+    profileFilled: false,
+    securitySetup: false,
+    salt: '',
+    key: '',
+    fetchDataErrors: {
+      forecast: '',
+      magneticWeather: '',
+    },
+  });
+  const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -60,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // handle initial session
       } else if (_event === 'SIGNED_IN') {
         const users = await userExists(supabase, session?.user.id);
-
+        console.info(`SIGNED_IN`);
         if (!users?.length) {
           const { error: error2 } = await supabase
             .from('migrane_tracker-users')
@@ -78,6 +114,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           //console.dir(inserted);
+        } else {
+          setProfileLoading(true);
+          const userData = await fetchUserData(supabase, session?.user.id);
+
+          if (userData) {
+            setProfileSettingsData({
+              ...profileSettingsData,
+              birthDate: userData.birthdate?.toString() || '',
+              latitude: userData.latitude?.toString() || '',
+              longitude: userData.longitude?.toString() || '',
+              profileFilled: !!userData.birthdate && !!userData.latitude && !!userData.longitude, // Improved check
+            });
+          }
+          setProfileLoading(false);
         }
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
@@ -94,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [profileSettingsData, setProfileSettingsData]);
 
   const signInWithGithub = async () => {
     if (!supabase) {
@@ -148,7 +198,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signInWithGithub, signInWithGoogle, signOut }}
+      value={{
+        user,
+        session,
+        loading,
+        signInWithGithub,
+        signInWithGoogle,
+        signOut,
+        profileSettingsData,
+        setProfileSettingsData,
+        profileLoading,
+      }}
     >
       {children}
     </AuthContext.Provider>

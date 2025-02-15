@@ -102,6 +102,7 @@ export interface ProfileSettingsData {
   dailySummary: boolean;
   personalHealthData: boolean;
   securitySetup: boolean;
+  profileFilled: boolean;
   salt: string;
   key: string;
   fetchDataErrors: {

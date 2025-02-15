@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import BiorhythmChart from '../components/BiorhythmChart';
 import CalendarView from '../components/CalendarView';
 import LifeMetrics from '../components/LifeMetrics';
@@ -8,18 +7,12 @@ import GeoMagneticWidget from '../components/GeoMagneticWidget';
 import TrackingButtons from '../components/TrackingButtons';
 import MostRecentData from '../components/MostRecentData';
 import { useProfileDataContext } from '../context/ProfileDataContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
-  const { currentMonth, profileSettingsData } = useProfileDataContext();
+  const { currentMonth } = useProfileDataContext();
+  const { profileSettingsData } = useAuth();
   const [birthDate] = useState(new Date(profileSettingsData.birthDate));
-
-  if (
-    birthDate.toString() === 'Invalid Date' ||
-    !profileSettingsData.latitude ||
-    !profileSettingsData.longitude
-  ) {
-    return <Navigate to="/profile" replace />;
-  }
 
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
