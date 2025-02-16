@@ -109,6 +109,8 @@ export interface ProfileSettingsData {
     forecast: string;
     magneticWeather: string;
   };
+  fetchMagneticWeather: boolean;
+  fetchWeather: boolean;
 }
 
 export interface ProfileSecurityData {

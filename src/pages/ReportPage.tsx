@@ -4,6 +4,7 @@ import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { getIsoDate, getIsoTime } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
 import { Incident, Trigger, Medication, Symptom } from '../models/profileData.types.ts';
+import { useAuth } from '../context/AuthContext';
 
 interface ReportPageData {
   date: string;
@@ -72,8 +73,8 @@ const prepareReportData = ({
 
 export default function ReportPage() {
   const dtNow: Date = new Date();
-  const { incidentList, medicationList, triggerList, symptomList, profileSettingsData } =
-    useProfileDataContext();
+  const { incidentList, medicationList, triggerList, symptomList } = useProfileDataContext();
+  const { profileSettingsData } = useAuth();
   const [startDate, setStartDate] = useState(new Date(dtNow.getTime() - 30 * 86400 * 1000));
   const [endDate, setEndDate] = useState(dtNow);
   const [filteredData, setFilteredData] = useState<ReportPageData[]>(

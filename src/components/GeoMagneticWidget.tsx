@@ -1,8 +1,8 @@
 import React from 'react';
 import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle } from 'lucide-react';
-import { useGeoMagneticWeather } from '../hooks/useGeoMagneticWeather.ts';
 import { env } from '../config/env';
 import Loader from '../components/Loader';
+import { useAuth } from '../context/AuthContext';
 
 interface GeomagneticData {
   solarFlux: number;
@@ -58,7 +58,7 @@ function IndexBar({ value, max, colorClass }: { value: number; max: number; colo
 }
 
 export default function GeoMagneticWidget() {
-  const { geophysicalweather, loading, error } = useGeoMagneticWeather();
+  const { geomagneticData: geophysicalweather, loading, geoMagneticError: error } = useAuth();
 
   const geomagneticData: GeomagneticData = {
     solarFlux: 125,

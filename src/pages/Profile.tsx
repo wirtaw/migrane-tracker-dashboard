@@ -16,10 +16,9 @@ interface Location {
 }
 
 export default function Profile() {
-  const { profileSettingsData, setProfileSettingsData, profileSecurityData } =
-    useProfileDataContext();
+  const { profileSecurityData } = useProfileDataContext();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, profileSettingsData, setProfileSettingsData } = useAuth();
   const [formData, setFormData] = useState({
     ...profileSettingsData,
     salt: profileSecurityData.salt,
@@ -85,6 +84,7 @@ export default function Profile() {
         console.log('Saved:', data);
         setProfileSettingsData({
           ...formData,
+          profileFilled: true,
           fetchDataErrors: {
             magneticWeather: '',
             forecast: '',

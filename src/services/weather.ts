@@ -124,10 +124,10 @@ function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
   return result;
 }
 
-export async function fetchWeatherData(): Promise<WeatherData> {
+export async function fetchWeatherData({ latitude, longitude }: Coordinates): Promise<WeatherData> {
   try {
     const response = await fetch(
-      `${OPEN_WEATHER_BASE_URL}/onecall?lat=${env.LATITUDE}&lon=${env.LONGITUDE}&units=${env.WEATHER_UNITS}&exclude=hourly,daily&appid=${env.OPEN_WEATHER_API_KEY}`
+      `${OPEN_WEATHER_BASE_URL}/onecall?lat=${latitude}&lon=${longitude}&units=${env.WEATHER_UNITS}&exclude=hourly,daily&appid=${env.OPEN_WEATHER_API_KEY}`
     );
 
     if (!response.ok) {
@@ -164,8 +164,8 @@ export async function fetchOpenMeteoWeatherData({
 }: Coordinates): Promise<WeatherData> {
   try {
     const params: OpenMeteoParams = {
-      latitude: latitude,
-      longitude: longitude,
+      latitude,
+      longitude,
       current: [
         'temperature_2m',
         'relative_humidity_2m',

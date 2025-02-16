@@ -3,6 +3,12 @@ import { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
 import { ProfileSettingsData } from '../models/profileData.types';
+import {
+  WeatherData,
+  GeophysicalWeatherData,
+  fetchOpenMeteoWeatherData,
+  fetchGeophysicalWeatherData,
+} from '../services/weather.ts';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -13,6 +19,16 @@ interface AuthContextType {
   profileSettingsData: ProfileSettingsData;
   setProfileSettingsData: React.Dispatch<React.SetStateAction<ProfileSettingsData>>;
   profileLoading: boolean;
+  weatherLoading: boolean;
+  geoMagneticLoading: boolean;
+  setWeatherLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setGeoMagneticLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  forecastData: WeatherData | undefined;
+  geomagneticData: GeophysicalWeatherData | undefined;
+  fetchForecast: (params: ProfileSettingsData) => Promise<void>;
+  fetchGeomagnetic: () => Promise<void>;
+  forecastError: string;
+  geoMagneticError: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,6 +61,29 @@ const fetchUserData = async (supabase: SupabaseClient, userId: string) => {
   return data;
 };
 
+const fetchForecastData = async (latitude: string, longitude: string) => {
+  try {
+    const response: WeatherData = await fetchOpenMeteoWeatherData({
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
+    });
+    return response;
+  } catch (error) {
+    console.error('Error fetching forecast data:', error);
+    return;
+  }
+};
+
+const fetchGeomagneticData = async () => {
+  try {
+    const response: GeophysicalWeatherData = await fetchGeophysicalWeatherData();
+    return response;
+  } catch (error) {
+    console.error('Error fetching geomagnetic data:', error);
+    return;
+  }
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -65,8 +104,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       forecast: '',
       magneticWeather: '',
     },
+    fetchMagneticWeather: false,
+    fetchWeather: false,
   });
+  const [forecastData, setForecastData] = useState<WeatherData | undefined>(undefined);
+  const [geomagneticData, setGeomagneticData] = useState<GeophysicalWeatherData | undefined>(
+    undefined
+  );
   const [profileLoading, setProfileLoading] = useState(false);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [geoMagneticLoading, setGeoMagneticLoading] = useState(false);
+  const [forecastError, setForecastError] = useState<string>('');
+  const [geoMagneticError, setGeoMagneticError] = useState<string>('');
 
   useEffect(() => {
     if (!supabase) {
@@ -96,7 +145,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // handle initial session
       } else if (_event === 'SIGNED_IN') {
         const users = await userExists(supabase, session?.user.id);
-        console.info(`SIGNED_IN`);
         if (!users?.length) {
           const { error: error2 } = await supabase
             .from('migrane_tracker-users')
@@ -124,8 +172,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               birthDate: userData.birthdate?.toString() || '',
               latitude: userData.latitude?.toString() || '',
               longitude: userData.longitude?.toString() || '',
-              profileFilled: !!userData.birthdate && !!userData.latitude && !!userData.longitude, // Improved check
+              profileFilled: !!userData.birthdate && !!userData.latitude && !!userData.longitude,
             });
+
+            const { latitude, longitude } = userData;
+
+            if (latitude && longitude) {
+              const cachedForecast = sessionStorage.getItem(`forecast_${session?.user.id}`);
+              const cachedGeomagnetic = sessionStorage.getItem(`geomagnetic_${session?.user.id}`);
+
+              if (cachedForecast) {
+                setForecastData(JSON.parse(cachedForecast));
+              } else {
+                const forecast = await fetchForecastData(latitude, longitude);
+                setForecastData(forecast);
+                if (forecast) {
+                  sessionStorage.setItem(`forecast_${session?.user.id}`, JSON.stringify(forecast));
+                }
+              }
+
+              if (cachedGeomagnetic) {
+                setGeomagneticData(JSON.parse(cachedGeomagnetic));
+              } else {
+                const geomagnetic = await fetchGeomagneticData();
+                setGeomagneticData(geomagnetic);
+                if (geomagnetic) {
+                  sessionStorage.setItem(
+                    `geomagnetic_${session?.user.id}`,
+                    JSON.stringify(geomagnetic)
+                  );
+                }
+              }
+            }
           }
           setProfileLoading(false);
         }
@@ -196,6 +274,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const fetchForecast = async (profileSettingsData: ProfileSettingsData) => {
+    try {
+      if (profileSettingsData.latitude && profileSettingsData.longitude) {
+        const forecast = await fetchForecastData(
+          profileSettingsData.latitude,
+          profileSettingsData.longitude
+        );
+        setForecastData(forecast);
+        if (forecast) {
+          sessionStorage.setItem(`forecast_${user?.id}`, JSON.stringify(forecast));
+        }
+      }
+    } catch (err) {
+      const errMessage: string = `Failed to fetch weather data. ${JSON.stringify(err)}`;
+      setForecastError(errMessage);
+    }
+  };
+
+  const fetchGeomagnetic = async () => {
+    try {
+      const geomagnetic = await fetchGeomagneticData();
+      setGeomagneticData(geomagnetic);
+      if (geomagnetic) {
+        sessionStorage.setItem(`geomagnetic_${user?.id}`, JSON.stringify(geomagnetic));
+      }
+    } catch (err) {
+      const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
+      setGeoMagneticError(errMessage);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -208,6 +317,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profileSettingsData,
         setProfileSettingsData,
         profileLoading,
+        weatherLoading,
+        geoMagneticLoading,
+        setWeatherLoading,
+        setGeoMagneticLoading,
+        forecastData,
+        geomagneticData,
+        fetchForecast,
+        fetchGeomagnetic,
+        forecastError,
+        geoMagneticError,
       }}
     >
       {children}

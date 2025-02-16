@@ -7,7 +7,6 @@ import {
   Weight,
   Height,
   BloodPressure,
-  ProfileSettingsData,
   ProfileSecurityData,
   ErrorMessage,
   BrokenData,
@@ -37,8 +36,6 @@ interface ProfileDataContextProps {
   setHeightList: React.Dispatch<React.SetStateAction<Height[]>>;
   bloodPressureList: BloodPressure[];
   setBloodPressureList: React.Dispatch<React.SetStateAction<BloodPressure[]>>;
-  profileSettingsData: ProfileSettingsData;
-  setProfileSettingsData: React.Dispatch<React.SetStateAction<ProfileSettingsData>>;
   profileSecurityData: ProfileSecurityData;
   setProfileSecurityData: React.Dispatch<React.SetStateAction<ProfileSecurityData>>;
   formErrorMessage: ErrorMessage;
@@ -52,7 +49,7 @@ interface ProfileDataContextProps {
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
 
 export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
-  const { user, profileSettingsData: signProfileSettingsData } = useAuth();
+  const { user } = useAuth();
   const userId: string = user?.id || '1';
   const [triggerList, setTriggerList] = useState<Trigger[]>([]);
   const [incidentList, setIncidentList] = useState<Incident[]>([]);
@@ -103,24 +100,6 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
 
   const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([]);
 
-  const [profileSettingsData, setProfileSettingsData] = useState<ProfileSettingsData>({
-    birthDate: signProfileSettingsData?.birthDate || '',
-    latitude: signProfileSettingsData?.latitude || '',
-    longitude: signProfileSettingsData?.longitude || '',
-    emailNotifications: false,
-    dailySummary: false,
-    personalHealthData: true,
-    userId,
-    securitySetup: false,
-    profileFilled: !!signProfileSettingsData,
-    salt: signProfileSettingsData?.salt || '',
-    key: signProfileSettingsData?.key || '',
-    fetchDataErrors: {
-      forecast: '',
-      magneticWeather: '',
-    },
-  });
-
   const [profileSecurityData, setProfileSecurityData] = useState<ProfileSecurityData>({
     password: '',
     salt: '',
@@ -168,8 +147,6 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setHeightList,
         bloodPressureList,
         setBloodPressureList,
-        profileSettingsData,
-        setProfileSettingsData,
         profileSecurityData,
         setProfileSecurityData,
         formErrorMessage,

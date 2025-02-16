@@ -8,9 +8,9 @@ import {
   CloudSun,
   UmbrellaIcon,
 } from 'lucide-react';
-import { useWeather } from '../hooks/useWeather';
 import { env } from '../config/env';
 import Loader from '../components/Loader';
+import { useAuth } from '../context/AuthContext';
 
 function UVIndexIndicator({ uvi }: { uvi: number }) {
   const getUVIColor = (uvi: number) => {
@@ -38,7 +38,7 @@ function UVIndexIndicator({ uvi }: { uvi: number }) {
 }
 
 export default function WeatherWidget() {
-  const { weather, loading, error } = useWeather();
+  const { forecastData, weatherLoading: loading, forecastError: error } = useAuth();
 
   if (loading) {
     return <Loader />;
@@ -55,7 +55,7 @@ export default function WeatherWidget() {
     uvi: 4.5,
   };
 
-  const currentWeather = error ? defaultWeather : { ...defaultWeather, ...weather };
+  const currentWeather = error ? defaultWeather : { ...defaultWeather, ...forecastData };
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
