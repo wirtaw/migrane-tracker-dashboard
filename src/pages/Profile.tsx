@@ -90,6 +90,7 @@ export default function Profile() {
             forecast: '',
           },
         });
+        console.info('data update');
       }
     } catch (error) {
       console.error(error);

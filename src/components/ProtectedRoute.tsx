@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Loader from '../components/Loader';
 
@@ -12,13 +12,13 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     setProfileSettingsData,
   } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && user && !profileLoading && !profileSettingsData.profileFilled) {
-      setProfileSettingsData({
-        ...profileSettingsData,
-        profileFilled: true,
-      });
+    if (!authLoading && user && !profileLoading) {
+      if (!profileSettingsData.profileFilled) {
+        navigate('/profile');
+      }
     }
   }, [authLoading, user, profileLoading, profileSettingsData, setProfileSettingsData]);
 
