@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Incident } from '../../models/profileData.types';
@@ -10,16 +11,11 @@ interface IncidentFormProps {
 }
 
 export default function IncidentForm({ onSubmit }: IncidentFormProps) {
-  const { user } = useAuth();
+  const { user, profileSettingsData } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const {
-    incidentEnumList,
-    triggerEnumList,
-    incidentList,
-    setIncidentList,
-    profileSettingsData,
-    setFormErrorMessage,
-  } = useProfileDataContext();
+  const { incidentEnumList, triggerEnumList, incidentList, setIncidentList, setFormErrorMessage } =
+    useProfileDataContext();
+  const navigate = useNavigate();
 
   const userId: string = user?.id || '1';
   const [typeValue, setTypeValue] = useState<string>('');
@@ -95,8 +91,21 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
     setNotesValue(event.target.value.toString());
   };
 
+  const openCreateIncident = () => {
+    navigate('/create-incident');
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hidden">
+        <button
+          type="button"
+          onClick={openCreateIncident}
+          className="rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        >
+          Expand create
+        </button>
+      </div>
       <div>
         <label
           htmlFor="type"

@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import ReportPage from './pages/ReportPage';
 import DescriptionFeaturesPricing from './pages/DescriptionFeaturesPricing';
 import { ProfileDataProvider } from './context/ProfileDataContext';
+import CreateIncident from './pages/CreateIncident';
 
 export function App() {
   return (
@@ -45,6 +46,7 @@ export function App() {
             <Route path="data-management" element={<DataManagement />} />
             <Route path="settings" element={<Settings />} />
             <Route path="report-page" element={<ReportPage />} />
+            <Route path="create-incident" element={<CreateIncident />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

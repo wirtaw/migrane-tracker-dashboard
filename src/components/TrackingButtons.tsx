@@ -10,9 +10,11 @@ import HeightForm from './forms/HeightForm';
 import BloodPressureForm from './forms/BloodPressureForm';
 import TriggerForm from './forms/TriggerForm';
 import { useProfileDataContext } from '../context/ProfileDataContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function TrackingButtons() {
-  const { profileSettingsData, formErrorMessage, setFormErrorMessage } = useProfileDataContext();
+  const { profileSettingsData } = useAuth();
+  const { formErrorMessage, setFormErrorMessage } = useProfileDataContext();
   const [activeModal, setActiveModal] = useState<
     'symptom' | 'medication' | 'trigger' | 'incident' | 'weight' | 'height' | 'bloodPressure' | null
   >(null);
