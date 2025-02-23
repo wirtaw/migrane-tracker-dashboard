@@ -97,11 +97,11 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hidden">
+      <div className="bg-white dark:bg-gray-800 space-y-4 rounded-xl shadow-sm">
         <button
           type="button"
           onClick={openCreateIncident}
-          className="rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-black bg-gray-800 dark:bg-white hover:bg-gray-200 dark:hover:bg-gray-700 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           Expand create
         </button>

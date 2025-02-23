@@ -20,7 +20,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
         navigate('/profile');
       }
     }
-  }, [authLoading, user, profileLoading, profileSettingsData, setProfileSettingsData]);
+  }, [authLoading, user, profileLoading, profileSettingsData, setProfileSettingsData, navigate]);
 
   if (authLoading || profileLoading) {
     return <Loader />;
