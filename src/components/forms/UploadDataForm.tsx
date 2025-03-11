@@ -413,6 +413,12 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
     setSymptomList,
     profileSecurityData,
     setBrokenImportData,
+    medicationEnumList,
+    setMedicationEnumList,
+    triggerEnumList,
+    setTriggerEnumList,
+    symptomEnumList,
+    setSymptomEnumList
   } = useProfileDataContext();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -471,6 +477,11 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
 
         setNewTriggers(triggers);
         setTriggerList([...triggerList, ...triggers]);
+        for (const trigger of triggers) {
+          if (!triggerEnumList.includes(trigger.type)) {
+            setTriggerEnumList([...triggerEnumList, trigger.type]);
+          }
+        }
 
         // Medications
         maxId = Math.max(...medicationList.map(({ id }) => id));
@@ -478,6 +489,11 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
 
         setNewMedications(medications);
         setMedicationList([...medicationList, ...medications]);
+        for (const medication of medications) {
+          if (!medicationEnumList.includes(medication.title)) {
+            setMedicationEnumList([...medicationEnumList, medication.title]);
+          }
+        }
 
         // Symptoms
         maxId = Math.max(...symptomList.map(({ id }) => id));
@@ -485,6 +501,12 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
 
         setNewSymptoms(symptoms);
         setSymptomList([...symptomList, ...symptoms]);
+        for (const symptom of symptoms) {
+          if (!symptomEnumList.includes(symptom.type)) {
+            setSymptomEnumList([...symptomEnumList, symptom.type]);
+          }
+        }
+
         setIsFinished(true);
         setErrorMessage('');
         setWarnMessage('');
