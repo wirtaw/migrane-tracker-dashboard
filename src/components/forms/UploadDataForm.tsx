@@ -418,7 +418,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
     triggerEnumList,
     setTriggerEnumList,
     symptomEnumList,
-    setSymptomEnumList
+    setSymptomEnumList,
   } = useProfileDataContext();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
