@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
-import { ProfileSettingsData } from '../models/profileData.types';
+import { ProfileSettingsData, LocationData } from '../models/profileData.types';
 import {
   WeatherData,
   GeophysicalWeatherData,
@@ -29,11 +29,13 @@ interface AuthContextType {
   fetchGeomagnetic: () => Promise<void>;
   forecastError: string;
   geoMagneticError: string;
+  locationDataList: LocationData[];
+  setLocationDataList: React.Dispatch<React.SetStateAction<LocationData[]>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const userExists = async (supabase: SupabaseClient, userId: string) => {
+const userExists = async (supabase: SupabaseClient, userId: string | undefined) => {
   const { data: users, error } = await supabase
     .from('migrane_tracker-users')
     .select('user_id,email,username')
@@ -46,7 +48,7 @@ const userExists = async (supabase: SupabaseClient, userId: string) => {
   return users;
 };
 
-const fetchUserData = async (supabase: SupabaseClient, userId: string) => {
+const fetchUserData = async (supabase: SupabaseClient, userId: string | undefined) => {
   const { data, error } = await supabase
     .from('migrane_tracker-users')
     .select('birthdate, latitude, longitude, salt, key, isSecurityFinished')
@@ -116,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [geoMagneticLoading, setGeoMagneticLoading] = useState(false);
   const [forecastError, setForecastError] = useState<string>('');
   const [geoMagneticError, setGeoMagneticError] = useState<string>('');
+  const [locationDataList, setLocationDataList] = useState<LocationData[]>([]);
 
   useEffect(() => {
     if (!supabase) {
@@ -261,16 +264,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     if (!supabase) {
-      throw new Error('Problem to connect supbase');
+      console.error('Supabase client not initialized.');
+      return;
     }
 
-    if (!session) {
-      throw new Error('Problem find the session');
-    }
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+        return;
+      }
 
-    const { error } = await supabase.auth.signOut({ scope: 'local' });
-    if (error) {
-      throw new Error('Problem to connect supbase');
+      setSession(null);
+    } catch (error) {
+      console.error('An unexpected error occurred during sign out:', error);
     }
   };
 
@@ -327,6 +334,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fetchGeomagnetic,
         forecastError,
         geoMagneticError,
+        locationDataList,
+        setLocationDataList,
       }}
     >
       {children}

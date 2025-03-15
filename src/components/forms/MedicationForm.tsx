@@ -10,14 +10,9 @@ interface MedicationFormProps {
 }
 
 export default function MedicationForm({ onSubmit }: MedicationFormProps) {
-  const { user } = useAuth();
-  const {
-    medicationEnumList,
-    medicationList,
-    setMedicationList,
-    setFormErrorMessage,
-    profileSettingsData,
-  } = useProfileDataContext();
+  const { profileSettingsData, user } = useAuth();
+  const { medicationEnumList, medicationList, setMedicationList, setFormErrorMessage } =
+    useProfileDataContext();
 
   const userId: string = user?.id || '1';
   const [titleValue, setTitleValue] = useState<string>('');

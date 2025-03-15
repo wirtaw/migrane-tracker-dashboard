@@ -74,7 +74,8 @@ export interface Sleep {
   datetimeAt: Date;
 }
 
-export interface Location {
+export interface LocationData {
+  id: number;
   latitude: number;
   longitude: number;
   forecast: {
@@ -83,14 +84,18 @@ export interface Location {
     pressure: number;
     humidity: number;
     windSpeed: number;
+    clouds: number;
+    uvi: number;
   };
   solar: {
-    kIndex: number;
-    aIndex: number;
-    bIndex: number;
-    flareProbability: number;
+    solarFlux: number | null;
+    kIndex: number | null;
+    aIndex: number | null;
+    bIndex: number | null;
+    flareProbability: number | null;
   };
   datetimeAt: Date;
+  incidentId: number | null;
 }
 
 export interface ProfileSettingsData {
@@ -184,7 +189,7 @@ export interface JSONData {
   incidents: Incident[];
   symptoms: Symptom[];
   medications: Medication[];
-  logsForecast: Location[] | unknown;
+  logsForecast: LocationData[] | unknown;
   logHealth:
     | {
         weight: Weight[] | unknown;

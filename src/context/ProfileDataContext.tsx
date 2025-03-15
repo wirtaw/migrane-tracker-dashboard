@@ -164,7 +164,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
 
 export const useProfileDataContext = () => {
   const context = useContext(ProfileDataContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useProfileDataContext must be used within a ProfileDataProvider');
   }
   return context;

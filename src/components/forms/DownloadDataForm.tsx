@@ -1,8 +1,15 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
-import { Incident, Trigger, Medication, Symptom } from '../../models/profileData.types';
+import {
+  Incident,
+  Trigger,
+  Medication,
+  Symptom,
+  LocationData,
+} from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import Loader from '../Loader';
+import { useAuth } from '../../context/AuthContext.tsx';
 
 interface DownloadDataFormProps {
   onSubmit: () => void;
@@ -14,6 +21,7 @@ interface ExportJSON {
   triggers: Trigger[];
   medications: Medication[];
   symptoms: Symptom[];
+  locationData: LocationData[];
 }
 
 const encrypt = (data: string | SjclCipherEncrypted, key: string) => {
@@ -29,6 +37,7 @@ export default function DownloadDataForm({ onSubmit, decode }: DownloadDataFormP
   const [exportString, setExportString] = useState<string>('');
   const { incidentList, triggerList, medicationList, symptomList, profileSecurityData } =
     useProfileDataContext();
+  const { locationDataList } = useAuth();
 
   useEffect(() => {
     const hasData =
@@ -43,17 +52,19 @@ export default function DownloadDataForm({ onSubmit, decode }: DownloadDataFormP
       medicationList.length > 0 &&
       symptomList &&
       Array.isArray(symptomList) &&
-      symptomList.length > 0;
+      symptomList.length > 0 &&
+      Array.isArray(locationDataList) &&
+      locationDataList.length > 0;
 
     setExistDataExport(hasData);
-  }, [incidentList, triggerList, medicationList, symptomList]);
+  }, [incidentList, triggerList, medicationList, symptomList, locationDataList]);
 
   const exportData = useMemo<ExportJSON>(() => {
     if (!existDataExport) {
       setIsFinished(false);
       setIsloading(false);
       setWarnMessage(`Empty export data`);
-      return { incidents: [], triggers: [], medications: [], symptoms: [] };
+      return { incidents: [], triggers: [], medications: [], symptoms: [], locationData: [] };
     }
 
     return {
@@ -61,8 +72,9 @@ export default function DownloadDataForm({ onSubmit, decode }: DownloadDataFormP
       triggers: triggerList || [],
       medications: medicationList || [],
       symptoms: symptomList || [],
+      locationData: locationDataList || [],
     };
-  }, [incidentList, triggerList, medicationList, symptomList, existDataExport]);
+  }, [incidentList, triggerList, medicationList, symptomList, locationDataList, existDataExport]);
 
   useEffect(() => {
     const jsonString =

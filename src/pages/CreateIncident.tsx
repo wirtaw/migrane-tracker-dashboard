@@ -1,28 +1,59 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
-import { Incident } from '../models/profileData.types.ts';
+import { Incident, LocationData } from '../models/profileData.types.ts';
 import { getIsoDateTimeLocal } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
+import { GeomagneticData } from '../components/GeoMagneticWidget.tsx';
+import Modal from '../components/Modal';
 
 export default function CreateIncident() {
-  const { user, profileSettingsData, forecastData, forecastError } = useAuth();
+  const {
+    user,
+    profileSettingsData,
+    forecastData,
+    forecastError,
+    geomagneticData,
+    geoMagneticError,
+    locationDataList,
+    setLocationDataList,
+  } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { incidentEnumList, triggerEnumList, incidentList, setIncidentList, setFormErrorMessage } =
-    useProfileDataContext();
+  const {
+    incidentEnumList,
+    triggerEnumList,
+    incidentList,
+    setIncidentList,
+    formErrorMessage,
+    setFormErrorMessage,
+  } = useProfileDataContext();
 
   const defaultWeather = {
-    temperature: 20,
-    feels_like: 10,
-    humidity: 65,
-    pressure: 1013,
-    description: 'Clear sky',
-    icon: '01d',
-    clouds: 20,
-    uvi: 4.5,
+    temperature: 0,
+    feels_like: 0,
+    humidity: 0,
+    pressure: 0,
+    description: '',
+    icon: '',
+    clouds: 0,
+    uvi: 0,
+  };
+  const deafaultGeomagneticData: GeomagneticData = {
+    solarFlux: 0,
+    kIndex: 0,
+    aIndex: 0,
+    pastWeather: {
+      level: '',
+    },
+    nextWeather: {
+      level: '',
+    },
   };
 
   const currentWeather = forecastError ? defaultWeather : { ...defaultWeather, ...forecastData };
+  const currentGeomagneticData = geoMagneticError
+    ? deafaultGeomagneticData
+    : { ...deafaultGeomagneticData, ...geomagneticData };
 
   const userId: string = user?.id || '1';
   const [typeValue, setTypeValue] = useState<string>('');
@@ -37,6 +68,11 @@ export default function CreateIncident() {
   const [pressureValue, setPressureValue] = useState<number>(currentWeather.pressure);
   const [cloudsValue, setCloudsValue] = useState<number>(currentWeather.clouds);
   const [uviValue, setUviValue] = useState<number>(currentWeather.uvi);
+  const [solarFlux, setSolarFlux] = useState<number>(currentGeomagneticData.solarFlux);
+  const [kIndex, setKIndex] = useState<number>(currentGeomagneticData.kIndex);
+  const [aIndex, setAIndex] = useState<number>(currentGeomagneticData.aIndex);
+  const [latitudeValue, setLatitudeValue] = useState<string>(profileSettingsData.latitude);
+  const [longitudeValue, setLongitudeValue] = useState<string>(profileSettingsData.longitude);
 
   const isValidIncident = (incident: Incident) => {
     if (!incident?.type) {
@@ -54,6 +90,42 @@ export default function CreateIncident() {
     return true;
   };
 
+  const isValidLocation = (locationData: LocationData) => {
+    if (typeof locationData?.forecast?.temperature === 'undefined') {
+      return false;
+    }
+
+    if (typeof locationData?.forecast?.pressure === 'undefined') {
+      return false;
+    }
+
+    if (typeof locationData?.forecast?.humidity === 'undefined') {
+      return false;
+    }
+
+    if (typeof locationData?.forecast?.clouds === 'undefined') {
+      return false;
+    }
+
+    if (typeof locationData?.forecast?.uvi === 'undefined') {
+      return false;
+    }
+
+    if (typeof locationData?.solar?.solarFlux === 'undefined') {
+      return false;
+    }
+
+    if (typeof locationData?.solar?.kIndex === 'undefined') {
+      return false;
+    }
+
+    if (typeof locationData?.solar?.aIndex === 'undefined') {
+      return false;
+    }
+
+    return true;
+  };
+
   const handleTagClick = (tag: string) => {
     const triggerList: string[] = [...new Set([...triggers, tag])];
     setTriggers(triggerList);
@@ -65,6 +137,7 @@ export default function CreateIncident() {
 
   const handleSubmit = (e: React.FormEvent) => {
     const maxId = Math.max(...incidentList.map(({ id }) => id));
+    const incidentId = Math.max(...locationDataList.map(({ id }) => id));
     const incident: Incident = {
       id: maxId + 1,
       userId,
@@ -77,6 +150,30 @@ export default function CreateIncident() {
       notes: notesValue,
     };
 
+    const locationData: LocationData = {
+      id: incidentId,
+      latitude: parseFloat(profileSettingsData.latitude),
+      longitude: parseFloat(profileSettingsData.longitude),
+      forecast: {
+        description: '',
+        temperature: forecastTemperature,
+        pressure: pressureValue,
+        humidity: humidityValue,
+        windSpeed: 0,
+        clouds: cloudsValue,
+        uvi: uviValue,
+      },
+      solar: {
+        solarFlux,
+        kIndex,
+        aIndex,
+        bIndex: null,
+        flareProbability: null,
+      },
+      datetimeAt: datetimeAtValue,
+      incidentId: incident.id || null,
+    };
+
     if (isValidIncident(incident)) {
       setIncidentList([...incidentList, incident]);
     } else {
@@ -84,7 +181,22 @@ export default function CreateIncident() {
       setFormErrorMessage({ showModal: true, message: 'Invalid incident form' });
     }
 
+    if (isValidLocation(locationData)) {
+      setLocationDataList([...locationDataList, locationData]);
+    } else {
+      console.error('Invalid incident form');
+      setFormErrorMessage({ showModal: true, message: 'Invalid incident form - forecast' });
+    }
+
     e.preventDefault();
+  };
+
+  const handleLatitudeChange = (event: FormEvent) => {
+    setLatitudeValue(event.target.value.toString());
+  };
+
+  const handleLongitudeChange = (event: FormEvent) => {
+    setLongitudeValue(event.target.value.toString());
   };
 
   const handleNumberChange = (event: FormEvent) => {
@@ -122,6 +234,18 @@ export default function CreateIncident() {
 
   const handleForecastUviChange = (event: FormEvent) => {
     setUviValue(Number(event.target.value));
+  };
+
+  const handleSolarFluxChange = (event: FormEvent) => {
+    setSolarFlux(Number(event.target.value));
+  };
+
+  const handleKIndexChange = (event: FormEvent) => {
+    setKIndex(Number(event.target.value));
+  };
+
+  const handleAIndexChange = (event: FormEvent) => {
+    setAIndex(Number(event.target.value));
   };
 
   return (
@@ -257,6 +381,40 @@ export default function CreateIncident() {
               <section className="m-0">
                 <div className="border-2 border-indigo-600 dark:border-white p-2">
                   <div className="space-y-2">
+                    <p className="text-gray-600 dark:text-gray-300 dark:text-white">Location</p>
+                  </div>
+                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="latitude" className="block text-sm font-medium">
+                      Latitude
+                    </label>
+                    <input
+                      type="text"
+                      id="latitude"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                      value={latitudeValue}
+                      onChange={handleLatitudeChange}
+                    />
+                  </div>
+                </div>
+                <div className="border-2 border-indigo-600 dark:border-white p-2">
+                  <div className="space-y-2">
+                    <p className="text-gray-600 dark:text-gray-300 dark:text-white">Location</p>
+                  </div>
+                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="longitude" className="block text-sm font-medium">
+                      Longitude
+                    </label>
+                    <input
+                      type="text"
+                      id="longitude"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                      value={longitudeValue}
+                      onChange={handleLongitudeChange}
+                    />
+                  </div>
+                </div>
+                <div className="border-2 border-indigo-600 dark:border-white p-2">
+                  <div className="space-y-2">
                     <p className="text-gray-600 dark:text-gray-300 dark:text-white">Weather</p>
                   </div>
                   <div className="space-y-2 text-gray-700 dark:text-gray-300">
@@ -336,6 +494,42 @@ export default function CreateIncident() {
                   <div className="space-y-2">
                     <p className="text-gray-600 dark:text-gray-300 dark:text-white">Solar</p>
                   </div>
+                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="solarFlux" className="block text-sm font-medium">
+                      Solar Flux (sfu)
+                    </label>
+                    <input
+                      type="number"
+                      id="solarFlux"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                      value={solarFlux}
+                      onChange={handleSolarFluxChange}
+                    />
+                  </div>
+                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="kIndex" className="block text-sm font-medium">
+                      K-Index
+                    </label>
+                    <input
+                      type="number"
+                      id="kIndex"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                      value={kIndex}
+                      onChange={handleKIndexChange}
+                    />
+                  </div>
+                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                    <label htmlFor="aIndex" className="block text-sm font-medium">
+                      A-Index
+                    </label>
+                    <input
+                      type="number"
+                      id="aIndex"
+                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                      value={aIndex}
+                      onChange={handleAIndexChange}
+                    />
+                  </div>
                 </div>
               </section>
               <section className="lg:col-span-2">
@@ -352,6 +546,15 @@ export default function CreateIncident() {
           </div>
         </div>
       </main>
+      <Modal
+        isOpen={formErrorMessage.showModal === true}
+        onClose={() => setFormErrorMessage({ showModal: false, message: '' })}
+        title="Error message"
+      >
+        <div className="text-red-500 text-sm mt-1 dark:text-white">
+          <p>{formErrorMessage.message}</p>
+        </div>
+      </Modal>
     </>
   );
 }

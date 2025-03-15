@@ -4,7 +4,7 @@ import { env } from '../config/env';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
 
-interface GeomagneticData {
+export interface GeomagneticData {
   solarFlux: number;
   kIndex: number;
   aIndex: number;
