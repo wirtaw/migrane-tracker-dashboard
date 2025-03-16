@@ -284,6 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchForecast = async (profileSettingsData: ProfileSettingsData) => {
     try {
       if (profileSettingsData.latitude && profileSettingsData.longitude) {
+        setWeatherLoading(true);
         const forecast = await fetchForecastData(
           profileSettingsData.latitude,
           profileSettingsData.longitude
@@ -292,22 +293,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (forecast) {
           sessionStorage.setItem(`forecast_${user?.id}`, JSON.stringify(forecast));
         }
+        setWeatherLoading(false);
       }
     } catch (err) {
       const errMessage: string = `Failed to fetch weather data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
       setForecastError(errMessage);
     }
   };
 
   const fetchGeomagnetic = async () => {
     try {
+      setGeoMagneticLoading(true);
       const geomagnetic = await fetchGeomagneticData();
       setGeomagneticData(geomagnetic);
       if (geomagnetic) {
         sessionStorage.setItem(`geomagnetic_${user?.id}`, JSON.stringify(geomagnetic));
       }
+      setGeoMagneticLoading(false);
     } catch (err) {
       const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
       setGeoMagneticError(errMessage);
     }
   };
@@ -335,7 +341,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forecastError,
         geoMagneticError,
         locationDataList,
-        setLocationDataList,
+        setLocationDataList
       }}
     >
       {children}

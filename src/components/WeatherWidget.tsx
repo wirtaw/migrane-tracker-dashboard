@@ -7,6 +7,7 @@ import {
   Gauge,
   CloudSun,
   UmbrellaIcon,
+  RefreshCcw,
 } from 'lucide-react';
 import { env } from '../config/env';
 import Loader from '../components/Loader';
@@ -38,7 +39,7 @@ function UVIndexIndicator({ uvi }: { uvi: number }) {
 }
 
 export default function WeatherWidget() {
-  const { forecastData, weatherLoading: loading, forecastError: error } = useAuth();
+  const { forecastData, weatherLoading: loading, forecastError: error, fetchForecast, profileSettingsData } = useAuth();
 
   if (loading) {
     return <Loader />;
@@ -71,6 +72,9 @@ export default function WeatherWidget() {
             <span>Using default data</span>
           </div>
         )}
+        <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
+            <p>Reload <RefreshCcw className="w-3 h-3 " onClick={() => fetchForecast(profileSettingsData)}/></p>
+        </div>
       </div>
 
       {currentWeather?.temperature && currentWeather?.feels_like && currentWeather?.humidity && (

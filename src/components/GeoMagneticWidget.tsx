@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle, RefreshCcw } from 'lucide-react';
 import { env } from '../config/env';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
@@ -58,7 +58,7 @@ function IndexBar({ value, max, colorClass }: { value: number; max: number; colo
 }
 
 export default function GeoMagneticWidget() {
-  const { geomagneticData: geophysicalweather, loading, geoMagneticError: error } = useAuth();
+  const { geomagneticData: geophysicalweather, loading, geoMagneticError: error, fetchGeomagnetic } = useAuth();
 
   const geomagneticData = {
     solarFlux: undefined,
@@ -81,15 +81,20 @@ export default function GeoMagneticWidget() {
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-      <div className="flex items-center gap-2 mb-6">
-        <Zap className="w-5 h-5 text-amber-500" />
-        <h2 className="text-lg font-semibold dark:text-white">Geomagnetic Activity</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Zap className="w-5 h-5 text-amber-500" />
+          <h2 className="text-lg font-semibold dark:text-white">Geomagnetic Activity</h2>
+        </div>
         {error && (
           <div className="flex items-center gap-1 text-amber-500 text-sm">
             <AlertCircle className="w-4 h-4" />
             <span>Using default data</span>
           </div>
         )}
+        <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
+            <p>Reload <RefreshCcw className="w-3 h-3 hover" onClick={() => fetchGeomagnetic()}/></p>
+        </div>
       </div>
 
       {currentGeomagneticData?.solarFlux &&
