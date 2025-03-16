@@ -58,7 +58,12 @@ function IndexBar({ value, max, colorClass }: { value: number; max: number; colo
 }
 
 export default function GeoMagneticWidget() {
-  const { geomagneticData: geophysicalweather, loading, geoMagneticError: error, fetchGeomagnetic } = useAuth();
+  const {
+    geomagneticData: geophysicalweather,
+    loading,
+    geoMagneticError: error,
+    fetchGeomagnetic,
+  } = useAuth();
 
   const geomagneticData = {
     solarFlux: undefined,
@@ -93,7 +98,9 @@ export default function GeoMagneticWidget() {
           </div>
         )}
         <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
-            <p>Reload <RefreshCcw className="w-3 h-3 hover" onClick={() => fetchGeomagnetic()}/></p>
+          <p>
+            Reload <RefreshCcw className="w-3 h-3 hover" onClick={() => fetchGeomagnetic()} />
+          </p>
         </div>
       </div>
 

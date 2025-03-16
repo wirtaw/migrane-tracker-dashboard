@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { Incident, LocationData } from '../models/profileData.types.ts';
@@ -6,6 +7,7 @@ import { getIsoDateTimeLocal } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
 import { GeomagneticData } from '../components/GeoMagneticWidget.tsx';
 import Modal from '../components/Modal';
+import Loader from '../components/Loader';
 
 export default function CreateIncident() {
   const {
@@ -73,6 +75,8 @@ export default function CreateIncident() {
   const [aIndex, setAIndex] = useState<number>(currentGeomagneticData.aIndex);
   const [latitudeValue, setLatitudeValue] = useState<string>(profileSettingsData.latitude);
   const [longitudeValue, setLongitudeValue] = useState<string>(profileSettingsData.longitude);
+  const [loading, setLoading] = useState(false);
+  const [finished, setFinished] = useState(false);
 
   const isValidIncident = (incident: Incident) => {
     if (!incident?.type) {
@@ -136,6 +140,7 @@ export default function CreateIncident() {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
+    setLoading(true);
     const maxId = Math.max(...incidentList.map(({ id }) => id));
     const incidentId = Math.max(...locationDataList.map(({ id }) => id));
     const incident: Incident = {
@@ -187,6 +192,9 @@ export default function CreateIncident() {
       console.error('Invalid incident form');
       setFormErrorMessage({ showModal: true, message: 'Invalid incident form - forecast' });
     }
+
+    setLoading(true);
+    setFinished(true);
 
     e.preventDefault();
   };
@@ -248,6 +256,10 @@ export default function CreateIncident() {
     setAIndex(Number(event.target.value));
   };
 
+  if (loading && finished) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <>
       <main className="max-w-8xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -266,283 +278,286 @@ export default function CreateIncident() {
                 </p>
               </div>
             </section>
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-8 mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
-            >
-              <section className="space-x-0 space-y-0">
-                <div className="space-y-4 border-2 border-indigo-600 dark:border-white p-2">
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="type"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Incident Type
-                    </label>
-                    <select
-                      id="type"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={typeValue}
-                      onChange={handleSelectChange}
-                    >
-                      <option value="" disabled>
-                        Select a type
-                      </option>
-                      {incidentEnumList.map((option, index) => (
-                        <option key={index} value={option}>
-                          {option}
+            {loading && !finished && <Loader />}
+            {!loading && !finished && (
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-8 mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
+              >
+                <section className="space-x-0 space-y-0">
+                  <div className="space-y-4 border-2 border-indigo-600 dark:border-white p-2">
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="type"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Incident Type
+                      </label>
+                      <select
+                        id="type"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={typeValue}
+                        onChange={handleSelectChange}
+                      >
+                        <option value="" disabled>
+                          Select a type
                         </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="start"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Start Time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      id="start"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={getIsoDateTimeLocal(startTimeValue)}
-                      onChange={handleDateChange}
-                      min={getIsoDateTimeLocal(new Date(profileSettingsData?.birthDate))}
-                      max={getIsoDateTimeLocal(new Date())}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="duration"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Duration (hours)
-                    </label>
-                    <input
-                      type="number"
-                      id="duration"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={durationHoursValue}
-                      onChange={handleNumberChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="triggers"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Potential Triggers
-                    </label>
-                    <input
-                      type="text"
-                      id="triggers"
-                      value={triggers.join(', ')}
-                      readOnly
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                    />
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {triggerEnumList.map((trigger, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => handleTagClick(trigger)}
-                          className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          {trigger}
-                        </button>
-                      ))}
+                        {incidentEnumList.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="start"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Start Time
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="start"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={getIsoDateTimeLocal(startTimeValue)}
+                        onChange={handleDateChange}
+                        min={getIsoDateTimeLocal(new Date(profileSettingsData?.birthDate))}
+                        max={getIsoDateTimeLocal(new Date())}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="duration"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Duration (hours)
+                      </label>
+                      <input
+                        type="number"
+                        id="duration"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={durationHoursValue}
+                        onChange={handleNumberChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="triggers"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Potential Triggers
+                      </label>
+                      <input
+                        type="text"
+                        id="triggers"
+                        value={triggers.join(', ')}
+                        readOnly
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                      />
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {triggerEnumList.map((trigger, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleTagClick(trigger)}
+                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            {trigger}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleClearTriggers}
+                        className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      >
+                        Clear Triggers
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="notes"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Notes
+                      </label>
+                      <textarea
+                        id="notes"
+                        rows={3}
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={notesValue}
+                        onChange={handleTextareaChange}
+                      />
+                    </div>
+                  </div>
+                </section>
+                <section className="m-0">
+                  <div className="border-2 border-indigo-600 dark:border-white p-2">
+                    <div className="space-y-2">
+                      <p className="text-gray-600 dark:text-gray-300 dark:text-white">Location</p>
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label htmlFor="latitude" className="block text-sm font-medium">
+                        Latitude
+                      </label>
+                      <input
+                        type="text"
+                        id="latitude"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={latitudeValue}
+                        onChange={handleLatitudeChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="border-2 border-indigo-600 dark:border-white p-2">
+                    <div className="space-y-2">
+                      <p className="text-gray-600 dark:text-gray-300 dark:text-white">Location</p>
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label htmlFor="longitude" className="block text-sm font-medium">
+                        Longitude
+                      </label>
+                      <input
+                        type="text"
+                        id="longitude"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={longitudeValue}
+                        onChange={handleLongitudeChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="border-2 border-indigo-600 dark:border-white p-2">
+                    <div className="space-y-2">
+                      <p className="text-gray-600 dark:text-gray-300 dark:text-white">Weather</p>
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label htmlFor="forecastTemperature" className="block text-sm font-medium">
+                        Temperature (°C)
+                      </label>
+                      <input
+                        type="number"
+                        id="forecastTemperature"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={forecastTemperature}
+                        onChange={handleForecastTemperatureChange}
+                      />
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label
+                        htmlFor="forecastHumidity"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Humidity (%)
+                      </label>
+                      <input
+                        type="number"
+                        id="forecastHumidity"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={humidityValue}
+                        onChange={handleForecastHumidityChange}
+                      />
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label
+                        htmlFor="forecastPressure"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Pressure (hPa)
+                      </label>
+                      <input
+                        type="number"
+                        id="forecastPressure"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={pressureValue}
+                        onChange={handleForecastPressureChange}
+                      />
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label
+                        htmlFor="forecastUvi"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        UV Index
+                      </label>
+                      <input
+                        type="number"
+                        id="forecastUvi"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={uviValue}
+                        onChange={handleForecastUviChange}
+                      />
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label
+                        htmlFor="forecastClouds"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Cloud Cover (%)
+                      </label>
+                      <input
+                        type="number"
+                        id="forecastClouds"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={cloudsValue}
+                        onChange={handleForecastCloudsChange}
+                      />
+                    </div>
+                  </div>
+                  <div className="border-2 border-indigo-600 dark:border-white p-2 mt-2">
+                    <div className="space-y-2">
+                      <p className="text-gray-600 dark:text-gray-300 dark:text-white">Solar</p>
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label htmlFor="solarFlux" className="block text-sm font-medium">
+                        Solar Flux (sfu)
+                      </label>
+                      <input
+                        type="number"
+                        id="solarFlux"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={solarFlux}
+                        onChange={handleSolarFluxChange}
+                      />
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label htmlFor="kIndex" className="block text-sm font-medium">
+                        K-Index
+                      </label>
+                      <input
+                        type="number"
+                        id="kIndex"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={kIndex}
+                        onChange={handleKIndexChange}
+                      />
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label htmlFor="aIndex" className="block text-sm font-medium">
+                        A-Index
+                      </label>
+                      <input
+                        type="number"
+                        id="aIndex"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={aIndex}
+                        onChange={handleAIndexChange}
+                      />
+                    </div>
+                  </div>
+                </section>
+                <section className="lg:col-span-2">
+                  <div className="flex justify-end gap-3">
                     <button
-                      type="button"
-                      onClick={handleClearTriggers}
-                      className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      type="submit"
+                      className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                      Clear Triggers
+                      Save
                     </button>
                   </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="notes"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Notes
-                    </label>
-                    <textarea
-                      id="notes"
-                      rows={3}
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={notesValue}
-                      onChange={handleTextareaChange}
-                    />
-                  </div>
-                </div>
-              </section>
-              <section className="m-0">
-                <div className="border-2 border-indigo-600 dark:border-white p-2">
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 dark:text-white">Location</p>
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label htmlFor="latitude" className="block text-sm font-medium">
-                      Latitude
-                    </label>
-                    <input
-                      type="text"
-                      id="latitude"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={latitudeValue}
-                      onChange={handleLatitudeChange}
-                    />
-                  </div>
-                </div>
-                <div className="border-2 border-indigo-600 dark:border-white p-2">
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 dark:text-white">Location</p>
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label htmlFor="longitude" className="block text-sm font-medium">
-                      Longitude
-                    </label>
-                    <input
-                      type="text"
-                      id="longitude"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={longitudeValue}
-                      onChange={handleLongitudeChange}
-                    />
-                  </div>
-                </div>
-                <div className="border-2 border-indigo-600 dark:border-white p-2">
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 dark:text-white">Weather</p>
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label htmlFor="forecastTemperature" className="block text-sm font-medium">
-                      Temperature (°C)
-                    </label>
-                    <input
-                      type="number"
-                      id="forecastTemperature"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={forecastTemperature}
-                      onChange={handleForecastTemperatureChange}
-                    />
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label
-                      htmlFor="forecastHumidity"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Humidity (%)
-                    </label>
-                    <input
-                      type="number"
-                      id="forecastHumidity"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={humidityValue}
-                      onChange={handleForecastHumidityChange}
-                    />
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label
-                      htmlFor="forecastPressure"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Pressure (hPa)
-                    </label>
-                    <input
-                      type="number"
-                      id="forecastPressure"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={pressureValue}
-                      onChange={handleForecastPressureChange}
-                    />
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label
-                      htmlFor="forecastUvi"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      UV Index
-                    </label>
-                    <input
-                      type="number"
-                      id="forecastUvi"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={uviValue}
-                      onChange={handleForecastUviChange}
-                    />
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label
-                      htmlFor="forecastClouds"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Cloud Cover (%)
-                    </label>
-                    <input
-                      type="number"
-                      id="forecastClouds"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={cloudsValue}
-                      onChange={handleForecastCloudsChange}
-                    />
-                  </div>
-                </div>
-                <div className="border-2 border-indigo-600 dark:border-white p-2 mt-2">
-                  <div className="space-y-2">
-                    <p className="text-gray-600 dark:text-gray-300 dark:text-white">Solar</p>
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label htmlFor="solarFlux" className="block text-sm font-medium">
-                      Solar Flux (sfu)
-                    </label>
-                    <input
-                      type="number"
-                      id="solarFlux"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={solarFlux}
-                      onChange={handleSolarFluxChange}
-                    />
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label htmlFor="kIndex" className="block text-sm font-medium">
-                      K-Index
-                    </label>
-                    <input
-                      type="number"
-                      id="kIndex"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={kIndex}
-                      onChange={handleKIndexChange}
-                    />
-                  </div>
-                  <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                    <label htmlFor="aIndex" className="block text-sm font-medium">
-                      A-Index
-                    </label>
-                    <input
-                      type="number"
-                      id="aIndex"
-                      className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                      value={aIndex}
-                      onChange={handleAIndexChange}
-                    />
-                  </div>
-                </div>
-              </section>
-              <section className="lg:col-span-2">
-                <div className="flex justify-end gap-3">
-                  <button
-                    type="submit"
-                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Save
-                  </button>
-                </div>
-              </section>
-            </form>
+                </section>
+              </form>
+            )}
           </div>
         </div>
       </main>

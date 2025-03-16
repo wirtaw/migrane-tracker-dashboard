@@ -39,7 +39,13 @@ function UVIndexIndicator({ uvi }: { uvi: number }) {
 }
 
 export default function WeatherWidget() {
-  const { forecastData, weatherLoading: loading, forecastError: error, fetchForecast, profileSettingsData } = useAuth();
+  const {
+    forecastData,
+    weatherLoading: loading,
+    forecastError: error,
+    fetchForecast,
+    profileSettingsData,
+  } = useAuth();
 
   if (loading) {
     return <Loader />;
@@ -73,7 +79,10 @@ export default function WeatherWidget() {
           </div>
         )}
         <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
-            <p>Reload <RefreshCcw className="w-3 h-3 " onClick={() => fetchForecast(profileSettingsData)}/></p>
+          <p>
+            Reload{' '}
+            <RefreshCcw className="w-3 h-3 " onClick={() => fetchForecast(profileSettingsData)} />
+          </p>
         </div>
       </div>
 

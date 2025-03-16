@@ -341,7 +341,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         forecastError,
         geoMagneticError,
         locationDataList,
-        setLocationDataList
+        setLocationDataList,
       }}
     >
       {children}
