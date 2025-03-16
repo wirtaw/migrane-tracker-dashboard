@@ -19,6 +19,8 @@ export default function CreateIncident() {
     geoMagneticError,
     locationDataList,
     setLocationDataList,
+    fetchForecastHistorical,
+    fetchGeomagneticHistorical,
   } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
   const {
@@ -211,9 +213,27 @@ export default function CreateIncident() {
     setDurationHoursValue(Number(event.target.value));
   };
 
-  const handleDateChange = (event: FormEvent) => {
-    setStartTimeValue(new Date(event.target.value));
-    setDatetimeAtValue(new Date(event.target.value));
+  const handleDateChange = async (event: FormEvent) => {
+    const dt: Date = new Date(event.target.value);
+    if (dt.toString() !== 'Invalid Date') {
+      setStartTimeValue(dt);
+      setDatetimeAtValue(dt);
+
+      const forecast = await fetchForecastHistorical({
+        latitude: parseFloat(latitudeValue),
+        longitude: parseFloat(longitudeValue),
+        dateTime: dt,
+      });
+      if (typeof forecast?.temperature !== 'undefined') {
+        setForecastTemperature(Number(forecast.temperature));
+      }
+
+      const solar = await fetchGeomagneticHistorical({
+        dateTime: dt,
+      });
+
+      console.info(`solar ${JSON.stringify(solar)}`);
+    }
   };
 
   const handleSelectChange = (event: FormEvent) => {

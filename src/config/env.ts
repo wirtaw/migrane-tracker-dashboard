@@ -4,6 +4,7 @@ interface EnvConfig {
   OPEN_WEATHER_BASE_URL: string;
   NOAA_GOV_CURRENT_BASE_URL: string;
   OPEN_METEO_BASE_URL: string;
+  OPEN_METEO_ARCHIVE_URL: string;
   WEATHER_UNITS: 'metric' | 'imperial';
   LATITUDE: number;
   LONGITUDE: number;
@@ -43,4 +44,5 @@ export const env: EnvConfig = {
   NOAA_GOV_CURRENT_RESOURCE_TITLE: import.meta.env.VITE_NOAA_GOV_CURRENT_RESOURCE_TITLE || '',
   OPEN_METEO_RESOURCE_URL: import.meta.env.VITE_OPEN_METEO_RESOURCE_URL || '',
   OPEN_METEO_RESOURCE_TITLE: import.meta.env.VITE_OPEN_METEO_RESOURCE_TITLE || '',
+  OPEN_METEO_ARCHIVE_URL: import.meta.env.VITE_OPEN_METEO_ARCHIVE_RESOURCE_URL || '',
 };

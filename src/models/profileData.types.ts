@@ -199,3 +199,13 @@ export interface JSONData {
       }
     | unknown;
 }
+
+export interface ForecastHistoricalParams {
+  latitude: number;
+  longitude: number;
+  dateTime: Date;
+}
+
+export interface SolarHistoricalParams {
+  dateTime: Date;
+}

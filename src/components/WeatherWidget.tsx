@@ -13,8 +13,9 @@ import { env } from '../config/env';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
 
-function UVIndexIndicator({ uvi }: { uvi: number }) {
-  const getUVIColor = (uvi: number) => {
+function UVIndexIndicator({ uvi }: { uvi: number | undefined }) {
+  const getUVIColor = (uvi: number | undefined) => {
+    if (!uvi) return '';
     if (uvi <= 2) return 'bg-green-500';
     if (uvi <= 5) return 'bg-yellow-500';
     if (uvi <= 7) return 'bg-orange-500';
@@ -22,7 +23,8 @@ function UVIndexIndicator({ uvi }: { uvi: number }) {
     return 'bg-purple-500';
   };
 
-  const getUVIText = (uvi: number) => {
+  const getUVIText = (uvi: number | undefined) => {
+    if (!uvi) return '';
     if (uvi <= 2) return 'Low';
     if (uvi <= 5) return 'Moderate';
     if (uvi <= 7) return 'High';

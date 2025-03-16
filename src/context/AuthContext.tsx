@@ -2,12 +2,19 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
-import { ProfileSettingsData, LocationData } from '../models/profileData.types';
+import {
+  ProfileSettingsData,
+  LocationData,
+  ForecastHistoricalParams,
+  SolarHistoricalParams,
+} from '../models/profileData.types';
 import {
   WeatherData,
   GeophysicalWeatherData,
   fetchOpenMeteoWeatherData,
   fetchGeophysicalWeatherData,
+  fetchOpenMeteoWeatherDataHistorical,
+  fetchGeophysicalWeatherDataHistorical,
 } from '../services/weather.ts';
 interface AuthContextType {
   user: User | null;
@@ -31,6 +38,10 @@ interface AuthContextType {
   geoMagneticError: string;
   locationDataList: LocationData[];
   setLocationDataList: React.Dispatch<React.SetStateAction<LocationData[]>>;
+  fetchForecastHistorical: (params: ForecastHistoricalParams) => Promise<WeatherData | undefined>;
+  fetchGeomagneticHistorical: (
+    params: SolarHistoricalParams
+  ) => Promise<GeophysicalWeatherData | undefined>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,6 +90,30 @@ const fetchForecastData = async (latitude: string, longitude: string) => {
 const fetchGeomagneticData = async () => {
   try {
     const response: GeophysicalWeatherData = await fetchGeophysicalWeatherData();
+    return response;
+  } catch (error) {
+    console.error('Error fetching geomagnetic data:', error);
+    return;
+  }
+};
+
+const fetchForecastDataHistorical = async (latitude: number, longitude: number, dateTime: Date) => {
+  try {
+    const response: WeatherData | undefined = await fetchOpenMeteoWeatherDataHistorical({
+      latitude,
+      longitude,
+      dateTime,
+    });
+    return response;
+  } catch (error) {
+    console.error('Error fetching forecast data:', error);
+    return;
+  }
+};
+
+const fetchGeomagneticDataHistorical = async (dateTime: Date) => {
+  try {
+    const response: GeophysicalWeatherData = await fetchGeophysicalWeatherDataHistorical(dateTime);
     return response;
   } catch (error) {
     console.error('Error fetching geomagnetic data:', error);
@@ -318,6 +353,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const fetchForecastHistorical = async (forecastHistoricalParams: ForecastHistoricalParams) => {
+    try {
+      if (forecastHistoricalParams.latitude && forecastHistoricalParams.longitude) {
+        const forecast = await fetchForecastDataHistorical(
+          forecastHistoricalParams.latitude,
+          forecastHistoricalParams.longitude,
+          forecastHistoricalParams.dateTime
+        );
+        return forecast;
+      }
+    } catch (err) {
+      const errMessage: string = `Failed to fetch weather data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+    }
+  };
+
+  const fetchGeomagneticHistorical = async (solarHistoricalParams: SolarHistoricalParams) => {
+    try {
+      const geomagnetic = await fetchGeomagneticDataHistorical(solarHistoricalParams.dateTime);
+
+      return geomagnetic;
+    } catch (err) {
+      const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+      setGeoMagneticError(errMessage);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -342,6 +405,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         geoMagneticError,
         locationDataList,
         setLocationDataList,
+        fetchForecastHistorical,
+        fetchGeomagneticHistorical,
       }}
     >
       {children}

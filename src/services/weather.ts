@@ -6,8 +6,17 @@ interface OpenMeteoParams {
   longitude: number;
   current: Array<string>;
   daily: Array<string>;
-  timezone: string;
   wind_speed_unit: string;
+}
+
+interface OpenMeteoArchiveParams {
+  latitude: number;
+  longitude: number;
+  start_date: string;
+  end_date: string;
+  daily: Array<string>;
+  wind_speed_unit: string;
+  timezone: string;
 }
 
 interface WeatherResponse {
@@ -35,11 +44,12 @@ interface WeatherResponse {
 
 export interface WeatherData {
   temperature: number;
-  humidity: number;
-  pressure: number;
-  feels_like: number;
-  clouds: number;
-  uvi: number;
+  humidity: number | undefined;
+  pressure: number | undefined;
+  feels_like: number | undefined;
+  wind_speed_10m: number | undefined;
+  clouds: number | undefined;
+  uvi: number | undefined;
   description: string;
   icon: string;
   alerts: Array<{
@@ -64,9 +74,16 @@ interface Coordinates {
   longitude: number;
 }
 
+interface CoordinatesWithDate {
+  latitude: number;
+  longitude: number;
+  dateTime: Date;
+}
+
 const OPEN_WEATHER_BASE_URL: string = env.OPEN_WEATHER_BASE_URL;
 const NOAA_GOV_CURRENT_BASE_URL: string = env.NOAA_GOV_CURRENT_BASE_URL;
 const OPEN_METEO_BASE_URL: string = env.OPEN_METEO_BASE_URL;
+const OPEN_METEO_ARCHIVE_URL: string = env.OPEN_METEO_ARCHIVE_URL;
 
 function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
   const result: GeophysicalWeatherData = {
@@ -141,6 +158,7 @@ export async function fetchWeatherData({ latitude, longitude }: Coordinates): Pr
       humidity: data.current.humidity,
       pressure: data.current.pressure,
       feels_like: Math.round(data.current.feels_like),
+      wind_speed_10m: 0,
       clouds: data.current.clouds,
       uvi: data.current.uvi,
       description: data.current.weather[0].description,
@@ -182,7 +200,6 @@ export async function fetchOpenMeteoWeatherData({
       ],
       daily: ['uv_index_max', 'precipitation_sum', 'rain_sum'],
       wind_speed_unit: 'ms',
-      timezone: 'Europe/Vilnius',
     };
     const responses = await fetchWeatherApi(OPEN_METEO_BASE_URL, params);
 
@@ -207,6 +224,7 @@ export async function fetchOpenMeteoWeatherData({
       humidity: current.variables(1)!.value(),
       pressure: Math.round(current.variables(8)!.value()),
       feels_like: Math.round(current.variables(2)!.value()),
+      wind_speed_10m: Math.round(current.variables(9)!.value()),
       clouds: current.variables(7)!.value(),
       uvi: Math.round(uvIndexMax.reduce((acc, prev) => acc + prev, 0) / time.length),
       description: '',
@@ -222,6 +240,103 @@ export async function fetchOpenMeteoWeatherData({
 }
 
 export async function fetchGeophysicalWeatherData(): Promise<GeophysicalWeatherData> {
+  const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
+
+  if (!responseGeoActivity.ok) {
+    throw new Error('Weather data fetch failed');
+  }
+
+  const geoActivityData: string = await responseGeoActivity.text();
+
+  const geoActivityDataMapped: GeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
+
+  return geoActivityDataMapped;
+}
+
+const getDateRange = (dateTime: Date) => {
+  const year = dateTime.getFullYear();
+  const month = dateTime.getMonth() + 1;
+  const date = dateTime.getDate();
+
+  return `${year}-${month < 9 ? `0${month}` : month}-${date < 9 ? `0${date}` : date}`;
+};
+
+export async function fetchOpenMeteoWeatherDataHistorical({
+  latitude,
+  longitude,
+  dateTime,
+}: CoordinatesWithDate): Promise<WeatherData | undefined> {
+  try {
+    if (typeof dateTime === 'undefined') {
+      return;
+    }
+    const params: OpenMeteoArchiveParams = {
+      latitude,
+      longitude,
+      start_date: getDateRange(dateTime),
+      end_date: getDateRange(dateTime),
+      daily: [
+        'wind_speed_10m_max',
+        'temperature_2m_max',
+        'temperature_2m_min',
+        'rain_sum',
+        'wind_direction_10m_dominant',
+        'precipitation_hours',
+        'shortwave_radiation_sum',
+        'precipitation_sum',
+        'et0_fao_evapotranspiration',
+      ],
+      wind_speed_unit: 'ms',
+      timezone: 'GMT',
+    };
+    const responses = await fetchWeatherApi(OPEN_METEO_ARCHIVE_URL, params);
+
+    if (!responses) {
+      throw new Error('Weather data fetch failed');
+    }
+
+    const [response] = responses;
+
+    const daily = response.daily()!;
+    const utcOffsetSeconds = response.utcOffsetSeconds();
+
+    const time = range(Number(daily.time()), Number(daily.timeEnd()), daily.interval()).map(
+      t => new Date((t + utcOffsetSeconds) * 1000)
+    );
+
+    const windSpeed10mMax = daily.variables(0)!.valuesArray()!;
+    const temperature2mMax = daily.variables(1)!.valuesArray()!;
+    const temperature2mMin = daily.variables(2)!.valuesArray()!;
+
+    const weather: WeatherData = {
+      temperature: Math.round(
+        ([...temperature2mMax, ...temperature2mMin].reduce((acc, prev) => acc + prev, 0) / 2) *
+          time.length
+      ),
+      humidity: undefined,
+      pressure: undefined,
+      feels_like: undefined,
+      wind_speed_10m: Math.round(
+        windSpeed10mMax.reduce((acc, prev) => acc + prev, 0) / time.length
+      ),
+      clouds: undefined,
+      uvi: undefined,
+      description: '',
+      icon: '',
+      alerts: [],
+    };
+
+    return weather;
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+    throw error;
+  }
+}
+
+export async function fetchGeophysicalWeatherDataHistorical(
+  dateTime: Date
+): Promise<GeophysicalWeatherData> {
+  console.info(`${dateTime.toISOString()}`);
   const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
 
   if (!responseGeoActivity.ok) {
