@@ -96,40 +96,21 @@ export default function CreateIncident() {
     return true;
   };
 
-  const isValidLocation = (locationData: LocationData) => {
-    if (typeof locationData?.forecast?.temperature === 'undefined') {
-      return false;
+  const isWritableLocation = (locationData: LocationData) => {
+    if (
+      typeof locationData?.forecast?.temperature !== 'undefined' ||
+      typeof locationData?.forecast?.pressure !== 'undefined' ||
+      typeof locationData?.forecast?.humidity !== 'undefined' ||
+      typeof locationData?.forecast?.clouds !== 'undefined' ||
+      typeof locationData?.forecast?.uvi !== 'undefined' ||
+      typeof locationData?.solar?.solarFlux !== 'undefined' ||
+      typeof locationData?.solar?.kIndex !== 'undefined' ||
+      typeof locationData?.solar?.aIndex !== 'undefined'
+    ) {
+      return true;
     }
 
-    if (typeof locationData?.forecast?.pressure === 'undefined') {
-      return false;
-    }
-
-    if (typeof locationData?.forecast?.humidity === 'undefined') {
-      return false;
-    }
-
-    if (typeof locationData?.forecast?.clouds === 'undefined') {
-      return false;
-    }
-
-    if (typeof locationData?.forecast?.uvi === 'undefined') {
-      return false;
-    }
-
-    if (typeof locationData?.solar?.solarFlux === 'undefined') {
-      return false;
-    }
-
-    if (typeof locationData?.solar?.kIndex === 'undefined') {
-      return false;
-    }
-
-    if (typeof locationData?.solar?.aIndex === 'undefined') {
-      return false;
-    }
-
-    return true;
+    return false;
   };
 
   const handleTagClick = (tag: string) => {
@@ -188,11 +169,8 @@ export default function CreateIncident() {
       setFormErrorMessage({ showModal: true, message: 'Invalid incident form' });
     }
 
-    if (isValidLocation(locationData)) {
+    if (isWritableLocation(locationData)) {
       setLocationDataList([...locationDataList, locationData]);
-    } else {
-      console.error('Invalid incident form');
-      setFormErrorMessage({ showModal: true, message: 'Invalid incident form - forecast' });
     }
 
     setLoading(true);
