@@ -14,7 +14,8 @@ interface OpenMeteoArchiveParams {
   longitude: number;
   start_date: string;
   end_date: string;
-  daily: Array<string>;
+  hourly: Array<string>;
+  daily: Array<string> | unknown;
   wind_speed_unit: string;
   timezone: string;
 }
@@ -43,7 +44,7 @@ interface WeatherResponse {
 }
 
 export interface WeatherData {
-  temperature: number;
+  temperature: number | undefined;
   humidity: number | undefined;
   pressure: number | undefined;
   feels_like: number | undefined;
@@ -275,19 +276,17 @@ export async function fetchOpenMeteoWeatherDataHistorical({
       longitude,
       start_date: getDateRange(dateTime),
       end_date: getDateRange(dateTime),
-      daily: [
-        'wind_speed_10m_max',
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'rain_sum',
-        'wind_direction_10m_dominant',
-        'precipitation_hours',
-        'shortwave_radiation_sum',
-        'precipitation_sum',
-        'et0_fao_evapotranspiration',
+      hourly: [
+        'temperature_2m',
+        'wind_speed_10m',
+        'precipitation',
+        'relative_humidity_2m',
+        'cloud_cover',
+        'pressure_msl_spread',
       ],
+      daily: '',
       wind_speed_unit: 'ms',
-      timezone: 'GMT',
+      timezone: 'auto',
     };
     const responses = await fetchWeatherApi(OPEN_METEO_ARCHIVE_URL, params);
 
@@ -297,29 +296,47 @@ export async function fetchOpenMeteoWeatherDataHistorical({
 
     const [response] = responses;
 
-    const daily = response.daily()!;
+    const hourly = response.hourly()!;
     const utcOffsetSeconds = response.utcOffsetSeconds();
 
-    const time = range(Number(daily.time()), Number(daily.timeEnd()), daily.interval()).map(
+    const time = range(Number(hourly.time()), Number(hourly.timeEnd()), hourly.interval()).map(
       t => new Date((t + utcOffsetSeconds) * 1000)
     );
 
-    const windSpeed10mMax = daily.variables(0)!.valuesArray()!;
-    const temperature2mMax = daily.variables(1)!.valuesArray()!;
-    const temperature2mMin = daily.variables(2)!.valuesArray()!;
+    const temperature2m = hourly.variables(0)!.valuesArray()!;
+    const windSpeed10m = hourly.variables(1)!.valuesArray()!;
+    const relativeHumidity2m = hourly.variables(3)!.valuesArray()!;
+    const cloudCover = hourly.variables(4)!.valuesArray()!;
+    const pressureMslSpread = hourly.variables(5)!.valuesArray()!;
+
+    const isTemperatureValuesValid: boolean =
+      temperature2m.filter(item => !Number.isNaN(item)).length === temperature2m.length;
+    const isWindValuesValid: boolean =
+      windSpeed10m.filter(item => !Number.isNaN(item)).length === windSpeed10m.length;
+    const isHumidityValuesValid: boolean =
+      relativeHumidity2m.filter(item => !Number.isNaN(item)).length === relativeHumidity2m.length;
+    const isCloudCoverValuesValid: boolean =
+      cloudCover.filter(item => !Number.isNaN(item)).length === cloudCover.length;
+    const isPressureValuesValid: boolean =
+      pressureMslSpread.filter(item => !Number.isNaN(item)).length === pressureMslSpread.length;
 
     const weather: WeatherData = {
-      temperature: Math.round(
-        ([...temperature2mMax, ...temperature2mMin].reduce((acc, prev) => acc + prev, 0) / 2) *
-          time.length
-      ),
-      humidity: undefined,
-      pressure: undefined,
+      temperature: isTemperatureValuesValid
+        ? Math.round(temperature2m.reduce((acc, prev) => acc + prev, 0) / time.length)
+        : undefined,
+      humidity: isHumidityValuesValid
+        ? Math.round(relativeHumidity2m.reduce((acc, prev) => acc + prev, 0) / time.length)
+        : undefined,
+      pressure: isPressureValuesValid
+        ? Math.round(pressureMslSpread.reduce((acc, prev) => acc + prev, 0) / time.length)
+        : undefined,
       feels_like: undefined,
-      wind_speed_10m: Math.round(
-        windSpeed10mMax.reduce((acc, prev) => acc + prev, 0) / time.length
-      ),
-      clouds: undefined,
+      wind_speed_10m: isWindValuesValid
+        ? Math.round(windSpeed10m.reduce((acc, prev) => acc + prev, 0) / time.length)
+        : undefined,
+      clouds: isCloudCoverValuesValid
+        ? Math.round(cloudCover.reduce((acc, prev) => acc + prev, 0) / time.length)
+        : undefined,
       uvi: undefined,
       description: '',
       icon: '',

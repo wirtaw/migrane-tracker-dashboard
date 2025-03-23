@@ -37,6 +37,7 @@ export default function CreateIncident() {
     feels_like: 0,
     humidity: 0,
     pressure: 0,
+    wind_speed_10m: 0,
     description: '',
     icon: '',
     clouds: 0,
@@ -72,6 +73,7 @@ export default function CreateIncident() {
   const [pressureValue, setPressureValue] = useState<number>(currentWeather.pressure);
   const [cloudsValue, setCloudsValue] = useState<number>(currentWeather.clouds);
   const [uviValue, setUviValue] = useState<number>(currentWeather.uvi);
+  const [windValue, setWindValue] = useState<number>(currentWeather.wind_speed_10m);
   const [solarFlux, setSolarFlux] = useState<number>(currentGeomagneticData.solarFlux);
   const [kIndex, setKIndex] = useState<number>(currentGeomagneticData.kIndex);
   const [aIndex, setAIndex] = useState<number>(currentGeomagneticData.aIndex);
@@ -79,6 +81,8 @@ export default function CreateIncident() {
   const [longitudeValue, setLongitudeValue] = useState<string>(profileSettingsData.longitude);
   const [loading, setLoading] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [changedDate, setChangedDate] = useState(false);
+  const [loadForecast, setLoadForecast] = useState(true);
 
   const isValidIncident = (incident: Incident) => {
     if (!incident?.type) {
@@ -103,6 +107,7 @@ export default function CreateIncident() {
       typeof locationData?.forecast?.humidity !== 'undefined' ||
       typeof locationData?.forecast?.clouds !== 'undefined' ||
       typeof locationData?.forecast?.uvi !== 'undefined' ||
+      typeof locationData?.forecast?.windSpeed !== 'undefined' ||
       typeof locationData?.solar?.solarFlux !== 'undefined' ||
       typeof locationData?.solar?.kIndex !== 'undefined' ||
       typeof locationData?.solar?.aIndex !== 'undefined'
@@ -147,7 +152,7 @@ export default function CreateIncident() {
         temperature: forecastTemperature,
         pressure: pressureValue,
         humidity: humidityValue,
-        windSpeed: 0,
+        windSpeed: windValue,
         clouds: cloudsValue,
         uvi: uviValue,
       },
@@ -196,21 +201,8 @@ export default function CreateIncident() {
     if (dt.toString() !== 'Invalid Date') {
       setStartTimeValue(dt);
       setDatetimeAtValue(dt);
-
-      const forecast = await fetchForecastHistorical({
-        latitude: parseFloat(latitudeValue),
-        longitude: parseFloat(longitudeValue),
-        dateTime: dt,
-      });
-      if (typeof forecast?.temperature !== 'undefined') {
-        setForecastTemperature(Number(forecast.temperature));
-      }
-
-      const solar = await fetchGeomagneticHistorical({
-        dateTime: dt,
-      });
-
-      console.info(`solar ${JSON.stringify(solar)}`);
+      setChangedDate(true);
+      setLoadForecast(false);
     }
   };
 
@@ -242,6 +234,10 @@ export default function CreateIncident() {
     setUviValue(Number(event.target.value));
   };
 
+  const handleForecastWindChange = (event: FormEvent) => {
+    setWindValue(Number(event.target.value));
+  };
+
   const handleSolarFluxChange = (event: FormEvent) => {
     setSolarFlux(Number(event.target.value));
   };
@@ -252,6 +248,37 @@ export default function CreateIncident() {
 
   const handleAIndexChange = (event: FormEvent) => {
     setAIndex(Number(event.target.value));
+  };
+
+  const handleWeatherCall = async () => {
+    const forecast = await fetchForecastHistorical({
+      latitude: parseFloat(latitudeValue),
+      longitude: parseFloat(longitudeValue),
+      dateTime: datetimeAtValue,
+    });
+
+    if (typeof forecast?.temperature !== 'undefined') {
+      setForecastTemperature(Number(forecast.temperature));
+    }
+
+    if (typeof forecast?.humidity !== 'undefined') {
+      setHumidityValue(Number(forecast.humidity));
+    }
+
+    if (typeof forecast?.pressure !== 'undefined') {
+      setPressureValue(Number(forecast.pressure));
+    }
+
+    if (typeof forecast?.clouds !== 'undefined') {
+      setCloudsValue(Number(forecast.clouds));
+    }
+
+    const solar = await fetchGeomagneticHistorical({
+      dateTime: datetimeAtValue,
+    });
+
+    console.info(`solar ${JSON.stringify(solar)}`);
+    setLoadForecast(true);
   };
 
   if (loading && finished) {
@@ -274,6 +301,16 @@ export default function CreateIncident() {
                 <p className="text-gray-600 dark:text-gray-300 dark:text-white">
                   Add complete incident
                 </p>
+              </div>
+              <div className="prose dark:prose-invert max-w-none">
+                {changedDate && !loadForecast && (
+                  <button
+                    className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    onClick={handleWeatherCall}
+                  >
+                    Load weather
+                  </button>
+                )}
               </div>
             </section>
             {loading && !finished && <Loader />}
@@ -484,6 +521,21 @@ export default function CreateIncident() {
                         className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
                         value={uviValue}
                         onChange={handleForecastUviChange}
+                      />
+                    </div>
+                    <div className="space-y-2 text-gray-700 dark:text-gray-300">
+                      <label
+                        htmlFor="forecastWind"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        Wind 10m (m/s)
+                      </label>
+                      <input
+                        type="number"
+                        id="forecastWind"
+                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                        value={windValue}
+                        onChange={handleForecastWindChange}
                       />
                     </div>
                     <div className="space-y-2 text-gray-700 dark:text-gray-300">

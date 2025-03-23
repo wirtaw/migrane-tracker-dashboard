@@ -8,6 +8,7 @@ import {
   CloudSun,
   UmbrellaIcon,
   RefreshCcw,
+  Wind,
 } from 'lucide-react';
 import { env } from '../config/env';
 import Loader from '../components/Loader';
@@ -59,6 +60,7 @@ export default function WeatherWidget() {
     humidity: undefined,
     pressure: undefined,
     description: undefined,
+    wind_speed_10m: undefined,
     icon: undefined,
     clouds: undefined,
     uvi: undefined,
@@ -150,6 +152,16 @@ export default function WeatherWidget() {
                       {currentWeather.uvi}
                     </span>
                     <UVIndexIndicator uvi={currentWeather.uvi} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-lg">
+                <Wind className="w-5 h-5 text-sky-500" />
+                <div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Wind speed</div>
+                  <div className="text-xl font-semibold dark:text-white">
+                    {currentWeather.wind_speed_10m} m/s
                   </div>
                 </div>
               </div>
