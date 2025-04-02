@@ -74,26 +74,39 @@ export interface Sleep {
   datetimeAt: Date;
 }
 
+export interface ISolar {
+  solarFlux: number | null;
+  kIndex: number | null;
+  aIndex: number | null;
+  bIndex: number | null;
+  flareProbability: number | null;
+  datetime: string;
+}
+
+export interface IForecast {
+  description: string;
+  temperature: number | null;
+  pressure: number | null;
+  humidity: number | null;
+  windSpeed: number | null;
+  clouds: number | null;
+  uvi: number | null;
+  datetime: string;
+}
+
+export interface ISolarRadiation {
+  uviIndex: number | null;
+  ozone: number | null;
+  datetime: string;
+}
+
 export interface LocationData {
   id: number;
   latitude: number;
   longitude: number;
-  forecast: {
-    description: string;
-    temperature: number;
-    pressure: number;
-    humidity: number;
-    windSpeed: number;
-    clouds: number;
-    uvi: number;
-  };
-  solar: {
-    solarFlux: number | null;
-    kIndex: number | null;
-    aIndex: number | null;
-    bIndex: number | null;
-    flareProbability: number | null;
-  };
+  forecast: IForecast[] | [];
+  solar: ISolar[] | [];
+  solarRadiation: ISolarRadiation[] | [];
   datetimeAt: Date;
   incidentId: number | null;
 }

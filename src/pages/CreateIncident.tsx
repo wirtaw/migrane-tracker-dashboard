@@ -102,15 +102,15 @@ export default function CreateIncident() {
 
   const isWritableLocation = (locationData: LocationData) => {
     if (
-      typeof locationData?.forecast?.temperature !== 'undefined' ||
-      typeof locationData?.forecast?.pressure !== 'undefined' ||
-      typeof locationData?.forecast?.humidity !== 'undefined' ||
-      typeof locationData?.forecast?.clouds !== 'undefined' ||
-      typeof locationData?.forecast?.uvi !== 'undefined' ||
-      typeof locationData?.forecast?.windSpeed !== 'undefined' ||
-      typeof locationData?.solar?.solarFlux !== 'undefined' ||
-      typeof locationData?.solar?.kIndex !== 'undefined' ||
-      typeof locationData?.solar?.aIndex !== 'undefined'
+      typeof locationData?.forecast[0]?.temperature !== 'undefined' ||
+      typeof locationData?.forecast[0]?.pressure !== 'undefined' ||
+      typeof locationData?.forecast[0]?.humidity !== 'undefined' ||
+      typeof locationData?.forecast[0]?.clouds !== 'undefined' ||
+      typeof locationData?.forecast[0]?.uvi !== 'undefined' ||
+      typeof locationData?.forecast[0]?.windSpeed !== 'undefined' ||
+      typeof locationData?.solar[0]?.solarFlux !== 'undefined' ||
+      typeof locationData?.solar[0]?.kIndex !== 'undefined' ||
+      typeof locationData?.solar[0]?.aIndex !== 'undefined'
     ) {
       return true;
     }
@@ -129,6 +129,7 @@ export default function CreateIncident() {
 
   const handleSubmit = (e: React.FormEvent) => {
     setLoading(true);
+    const now = new Date();
     const maxId = Math.max(...incidentList.map(({ id }) => id));
     const incidentId = Math.max(...locationDataList.map(({ id }) => id));
     const incident: Incident = {
@@ -137,7 +138,7 @@ export default function CreateIncident() {
       durationHours: durationHoursValue,
       type: typeValue,
       startTime: startTimeValue,
-      createdAt: new Date(),
+      createdAt: now,
       datetimeAt: datetimeAtValue,
       triggers,
       notes: notesValue,
@@ -147,22 +148,29 @@ export default function CreateIncident() {
       id: incidentId,
       latitude: parseFloat(profileSettingsData.latitude),
       longitude: parseFloat(profileSettingsData.longitude),
-      forecast: {
-        description: '',
-        temperature: forecastTemperature,
-        pressure: pressureValue,
-        humidity: humidityValue,
-        windSpeed: windValue,
-        clouds: cloudsValue,
-        uvi: uviValue,
-      },
-      solar: {
-        solarFlux,
-        kIndex,
-        aIndex,
-        bIndex: null,
-        flareProbability: null,
-      },
+      forecast: [
+        {
+          description: '',
+          temperature: forecastTemperature,
+          pressure: pressureValue,
+          humidity: humidityValue,
+          windSpeed: windValue,
+          clouds: cloudsValue,
+          uvi: uviValue,
+          datetime: now.toISOString(),
+        },
+      ],
+      solar: [
+        {
+          solarFlux,
+          kIndex,
+          aIndex,
+          bIndex: null,
+          flareProbability: null,
+          datetime: now.toISOString(),
+        },
+      ],
+      solarRadiation: [],
       datetimeAt: datetimeAtValue,
       incidentId: incident.id || null,
     };
