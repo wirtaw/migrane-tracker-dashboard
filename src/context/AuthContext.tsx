@@ -15,6 +15,8 @@ import {
   fetchGeophysicalWeatherData,
   fetchOpenMeteoWeatherDataHistorical,
   fetchGeophysicalWeatherDataHistorical,
+  RadiationTodayData,
+  fetchRadiationWeatherData,
 } from '../services/weather.ts';
 interface AuthContextType {
   user: User | null;
@@ -42,6 +44,10 @@ interface AuthContextType {
   fetchGeomagneticHistorical: (
     params: SolarHistoricalParams
   ) => Promise<GeophysicalWeatherData | undefined>;
+  fetchSolarRadiation: (params: ProfileSettingsData) => Promise<void>;
+  solarRadiationData: RadiationTodayData[] | undefined;
+  solarRadiationLoading: boolean;
+  solarRadiationError: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -121,6 +127,19 @@ const fetchGeomagneticDataHistorical = async (dateTime: Date) => {
   }
 };
 
+const fetchSolarRadiationData = async (latitude: number, longitude: number) => {
+  try {
+    const response: RadiationTodayData[] = await fetchRadiationWeatherData({
+      latitude,
+      longitude,
+    });
+    return response;
+  } catch (error) {
+    console.error('Error fetching solar radiation data:', error);
+    return;
+  }
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -148,11 +167,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [geomagneticData, setGeomagneticData] = useState<GeophysicalWeatherData | undefined>(
     undefined
   );
+  const [solarRadiationData, setSolarRadiationData] = useState<RadiationTodayData[] | undefined>(
+    undefined
+  );
   const [profileLoading, setProfileLoading] = useState(false);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [geoMagneticLoading, setGeoMagneticLoading] = useState(false);
+  const [solarRadiationLoading, setSolarRadiationLoading] = useState(false);
   const [forecastError, setForecastError] = useState<string>('');
   const [geoMagneticError, setGeoMagneticError] = useState<string>('');
+  const [solarRadiationError, setSolarRadiationError] = useState<string>('');
   const [locationDataList, setLocationDataList] = useState<LocationData[]>([]);
 
   useEffect(() => {
@@ -218,13 +242,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (latitude && longitude) {
               const cachedForecast = sessionStorage.getItem(`forecast_${session?.user.id}`);
               const cachedGeomagnetic = sessionStorage.getItem(`geomagnetic_${session?.user.id}`);
+              const cachedSolarRadiation = sessionStorage.getItem(
+                `solar_radiation_${session?.user.id}`
+              );
 
               if (cachedForecast) {
                 setForecastData(JSON.parse(cachedForecast));
               } else {
                 const forecast = await fetchForecastData(latitude, longitude);
-                setForecastData(forecast);
+
                 if (forecast) {
+                  setForecastData(forecast);
                   sessionStorage.setItem(`forecast_${session?.user.id}`, JSON.stringify(forecast));
                 }
               }
@@ -233,11 +261,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setGeomagneticData(JSON.parse(cachedGeomagnetic));
               } else {
                 const geomagnetic = await fetchGeomagneticData();
-                setGeomagneticData(geomagnetic);
+
                 if (geomagnetic) {
+                  setGeomagneticData(geomagnetic);
                   sessionStorage.setItem(
                     `geomagnetic_${session?.user.id}`,
                     JSON.stringify(geomagnetic)
+                  );
+                }
+              }
+
+              if (cachedSolarRadiation) {
+                setSolarRadiationData(JSON.parse(cachedSolarRadiation));
+              } else {
+                const solar = await fetchSolarRadiationData(latitude, longitude);
+                if (solar) {
+                  setSolarRadiationData(solar);
+                  sessionStorage.setItem(
+                    `solar_radiation_${session?.user.id}`,
+                    JSON.stringify(solar)
                   );
                 }
               }
@@ -381,6 +423,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const fetchSolarRadiation = async (profileSettingsData: ProfileSettingsData) => {
+    try {
+      if (profileSettingsData.latitude && profileSettingsData.longitude) {
+        setSolarRadiationLoading(true);
+        const solar = await fetchSolarRadiationData(
+          parseFloat(profileSettingsData.latitude),
+          parseFloat(profileSettingsData.longitude)
+        );
+
+        if (solar) {
+          setSolarRadiationData(solar);
+          sessionStorage.setItem(`solar_radiation_${user?.id}`, JSON.stringify(solar));
+        }
+        setSolarRadiationLoading(false);
+      }
+    } catch (err) {
+      const errMessage: string = `Failed to fetch solar radiation data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+      setSolarRadiationError(errMessage);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -407,6 +471,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLocationDataList,
         fetchForecastHistorical,
         fetchGeomagneticHistorical,
+        fetchSolarRadiation,
+        solarRadiationData,
+        solarRadiationLoading,
+        solarRadiationError,
       }}
     >
       {children}

@@ -17,6 +17,7 @@
         "@types/sjcl": "^1.0.34",
         "appwrite": "^16.1.0",
         "lucide-react": "^0.344.0",
+        "luxon": "^3.6.1",
         "openmeteo": "^1.1.4",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",

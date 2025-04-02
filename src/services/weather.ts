@@ -81,10 +81,20 @@ interface CoordinatesWithDate {
   dateTime: Date;
 }
 
+export interface RadiationTodayData {
+  date: string;
+  UVIndex: number;
+  ozone: number;
+}
+
 const OPEN_WEATHER_BASE_URL: string = env.OPEN_WEATHER_BASE_URL;
 const NOAA_GOV_CURRENT_BASE_URL: string = env.NOAA_GOV_CURRENT_BASE_URL;
 const OPEN_METEO_BASE_URL: string = env.OPEN_METEO_BASE_URL;
 const OPEN_METEO_ARCHIVE_URL: string = env.OPEN_METEO_ARCHIVE_URL;
+const TEMIS_BASE_RESOURCE_URL: string = env.TEMIS_BASE_RESOURCE_URL;
+const MIGRAINE_API_URL: string = env.MIGRAINE_API_URL;
+const MIGRAINE_API_HEADER_X_API_KEY: string = env.MIGRAINE_API_HEADER_X_API_KEY;
+const MIGRAINE_API_HEADER_X_API_VALUE: string = env.MIGRAINE_API_HEADER_X_API_VALUE;
 
 function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
   const result: GeophysicalWeatherData = {
@@ -365,4 +375,38 @@ export async function fetchGeophysicalWeatherDataHistorical(
   const geoActivityDataMapped: GeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
 
   return geoActivityDataMapped;
+}
+
+export async function fetchRadiationWeatherData({
+  latitude,
+  longitude,
+}: Coordinates): Promise<RadiationTodayData[] | []> {
+  if (!MIGRAINE_API_URL || !MIGRAINE_API_HEADER_X_API_KEY || !MIGRAINE_API_HEADER_X_API_VALUE) {
+    return [];
+  }
+
+  const headers = new Headers();
+  headers.append(MIGRAINE_API_HEADER_X_API_KEY, MIGRAINE_API_HEADER_X_API_VALUE);
+
+  const responseRadiation = await fetch(
+    `${MIGRAINE_API_URL}/radiation?latitude=${latitude}&longitude=${longitude}`,
+    {
+      method: 'GET',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        Origin: `${MIGRAINE_API_URL}`,
+        Referer: `${TEMIS_BASE_RESOURCE_URL}`,
+      },
+    }
+  );
+
+  if (!responseRadiation.ok) {
+    throw new Error('Radiation weather data fetch failed');
+  }
+
+  const responseRadiationData = await responseRadiation.json();
+
+  return responseRadiationData;
 }
