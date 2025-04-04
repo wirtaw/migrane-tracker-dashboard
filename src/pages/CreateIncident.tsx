@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
-import { Incident, LocationData } from '../models/profileData.types.ts';
+import { Incident, ILocationData } from '../models/profileData.types.ts';
 import { getIsoDateTimeLocal } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
 import { GeomagneticData } from '../components/GeoMagneticWidget.tsx';
@@ -100,7 +100,7 @@ export default function CreateIncident() {
     return true;
   };
 
-  const isWritableLocation = (locationData: LocationData) => {
+  const isWritableLocation = (locationData: ILocationData) => {
     if (
       typeof locationData?.forecast[0]?.temperature !== 'undefined' ||
       typeof locationData?.forecast[0]?.pressure !== 'undefined' ||
@@ -144,8 +144,9 @@ export default function CreateIncident() {
       notes: notesValue,
     };
 
-    const locationData: LocationData = {
+    const locationData: ILocationData = {
       id: incidentId,
+      userId,
       latitude: parseFloat(profileSettingsData.latitude),
       longitude: parseFloat(profileSettingsData.longitude),
       forecast: [

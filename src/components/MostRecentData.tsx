@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ReceiptText } from 'lucide-react';
 
-import { Incident, Trigger, Medication, Symptom } from '../models/profileData.types';
+import { Incident, ITrigger, Medication, Symptom } from '../models/profileData.types';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { getIsoDate, getIsoTime } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
@@ -12,7 +12,7 @@ interface MostRecentDataProps {
 
 interface FilteredData {
   incidents: Incident[];
-  triggers: Trigger[];
+  triggers: ITrigger[];
   medications: Medication[];
   symptoms: Symptom[];
 }

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
 import {
   ProfileSettingsData,
-  LocationData,
+  ILocationData,
   ForecastHistoricalParams,
   SolarHistoricalParams,
 } from '../models/profileData.types';
@@ -38,8 +38,8 @@ interface AuthContextType {
   fetchGeomagnetic: () => Promise<void>;
   forecastError: string;
   geoMagneticError: string;
-  locationDataList: LocationData[];
-  setLocationDataList: React.Dispatch<React.SetStateAction<LocationData[]>>;
+  locationDataList: ILocationData[];
+  setLocationDataList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
   fetchForecastHistorical: (params: ForecastHistoricalParams) => Promise<WeatherData | undefined>;
   fetchGeomagneticHistorical: (
     params: SolarHistoricalParams
@@ -177,7 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [forecastError, setForecastError] = useState<string>('');
   const [geoMagneticError, setGeoMagneticError] = useState<string>('');
   const [solarRadiationError, setSolarRadiationError] = useState<string>('');
-  const [locationDataList, setLocationDataList] = useState<LocationData[]>([]);
+  const [locationDataList, setLocationDataList] = useState<ILocationData[]>([]);
 
   useEffect(() => {
     if (!supabase) {

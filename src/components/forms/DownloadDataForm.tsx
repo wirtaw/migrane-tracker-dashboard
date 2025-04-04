@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import {
   Incident,
-  Trigger,
+  ITrigger,
   Medication,
   Symptom,
-  LocationData,
+  ILocationData,
 } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import Loader from '../Loader';
@@ -18,10 +18,10 @@ interface DownloadDataFormProps {
 
 interface ExportJSON {
   incidents: Incident[];
-  triggers: Trigger[];
+  triggers: ITrigger[];
   medications: Medication[];
   symptoms: Symptom[];
-  locationData: LocationData[];
+  locationData: ILocationData[];
 }
 
 const encrypt = (data: string | SjclCipherEncrypted, key: string) => {

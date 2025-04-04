@@ -3,17 +3,25 @@ import { useParams, useLocation } from 'react-router-dom';
 import { Info } from 'lucide-react';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { getIsoDate, getIsoTime } from '../lib/utils.ts';
-import { Trigger, Incident, Medication, Symptom } from '../models/profileData.types';
+import {
+  ITrigger,
+  Incident,
+  Medication,
+  Symptom,
+  ILocationData,
+} from '../models/profileData.types';
 
 export default function DateInfo() {
   const { date } = useParams();
   const location = useLocation();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const { incidentList, medicationList, triggerList, symptomList } = useProfileDataContext();
-  const [triggerItems, setTriggerItems] = useState<Trigger[]>([]);
+  const { incidentList, medicationList, triggerList, symptomList, locationList } =
+    useProfileDataContext();
+  const [triggerItems, setTriggerItems] = useState<ITrigger[]>([]);
   const [incidentItems, setIncidentItems] = useState<Incident[]>([]);
   const [medicationItems, setMedicationItems] = useState<Medication[]>([]);
   const [symptomItems, setSymptomItems] = useState<Symptom[]>([]);
+  const [locationItems, setLocationItems] = useState<ILocationData[]>([]);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -24,6 +32,7 @@ export default function DateInfo() {
     setMedicationItems(medicationList.filter(item => getIsoDate(item.datetimeAt) === date));
     setTriggerItems(triggerList.filter(item => getIsoDate(item.datetimeAt) === date));
     setSymptomItems(symptomList.filter(item => getIsoDate(item.datetimeAt) === date));
+    setLocationItems(locationList.filter(item => getIsoDate(item.datetimeAt) === date));
   }, [date, location.search]);
 
   return (
@@ -43,7 +52,7 @@ export default function DateInfo() {
                 </h2>
               </div>
               <p className="text-gray-600 dark:text-gray-300">
-                <table className="table-fixed border-separate border border-gray-400">
+                <table className="table-auto border-separate border border-gray-400">
                   <thead>
                     <tr>
                       <th className="border border-gray-400 p-3">Type</th>
@@ -74,6 +83,26 @@ export default function DateInfo() {
           </div>
         )}
 
+        {locationItems.length > 0 && (
+          <div className="space-y-8 pb-5">
+            <section className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Info className="w-6 h-6 text-blue-500" />
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Location</h2>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300">
+                {locationItems.map(location => (
+                  <>
+                    <span>Id - {location.id} </span>
+                    <span>latitude - {location.latitude} </span>
+                    <span>longitude - {location.longitude} </span>
+                  </>
+                ))}
+              </p>
+            </section>
+          </div>
+        )}
+
         {triggerItems.length > 0 && (
           <div className="space-y-8 pb-5">
             <section className="space-y-4">
@@ -82,7 +111,7 @@ export default function DateInfo() {
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Triggers</h2>
               </div>
               <p className="text-gray-600 dark:text-gray-300">
-                <table className="table-fixed border-separate border border-gray-40">
+                <table className="table-auto border-separate border border-gray-40">
                   <thead>
                     <tr>
                       <th className="border border-gray-400 p-3">Type</th>
@@ -115,7 +144,7 @@ export default function DateInfo() {
                 </h2>
               </div>
               <p className="text-gray-600 dark:text-gray-300">
-                <table className="table-fixed border-separate border border-gray-40">
+                <table className="table-auto border-separate border border-gray-40">
                   <thead>
                     <tr>
                       <th className="border border-gray-400 p-3">Title</th>
@@ -150,7 +179,7 @@ export default function DateInfo() {
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Symptoms</h2>
               </div>
               <p className="text-gray-600 dark:text-gray-300">
-                <table className="table-fixed border-separate border border-gray-40">
+                <table className="table-auto border-separate border border-gray-40">
                   <thead>
                     <tr>
                       <th className="border border-gray-400 p-3">Type</th>

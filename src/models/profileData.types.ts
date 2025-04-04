@@ -1,4 +1,4 @@
-export interface Trigger {
+export interface ITrigger {
   id: number;
   userId: string;
   type: string;
@@ -100,8 +100,9 @@ export interface ISolarRadiation {
   datetime: string;
 }
 
-export interface LocationData {
+export interface ILocationData {
   id: number;
+  userId: string;
   latitude: number;
   longitude: number;
   forecast: IForecast[] | [];
@@ -139,12 +140,12 @@ export interface ProfileSecurityData {
   isInit: boolean;
 }
 
-export interface ErrorMessage {
+export interface IErrorMessage {
   showModal: boolean;
   message: string;
 }
 
-export interface BrokenTrigger {
+export interface IBrokenTrigger {
   id: number;
   userId: string;
   type: string;
@@ -154,7 +155,7 @@ export interface BrokenTrigger {
   warning: string;
 }
 
-export interface BrokenSymptom {
+export interface IBrokenSymptom {
   id: number;
   userId: string;
   type: string;
@@ -165,7 +166,7 @@ export interface BrokenSymptom {
   warning: string;
 }
 
-export interface BrokenIncident {
+export interface IBrokenIncident {
   id: number;
   userId: string;
   type: string;
@@ -178,7 +179,7 @@ export interface BrokenIncident {
   warning: string;
 }
 
-export interface BrokenMedication {
+export interface IBrokenMedication {
   id: number;
   userId: string;
   title: string;
@@ -190,19 +191,33 @@ export interface BrokenMedication {
   warning: string;
 }
 
+export interface IBrokenLocation {
+  id: number;
+  userId: string;
+  latitude: number;
+  longitude: number;
+  forecast: IForecast[] | [];
+  solar: ISolar[] | [];
+  solarRadiation: ISolarRadiation[] | [];
+  datetimeAt: Date;
+  incidentId: number | null;
+  warning: string;
+}
+
 export interface BrokenData {
-  triggers: BrokenTrigger[] | unknown;
-  incidents: BrokenIncident[] | unknown;
-  symptoms: BrokenSymptom[] | unknown;
-  medications: BrokenMedication[] | unknown;
+  triggers: IBrokenTrigger[] | unknown;
+  incidents: IBrokenIncident[] | unknown;
+  symptoms: IBrokenSymptom[] | unknown;
+  medications: IBrokenMedication[] | unknown;
+  locations: IBrokenLocation[] | unknown;
 }
 
 export interface JSONData {
-  triggers: Trigger[];
+  triggers: ITrigger[];
   incidents: Incident[];
   symptoms: Symptom[];
   medications: Medication[];
-  logsForecast: LocationData[] | unknown;
+  logsForecast: ILocationData[] | unknown;
   logHealth:
     | {
         weight: Weight[] | unknown;

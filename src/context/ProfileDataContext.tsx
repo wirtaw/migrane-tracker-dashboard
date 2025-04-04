@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import {
-  Trigger,
+  ITrigger,
   Incident,
   Medication,
   Symptom,
@@ -8,14 +8,15 @@ import {
   Height,
   BloodPressure,
   ProfileSecurityData,
-  ErrorMessage,
+  IErrorMessage,
   BrokenData,
+  ILocationData,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
 
 interface ProfileDataContextProps {
-  triggerList: Trigger[];
-  setTriggerList: React.Dispatch<React.SetStateAction<Trigger[]>>;
+  triggerList: ITrigger[];
+  setTriggerList: React.Dispatch<React.SetStateAction<ITrigger[]>>;
   incidentList: Incident[];
   setIncidentList: React.Dispatch<React.SetStateAction<Incident[]>>;
   medicationList: Medication[];
@@ -38,12 +39,14 @@ interface ProfileDataContextProps {
   setBloodPressureList: React.Dispatch<React.SetStateAction<BloodPressure[]>>;
   profileSecurityData: ProfileSecurityData;
   setProfileSecurityData: React.Dispatch<React.SetStateAction<ProfileSecurityData>>;
-  formErrorMessage: ErrorMessage;
-  setFormErrorMessage: React.Dispatch<React.SetStateAction<ErrorMessage>>;
+  formErrorMessage: IErrorMessage;
+  setFormErrorMessage: React.Dispatch<React.SetStateAction<IErrorMessage>>;
   currentMonth: Date;
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
   brokenImportData: BrokenData;
   setBrokenImportData: React.Dispatch<React.SetStateAction<BrokenData>>;
+  locationList: ILocationData[];
+  setLocationList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
 }
 
 const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
@@ -51,10 +54,11 @@ const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(un
 export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const userId: string = user?.id || '1';
-  const [triggerList, setTriggerList] = useState<Trigger[]>([]);
+  const [triggerList, setTriggerList] = useState<ITrigger[]>([]);
   const [incidentList, setIncidentList] = useState<Incident[]>([]);
   const [medicationList, setMedicationList] = useState<Medication[]>([]);
   const [symptomList, setSymptomList] = useState<Symptom[]>([]);
+  const [locationList, setLocationList] = useState<ILocationData[]>([]);
 
   const [medicationEnumList, setMedicationEnumList] = useState<string[]>([
     'Aspirin',
@@ -108,7 +112,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     isInit: false,
   });
 
-  const [formErrorMessage, setFormErrorMessage] = useState<ErrorMessage>({
+  const [formErrorMessage, setFormErrorMessage] = useState<IErrorMessage>({
     showModal: false,
     message: '',
   });
@@ -120,6 +124,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     incidents: null,
     symptoms: null,
     medications: null,
+    locations: null,
   });
 
   return (
@@ -155,6 +160,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setCurrentMonth,
         brokenImportData,
         setBrokenImportData,
+        locationList,
+        setLocationList,
       }}
     >
       {children}

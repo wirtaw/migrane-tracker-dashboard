@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { getIsoDate, getIsoTime } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
-import { Incident, Trigger, Medication, Symptom } from '../models/profileData.types.ts';
+import { Incident, ITrigger, Medication, Symptom } from '../models/profileData.types.ts';
 import { useAuth } from '../context/AuthContext';
 
 interface ReportPageData {
   date: string;
   incidents: Incident[];
-  triggers: Trigger[];
+  triggers: ITrigger[];
   medications: Medication[];
   symptoms: Symptom[];
 }
@@ -50,7 +50,7 @@ const prepareReportData = ({
   endDate: Date;
   incidentList: Incident[];
   medicationList: Medication[];
-  triggerList: Trigger[];
+  triggerList: ITrigger[];
   symptomList: Symptom[];
 }): ReportPageData[] => {
   const data: { [date: string]: ReportPageData } = {};

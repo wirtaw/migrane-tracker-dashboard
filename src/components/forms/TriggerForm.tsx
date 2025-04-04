@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Trigger } from '../../models/profileData.types';
+import { ITrigger } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
 import { FormEvent } from '../../models/forms.types.ts';
 
@@ -10,8 +10,8 @@ interface TriggerFormProps {
 }
 
 export default function TriggerForm({ onSubmit }: TriggerFormProps) {
-  const { user } = useAuth();
-  const { triggerEnumList, triggerList, setTriggerList, setFormErrorMessage, profileSettingsData } =
+  const { user, profileSettingsData } = useAuth();
+  const { triggerEnumList, triggerList, setTriggerList, setFormErrorMessage } =
     useProfileDataContext();
 
   const userId: string = user?.id || '1';
@@ -19,7 +19,7 @@ export default function TriggerForm({ onSubmit }: TriggerFormProps) {
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [noteValue, setNoteValue] = useState<string>('');
 
-  const isValidTrigger = (trigger: Trigger) => {
+  const isValidTrigger = (trigger: ITrigger) => {
     if (!trigger?.type) {
       return false;
     }
@@ -33,7 +33,7 @@ export default function TriggerForm({ onSubmit }: TriggerFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     const maxId = Math.max(...triggerList.map(({ id }) => id));
-    const trigger: Trigger = {
+    const trigger: ITrigger = {
       id: maxId + 1,
       userId,
       type: typeValue,

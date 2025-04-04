@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import {
   Incident,
-  Trigger,
+  ITrigger,
   Medication,
   Symptom,
-  BrokenTrigger,
-  BrokenIncident,
-  BrokenMedication,
-  BrokenSymptom,
+  IBrokenTrigger,
+  IBrokenIncident,
+  IBrokenMedication,
+  IBrokenSymptom,
+  ILocationData,
+  IBrokenLocation,
 } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import Loader from '../Loader';
@@ -22,10 +24,11 @@ const decrypt = (data: string | SjclCipherEncrypted, key: string) => {
   return JSON.parse(sjcl.decrypt(key, data));
 };
 
-const brokenIncidents: BrokenIncident[] = [];
-const brokenTriggers: BrokenTrigger[] = [];
-const brokenMedications: BrokenMedication[] = [];
-const brokenSymptoms: BrokenSymptom[] = [];
+const brokenIncidents: IBrokenIncident[] = [];
+const brokenTriggers: IBrokenTrigger[] = [];
+const brokenMedications: IBrokenMedication[] = [];
+const brokenSymptoms: IBrokenSymptom[] = [];
+const brokenLocations: IBrokenLocation[] = [];
 
 const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): Incident[] | [] => {
   if (!jsonDataIncidents || !Array.isArray(jsonDataIncidents)) {
@@ -154,11 +157,11 @@ const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): Incident[] 
   return incidents;
 };
 
-const mapTriggerList = (jsonDataTriggers: unknown, maxId: number): Trigger[] | [] => {
+const mapTriggerList = (jsonDataTriggers: unknown, maxId: number): ITrigger[] | [] => {
   if (!jsonDataTriggers || !Array.isArray(jsonDataTriggers)) {
     return [];
   }
-  const triggers: Trigger[] = [];
+  const triggers: ITrigger[] = [];
   for (const trigger of jsonDataTriggers) {
     const { id, userId, datetimeAt, type, note, createdAt } = trigger;
 
@@ -393,15 +396,168 @@ const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): Symptom[] | [
   return symptoms;
 };
 
+const mapLocationList = (jsonDataLogsForecast: unknown, maxId: number): ILocationData[] | [] => {
+  if (!jsonDataLogsForecast || !Array.isArray(jsonDataLogsForecast)) {
+    return [];
+  }
+  const locations: ILocationData[] = [];
+  for (const location of jsonDataLogsForecast) {
+    const {
+      id,
+      userId,
+      datetimeAt,
+      incidentId,
+      solarRadiation,
+      solar,
+      forecast,
+      longitude,
+      latitude,
+    } = location;
+
+    if (!userId) {
+      brokenLocations.push({
+        id: 0,
+        userId: userId.toString(),
+        longitude,
+        latitude,
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        incidentId,
+        solarRadiation,
+        forecast,
+        solar,
+        warning: 'Location missing userId',
+      });
+      continue;
+    }
+
+    if (!datetimeAt) {
+      brokenLocations.push({
+        id: 0,
+        userId: userId.toString(),
+        longitude,
+        latitude,
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        incidentId,
+        solarRadiation,
+        forecast,
+        solar,
+        warning: 'Location missing datetimeAt',
+      });
+      continue;
+    }
+
+    if (!longitude) {
+      brokenLocations.push({
+        id: 0,
+        userId: userId.toString(),
+        longitude,
+        latitude,
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        incidentId,
+        solarRadiation,
+        forecast,
+        solar,
+        warning: 'Location missing longitude',
+      });
+      continue;
+    }
+
+    if (!latitude) {
+      brokenLocations.push({
+        id: 0,
+        userId: userId.toString(),
+        longitude,
+        latitude,
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        incidentId,
+        solarRadiation,
+        forecast,
+        solar,
+        warning: 'Location missing latitude',
+      });
+      continue;
+    }
+
+    if (!forecast || !Array.isArray(forecast)) {
+      brokenLocations.push({
+        id: 0,
+        userId: userId.toString(),
+        longitude,
+        latitude,
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        incidentId,
+        solarRadiation,
+        forecast,
+        solar,
+        warning: 'Location missing forecast',
+      });
+      continue;
+    }
+
+    if (!solarRadiation || !Array.isArray(solarRadiation)) {
+      brokenLocations.push({
+        id: 0,
+        userId: userId.toString(),
+        longitude,
+        latitude,
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        incidentId,
+        solarRadiation,
+        forecast,
+        solar,
+        warning: 'Location missing solarRadiation',
+      });
+      continue;
+    }
+
+    if (!solar || !Array.isArray(solar)) {
+      brokenLocations.push({
+        id: 0,
+        userId: userId.toString(),
+        longitude,
+        latitude,
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        incidentId,
+        solarRadiation,
+        forecast,
+        solar,
+        warning: 'Location missing solar',
+      });
+      continue;
+    }
+
+    const setId = id || maxId + 1;
+
+    locations.push({
+      id: setId,
+      userId: userId.toString(),
+      longitude,
+      latitude,
+      datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+      incidentId,
+      solarRadiation,
+      forecast,
+      solar,
+    });
+
+    if (setId > maxId) {
+      maxId = setId;
+    }
+  }
+
+  return locations;
+};
+
 export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [warnMessage, setWarnMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [newIncidents, setNewIncidents] = useState<Incident[]>([]);
-  const [newTriggers, setNewTriggers] = useState<Trigger[]>([]);
+  const [newTriggers, setNewTriggers] = useState<ITrigger[]>([]);
   const [newMedications, setNewMedications] = useState<Medication[]>([]);
   const [newSymptoms, setNewSymptoms] = useState<Symptom[]>([]);
+  const [newLocations, setNewLocations] = useState<ILocationData[]>([]);
   const {
     incidentList,
     setIncidentList,
@@ -419,6 +575,8 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
     setTriggerEnumList,
     symptomEnumList,
     setSymptomEnumList,
+    locationList,
+    setLocationList,
   } = useProfileDataContext();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -462,6 +620,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
           triggers: jsonDataTriggers,
           medications: jsonDataMedications,
           symptoms: jsonDataSymptoms,
+          logsForecast: jsonDataLogsForecast,
         } = data;
 
         // Incidents
@@ -473,7 +632,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
 
         // Triggers
         maxId = Math.max(...triggerList.map(({ id }) => id));
-        const triggers: Trigger[] = mapTriggerList(jsonDataTriggers, maxId);
+        const triggers: ITrigger[] = mapTriggerList(jsonDataTriggers, maxId);
 
         setNewTriggers(triggers);
         setTriggerList([...triggerList, ...triggers]);
@@ -507,6 +666,13 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
           }
         }
 
+        // Locations
+        maxId = Math.max(...locationList.map(({ id }) => id));
+        const locations: ILocationData[] = mapLocationList(jsonDataLogsForecast, maxId);
+
+        setNewLocations(locations);
+        setLocationList([...locationList, ...locations]);
+
         setIsFinished(true);
         setErrorMessage('');
         setWarnMessage('');
@@ -516,6 +682,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
           triggers: brokenTriggers.length > 0 ? brokenTriggers : null,
           symptoms: brokenSymptoms.length > 0 ? brokenSymptoms : null,
           medications: brokenMedications.length > 0 ? brokenMedications : null,
+          locations: brokenLocations.length > 0 ? brokenLocations : null,
         });
       } catch (error: unknown) {
         setIsFinished(false);
@@ -606,6 +773,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
           { type: 'Triggers', count: newTriggers.length },
           { type: 'Medications', count: newMedications.length },
           { type: 'Symptoms', count: newSymptoms.length },
+          { type: 'Locations', count: newLocations.length },
         ])}
       </div>
 
