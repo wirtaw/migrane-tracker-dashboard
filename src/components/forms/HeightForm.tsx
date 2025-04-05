@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
-import { Height } from '../../models/profileData.types';
+import { IHeight } from '../../models/profileData.types';
 import { getIsoDate } from '../../lib/utils.ts';
 
 interface HeightFormProps {
@@ -10,12 +10,12 @@ interface HeightFormProps {
 export default function HeightForm({ onSubmit }: HeightFormProps) {
   const { heightList, setHeightList } = useProfileDataContext();
 
-  const [selectedHeight, setSelectedHeight] = useState<Height[]>([...heightList]);
+  const [selectedHeight, setSelectedHeight] = useState<IHeight[]>([...heightList]);
   const [newHeight, setNewHeight] = useState('');
   const [heightDatetime, setHeightDatetime] = useState(getIsoDate(new Date()));
 
   const handleAddNewItem = () => {
-    const item: Height = {
+    const item: IHeight = {
       id: Math.max(...heightList.map(item => item.id)) + 1,
       userId: '1',
       height: parseFloat(newHeight),

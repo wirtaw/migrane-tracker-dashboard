@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Symptom } from '../../models/profileData.types';
+import { ISymptom } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
 import { FormEvent } from '../../models/forms.types.ts';
 
@@ -10,8 +10,8 @@ interface SymptomFormProps {
 }
 
 export default function SymptomForm({ onSubmit }: SymptomFormProps) {
-  const { user } = useAuth();
-  const { symptomEnumList, symptomList, setSymptomList, setFormErrorMessage, profileSettingsData } =
+  const { user, profileSettingsData } = useAuth();
+  const { symptomEnumList, symptomList, setSymptomList, setFormErrorMessage } =
     useProfileDataContext();
 
   const userId: string = user?.id || '1';
@@ -20,7 +20,7 @@ export default function SymptomForm({ onSubmit }: SymptomFormProps) {
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [notesValue, setNotesValue] = useState<string>('');
 
-  const isValidSymptom = (symptom: Symptom) => {
+  const isValidSymptom = (symptom: ISymptom) => {
     if (!symptom?.type) {
       return false;
     }
@@ -34,7 +34,7 @@ export default function SymptomForm({ onSubmit }: SymptomFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     const maxId = Math.max(...symptomList.map(({ id }) => id));
-    const symptom: Symptom = {
+    const symptom: ISymptom = {
       id: maxId + 1,
       userId,
       type: typeValue,

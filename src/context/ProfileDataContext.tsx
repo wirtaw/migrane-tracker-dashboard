@@ -1,15 +1,15 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import {
   ITrigger,
-  Incident,
-  Medication,
-  Symptom,
-  Weight,
-  Height,
-  BloodPressure,
+  IIncident,
+  IMedication,
+  ISymptom,
+  IWeight,
+  IHeight,
+  IBloodPressure,
   ProfileSecurityData,
   IErrorMessage,
-  BrokenData,
+  IBrokenData,
   ILocationData,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
@@ -17,12 +17,12 @@ import { useAuth } from './AuthContext';
 interface ProfileDataContextProps {
   triggerList: ITrigger[];
   setTriggerList: React.Dispatch<React.SetStateAction<ITrigger[]>>;
-  incidentList: Incident[];
-  setIncidentList: React.Dispatch<React.SetStateAction<Incident[]>>;
-  medicationList: Medication[];
-  setMedicationList: React.Dispatch<React.SetStateAction<Medication[]>>;
-  symptomList: Symptom[];
-  setSymptomList: React.Dispatch<React.SetStateAction<Symptom[]>>;
+  incidentList: IIncident[];
+  setIncidentList: React.Dispatch<React.SetStateAction<IIncident[]>>;
+  medicationList: IMedication[];
+  setMedicationList: React.Dispatch<React.SetStateAction<IMedication[]>>;
+  symptomList: ISymptom[];
+  setSymptomList: React.Dispatch<React.SetStateAction<ISymptom[]>>;
   medicationEnumList: string[];
   setMedicationEnumList: React.Dispatch<React.SetStateAction<string[]>>;
   symptomEnumList: string[];
@@ -31,20 +31,20 @@ interface ProfileDataContextProps {
   setIncidentEnumList: React.Dispatch<React.SetStateAction<string[]>>;
   triggerEnumList: string[];
   setTriggerEnumList: React.Dispatch<React.SetStateAction<string[]>>;
-  weightList: Weight[];
-  setWeightList: React.Dispatch<React.SetStateAction<Weight[]>>;
-  heightList: Height[];
-  setHeightList: React.Dispatch<React.SetStateAction<Height[]>>;
-  bloodPressureList: BloodPressure[];
-  setBloodPressureList: React.Dispatch<React.SetStateAction<BloodPressure[]>>;
+  weightList: IWeight[];
+  setWeightList: React.Dispatch<React.SetStateAction<IWeight[]>>;
+  heightList: IHeight[];
+  setHeightList: React.Dispatch<React.SetStateAction<IHeight[]>>;
+  bloodPressureList: IBloodPressure[];
+  setBloodPressureList: React.Dispatch<React.SetStateAction<IBloodPressure[]>>;
   profileSecurityData: ProfileSecurityData;
   setProfileSecurityData: React.Dispatch<React.SetStateAction<ProfileSecurityData>>;
   formErrorMessage: IErrorMessage;
   setFormErrorMessage: React.Dispatch<React.SetStateAction<IErrorMessage>>;
   currentMonth: Date;
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>;
-  brokenImportData: BrokenData;
-  setBrokenImportData: React.Dispatch<React.SetStateAction<BrokenData>>;
+  brokenImportData: IBrokenData;
+  setBrokenImportData: React.Dispatch<React.SetStateAction<IBrokenData>>;
   locationList: ILocationData[];
   setLocationList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
 }
@@ -55,9 +55,9 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const userId: string = user?.id || '1';
   const [triggerList, setTriggerList] = useState<ITrigger[]>([]);
-  const [incidentList, setIncidentList] = useState<Incident[]>([]);
-  const [medicationList, setMedicationList] = useState<Medication[]>([]);
-  const [symptomList, setSymptomList] = useState<Symptom[]>([]);
+  const [incidentList, setIncidentList] = useState<IIncident[]>([]);
+  const [medicationList, setMedicationList] = useState<IMedication[]>([]);
+  const [symptomList, setSymptomList] = useState<ISymptom[]>([]);
   const [locationList, setLocationList] = useState<ILocationData[]>([]);
 
   const [medicationEnumList, setMedicationEnumList] = useState<string[]>([
@@ -98,11 +98,11 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     'Medication',
   ]);
 
-  const [weightList, setWeightList] = useState<Weight[]>([]);
+  const [weightList, setWeightList] = useState<IWeight[]>([]);
 
-  const [heightList, setHeightList] = useState<Height[]>([]);
+  const [heightList, setHeightList] = useState<IHeight[]>([]);
 
-  const [bloodPressureList, setBloodPressureList] = useState<BloodPressure[]>([]);
+  const [bloodPressureList, setBloodPressureList] = useState<IBloodPressure[]>([]);
 
   const [profileSecurityData, setProfileSecurityData] = useState<ProfileSecurityData>({
     password: '',
@@ -119,7 +119,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
 
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
-  const [brokenImportData, setBrokenImportData] = useState<BrokenData>({
+  const [brokenImportData, setBrokenImportData] = useState<IBrokenData>({
     triggers: null,
     incidents: null,
     symptoms: null,

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
-import { Incident, ILocationData } from '../models/profileData.types.ts';
+import { IIncident, ILocationData } from '../models/profileData.types.ts';
 import { getIsoDateTimeLocal } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
-import { GeomagneticData } from '../components/GeoMagneticWidget.tsx';
+import { IGeomagneticData } from '../components/GeoMagneticWidget.tsx';
 import Modal from '../components/Modal';
 import Loader from '../components/Loader';
 
@@ -43,7 +43,7 @@ export default function CreateIncident() {
     clouds: 0,
     uvi: 0,
   };
-  const deafaultGeomagneticData: GeomagneticData = {
+  const deafaultGeomagneticData: IGeomagneticData = {
     solarFlux: 0,
     kIndex: 0,
     aIndex: 0,
@@ -84,7 +84,7 @@ export default function CreateIncident() {
   const [changedDate, setChangedDate] = useState(false);
   const [loadForecast, setLoadForecast] = useState(true);
 
-  const isValidIncident = (incident: Incident) => {
+  const isValidIncident = (incident: IIncident) => {
     if (!incident?.type) {
       return false;
     }
@@ -132,7 +132,7 @@ export default function CreateIncident() {
     const now = new Date();
     const maxId = Math.max(...incidentList.map(({ id }) => id));
     const incidentId = Math.max(...locationDataList.map(({ id }) => id));
-    const incident: Incident = {
+    const incident: IIncident = {
       id: maxId + 1,
       userId,
       durationHours: durationHoursValue,

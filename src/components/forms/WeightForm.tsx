@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
-import { Weight } from '../../models/profileData.types';
+import { IWeight } from '../../models/profileData.types';
 import { getIsoDate } from '../../lib/utils.ts';
 
 interface WeightFormProps {
@@ -10,12 +10,12 @@ interface WeightFormProps {
 export default function WeightForm({ onSubmit }: WeightFormProps) {
   const { weightList, setWeightList } = useProfileDataContext();
 
-  const [selectedWeight, setSelectedWeight] = useState<Weight[]>([...weightList]);
+  const [selectedWeight, setSelectedWeight] = useState<IWeight[]>([...weightList]);
   const [newWeight, setNewWeight] = useState('');
   const [weightDatetime, setWeightDatetime] = useState(getIsoDate(new Date()));
 
   const handleAddNewItem = () => {
-    const item: Weight = {
+    const item: IWeight = {
       id: Math.max(...weightList.map(item => item.id)) + 1,
       userId: '1',
       weight: parseFloat(newWeight),

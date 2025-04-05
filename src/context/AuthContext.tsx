@@ -3,10 +3,10 @@ import { User, Session, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
 import {
-  ProfileSettingsData,
+  IProfileSettingsData,
   ILocationData,
-  ForecastHistoricalParams,
-  SolarHistoricalParams,
+  IForecastHistoricalParams,
+  ISolarHistoricalParams,
 } from '../models/profileData.types';
 import {
   WeatherData,
@@ -25,8 +25,8 @@ interface AuthContextType {
   signInWithGithub: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  profileSettingsData: ProfileSettingsData;
-  setProfileSettingsData: React.Dispatch<React.SetStateAction<ProfileSettingsData>>;
+  profileSettingsData: IProfileSettingsData;
+  setProfileSettingsData: React.Dispatch<React.SetStateAction<IProfileSettingsData>>;
   profileLoading: boolean;
   weatherLoading: boolean;
   geoMagneticLoading: boolean;
@@ -34,17 +34,17 @@ interface AuthContextType {
   setGeoMagneticLoading: React.Dispatch<React.SetStateAction<boolean>>;
   forecastData: WeatherData | undefined;
   geomagneticData: GeophysicalWeatherData | undefined;
-  fetchForecast: (params: ProfileSettingsData) => Promise<void>;
+  fetchForecast: (params: IProfileSettingsData) => Promise<void>;
   fetchGeomagnetic: () => Promise<void>;
   forecastError: string;
   geoMagneticError: string;
   locationDataList: ILocationData[];
   setLocationDataList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
-  fetchForecastHistorical: (params: ForecastHistoricalParams) => Promise<WeatherData | undefined>;
+  fetchForecastHistorical: (params: IForecastHistoricalParams) => Promise<WeatherData | undefined>;
   fetchGeomagneticHistorical: (
-    params: SolarHistoricalParams
+    params: ISolarHistoricalParams
   ) => Promise<GeophysicalWeatherData | undefined>;
-  fetchSolarRadiation: (params: ProfileSettingsData) => Promise<void>;
+  fetchSolarRadiation: (params: IProfileSettingsData) => Promise<void>;
   solarRadiationData: RadiationTodayData[] | undefined;
   solarRadiationLoading: boolean;
   solarRadiationError: string;
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profileSettingsData, setProfileSettingsData] = useState<ProfileSettingsData>({
+  const [profileSettingsData, setProfileSettingsData] = useState<IProfileSettingsData>({
     birthDate: '',
     latitude: '',
     longitude: '',
@@ -358,7 +358,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchForecast = async (profileSettingsData: ProfileSettingsData) => {
+  const fetchForecast = async (profileSettingsData: IProfileSettingsData) => {
     try {
       if (profileSettingsData.latitude && profileSettingsData.longitude) {
         setWeatherLoading(true);
@@ -395,7 +395,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchForecastHistorical = async (forecastHistoricalParams: ForecastHistoricalParams) => {
+  const fetchForecastHistorical = async (forecastHistoricalParams: IForecastHistoricalParams) => {
     try {
       if (forecastHistoricalParams.latitude && forecastHistoricalParams.longitude) {
         const forecast = await fetchForecastDataHistorical(
@@ -411,7 +411,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchGeomagneticHistorical = async (solarHistoricalParams: SolarHistoricalParams) => {
+  const fetchGeomagneticHistorical = async (solarHistoricalParams: ISolarHistoricalParams) => {
     try {
       const geomagnetic = await fetchGeomagneticDataHistorical(solarHistoricalParams.dateTime);
 
@@ -423,7 +423,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const fetchSolarRadiation = async (profileSettingsData: ProfileSettingsData) => {
+  const fetchSolarRadiation = async (profileSettingsData: IProfileSettingsData) => {
     try {
       if (profileSettingsData.latitude && profileSettingsData.longitude) {
         setSolarRadiationLoading(true);

@@ -5,45 +5,45 @@ import Modal from './../components/Modal';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { getIsoDate } from '../lib/utils.ts';
 
-interface CalendarItem {
+interface ICalendarItem {
   type: 'Incident' | 'Medication' | 'Trigger' | 'Symptom';
   name: string;
   userId: string;
 }
 
-interface ModalContent {
+interface IModalContent {
   type: string;
-  items: CalendarItem[];
+  items: ICalendarItem[];
 }
 
-interface CalendarViewProps {
+interface ICalendarViewProps {
   weekDays: string[];
   firstDayOfMonth: number;
   days: number[];
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ weekDays, firstDayOfMonth, days }) => {
+const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth, days }) => {
   const [activeModal, setActiveModal] = useState<'details' | null>(null);
   const { incidentList, medicationList, triggerList, symptomList, currentMonth, setCurrentMonth } =
     useProfileDataContext();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [modalContent, setModalContent] = useState<ModalContent | null>(null);
+  const [modalContent, setModalContent] = useState<IModalContent | null>(null);
 
   const handleDayClick = (date: string) => {
-    const incidentItems: CalendarItem[] = incidentList
+    const incidentItems: ICalendarItem[] = incidentList
       .filter(item => getIsoDate(item.datetimeAt) === date)
       .map(({ type, userId }) => ({ type: 'Incident', name: type, userId }));
-    const medicationItems: CalendarItem[] = medicationList
+    const medicationItems: ICalendarItem[] = medicationList
       .filter(item => getIsoDate(item.datetimeAt) === date)
       .map(({ title, userId }) => ({ type: 'Medication', name: title, userId }));
-    const triggerItems: CalendarItem[] = triggerList
+    const triggerItems: ICalendarItem[] = triggerList
       .filter(item => getIsoDate(item.datetimeAt) === date)
       .map(({ type, userId }) => ({ type: 'Trigger', name: type, userId }));
-    const symptomItems: CalendarItem[] = symptomList
+    const symptomItems: ICalendarItem[] = symptomList
       .filter(item => getIsoDate(item.datetimeAt) === date)
       .map(({ type, userId }) => ({ type: 'Symptom', name: type, userId }));
 
-    const items: CalendarItem[] | [] = [
+    const items: ICalendarItem[] | [] = [
       ...incidentItems,
       ...medicationItems,
       ...triggerItems,

@@ -7,7 +7,7 @@ export interface ITrigger {
   datetimeAt: Date;
 }
 
-export interface Symptom {
+export interface ISymptom {
   id: number;
   userId: string;
   type: string;
@@ -17,7 +17,7 @@ export interface Symptom {
   datetimeAt: Date;
 }
 
-export interface Incident {
+export interface IIncident {
   id: number;
   userId: string;
   type: string;
@@ -29,7 +29,7 @@ export interface Incident {
   datetimeAt: Date;
 }
 
-export interface Medication {
+export interface IMedication {
   id: number;
   userId: string;
   title: string;
@@ -40,7 +40,7 @@ export interface Medication {
   updateAt: Date;
 }
 
-export interface Weight {
+export interface IWeight {
   id: number;
   userId: string;
   weight: number;
@@ -48,7 +48,7 @@ export interface Weight {
   datetimeAt: Date;
 }
 
-export interface Height {
+export interface IHeight {
   id: number;
   userId: string;
   height: number;
@@ -56,7 +56,7 @@ export interface Height {
   datetimeAt: Date;
 }
 
-export interface BloodPressure {
+export interface IBloodPressure {
   id: number;
   userId: string;
   systolic: number;
@@ -65,7 +65,7 @@ export interface BloodPressure {
   datetimeAt: Date;
 }
 
-export interface Sleep {
+export interface ISleep {
   id: number;
   userId: string;
   rate: number;
@@ -112,7 +112,7 @@ export interface ILocationData {
   incidentId: number | null;
 }
 
-export interface ProfileSettingsData {
+export interface IProfileSettingsData {
   userId: string;
   longitude: string;
   latitude: string;
@@ -204,7 +204,7 @@ export interface IBrokenLocation {
   warning: string;
 }
 
-export interface BrokenData {
+export interface IBrokenData {
   triggers: IBrokenTrigger[] | unknown;
   incidents: IBrokenIncident[] | unknown;
   symptoms: IBrokenSymptom[] | unknown;
@@ -212,28 +212,28 @@ export interface BrokenData {
   locations: IBrokenLocation[] | unknown;
 }
 
-export interface JSONData {
+export interface IJSONData {
   triggers: ITrigger[];
-  incidents: Incident[];
-  symptoms: Symptom[];
-  medications: Medication[];
+  incidents: IIncident[];
+  symptoms: ISymptom[];
+  medications: IMedication[];
   logsForecast: ILocationData[] | unknown;
   logHealth:
     | {
-        weight: Weight[] | unknown;
-        height: Height[] | unknown;
-        bloodPresure: BloodPressure[] | unknown;
-        sleep: Sleep[] | unknown;
+        weight: IWeight[] | unknown;
+        height: IHeight[] | unknown;
+        bloodPresure: IBloodPressure[] | unknown;
+        sleep: ISleep[] | unknown;
       }
     | unknown;
 }
 
-export interface ForecastHistoricalParams {
+export interface IForecastHistoricalParams {
   latitude: number;
   longitude: number;
   dateTime: Date;
 }
 
-export interface SolarHistoricalParams {
+export interface ISolarHistoricalParams {
   dateTime: Date;
 }

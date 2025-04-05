@@ -4,12 +4,6 @@ import { env } from '../config/env';
 import Loader from './Loader';
 import { useAuth } from '../context/AuthContext';
 
-export interface GeomagneticData {
-  solarFlux: number;
-  kIndex: number;
-  aIndex: number;
-}
-
 function IndexBar({ value, max, colorClass }: { value: number; max: number; colorClass: string }) {
   const percentage = (value / max) * 100;
 

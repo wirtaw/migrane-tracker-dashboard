@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
-import { BloodPressure } from '../../models/profileData.types';
+import { IBloodPressure } from '../../models/profileData.types';
 import { getIsoDate } from '../../lib/utils.ts';
 
 interface BloodPressureFormProps {
@@ -10,7 +10,7 @@ interface BloodPressureFormProps {
 const BloodPressureForm: React.FC<BloodPressureFormProps> = ({ onSubmit }) => {
   const { bloodPressureList, setBloodPressureList } = useProfileDataContext();
 
-  const [selectedBloodPressure, setSelectedBloodPressure] = useState<BloodPressure[]>([
+  const [selectedBloodPressure, setSelectedBloodPressure] = useState<IBloodPressure[]>([
     ...bloodPressureList,
   ]);
   const [systolic, setSystolic] = useState<number | ''>('');
@@ -80,7 +80,7 @@ const BloodPressureForm: React.FC<BloodPressureFormProps> = ({ onSubmit }) => {
         <button
           type="button"
           onClick={() => {
-            const item: BloodPressure = {
+            const item: IBloodPressure = {
               id: Math.max(...bloodPressureList.map(item => item.id)) + 1,
               userId: '1',
               systolic: systolic as number,
@@ -107,7 +107,7 @@ const BloodPressureForm: React.FC<BloodPressureFormProps> = ({ onSubmit }) => {
           id="bloodPressureList"
           className="mt-1 divide-y divide-gray-200 dark:divide-gray-700 rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         >
-          {bloodPressureList.map(({ id, systolic, diastolic, datetimeAt }: BloodPressure) => (
+          {bloodPressureList.map(({ id, systolic, diastolic, datetimeAt }: IBloodPressure) => (
             <li key={id} className="flex justify-between">
               <span>
                 {systolic}/{diastolic} - {getIsoDate(datetimeAt)}

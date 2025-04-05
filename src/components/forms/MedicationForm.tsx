@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Medication } from '../../models/profileData.types';
+import { IMedication } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
 import { FormEvent } from '../../models/forms.types.ts';
 
@@ -21,7 +21,7 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [notesValue, setNotesValue] = useState<string>('');
 
-  const isValidMedication = (medication: Medication) => {
+  const isValidMedication = (medication: IMedication) => {
     if (!medication?.title) {
       return false;
     }
@@ -39,7 +39,7 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     const maxId = Math.max(...medicationList.map(({ id }) => id));
-    const medication: Medication = {
+    const medication: IMedication = {
       id: maxId + 1,
       userId,
       title: titleValue,

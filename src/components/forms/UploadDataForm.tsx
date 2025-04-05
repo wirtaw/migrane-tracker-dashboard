@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import {
-  Incident,
+  IIncident,
   ITrigger,
-  Medication,
-  Symptom,
+  IMedication,
+  ISymptom,
   IBrokenTrigger,
   IBrokenIncident,
   IBrokenMedication,
@@ -30,11 +30,11 @@ const brokenMedications: IBrokenMedication[] = [];
 const brokenSymptoms: IBrokenSymptom[] = [];
 const brokenLocations: IBrokenLocation[] = [];
 
-const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): Incident[] | [] => {
+const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): IIncident[] | [] => {
   if (!jsonDataIncidents || !Array.isArray(jsonDataIncidents)) {
     return [];
   }
-  const incidents: Incident[] = [];
+  const incidents: IIncident[] = [];
   for (const incident of jsonDataIncidents) {
     const { id, userId, datetimeAt, type, startTime, durationHours, triggers, notes, createdAt } =
       incident;
@@ -223,11 +223,11 @@ const mapTriggerList = (jsonDataTriggers: unknown, maxId: number): ITrigger[] | 
   return triggers;
 };
 
-const mapMedicationList = (jsonDataMedications: unknown, maxId: number): Medication[] | [] => {
+const mapMedicationList = (jsonDataMedications: unknown, maxId: number): IMedication[] | [] => {
   if (!jsonDataMedications || !Array.isArray(jsonDataMedications)) {
     return [];
   }
-  const medications: Medication[] = [];
+  const medications: IMedication[] = [];
   for (const medication of jsonDataMedications) {
     const { id, userId, datetimeAt, title, dosage, notes, createdAt, updateAt } = medication;
 
@@ -312,11 +312,11 @@ const mapMedicationList = (jsonDataMedications: unknown, maxId: number): Medicat
   return medications;
 };
 
-const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): Symptom[] | [] => {
+const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): ISymptom[] | [] => {
   if (!jsonDataSymptoms || !Array.isArray(jsonDataSymptoms)) {
     return [];
   }
-  const symptoms: Symptom[] = [];
+  const symptoms: ISymptom[] = [];
   for (const symptom of jsonDataSymptoms) {
     const { id, userId, datetimeAt, type, severity, notes, createdAt } = symptom;
 
@@ -553,10 +553,10 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [warnMessage, setWarnMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [newIncidents, setNewIncidents] = useState<Incident[]>([]);
+  const [newIncidents, setNewIncidents] = useState<IIncident[]>([]);
   const [newTriggers, setNewTriggers] = useState<ITrigger[]>([]);
-  const [newMedications, setNewMedications] = useState<Medication[]>([]);
-  const [newSymptoms, setNewSymptoms] = useState<Symptom[]>([]);
+  const [newMedications, setNewMedications] = useState<IMedication[]>([]);
+  const [newSymptoms, setNewSymptoms] = useState<ISymptom[]>([]);
   const [newLocations, setNewLocations] = useState<ILocationData[]>([]);
   const {
     incidentList,
@@ -625,7 +625,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
 
         // Incidents
         let maxId = Math.max(...incidentList.map(({ id }) => id));
-        const incidents: Incident[] = mapIncidentList(jsonDataIncidents, maxId);
+        const incidents: IIncident[] = mapIncidentList(jsonDataIncidents, maxId);
 
         setNewIncidents(incidents);
         setIncidentList([...incidentList, ...incidents]);
@@ -644,7 +644,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
 
         // Medications
         maxId = Math.max(...medicationList.map(({ id }) => id));
-        const medications: Medication[] = mapMedicationList(jsonDataMedications, maxId);
+        const medications: IMedication[] = mapMedicationList(jsonDataMedications, maxId);
 
         setNewMedications(medications);
         setMedicationList([...medicationList, ...medications]);
@@ -656,7 +656,7 @@ export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps
 
         // Symptoms
         maxId = Math.max(...symptomList.map(({ id }) => id));
-        const symptoms: Symptom[] = mapSymptomList(jsonDataSymptoms, maxId);
+        const symptoms: ISymptom[] = mapSymptomList(jsonDataSymptoms, maxId);
 
         setNewSymptoms(symptoms);
         setSymptomList([...symptomList, ...symptoms]);

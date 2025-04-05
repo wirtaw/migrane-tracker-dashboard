@@ -3,15 +3,15 @@ import React, { useState } from 'react';
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { getIsoDate, getIsoTime } from '../lib/utils.ts';
 import { FormEvent } from '../models/forms.types.ts';
-import { Incident, ITrigger, Medication, Symptom } from '../models/profileData.types.ts';
+import { IIncident, ITrigger, IMedication, ISymptom } from '../models/profileData.types.ts';
 import { useAuth } from '../context/AuthContext';
 
 interface ReportPageData {
   date: string;
-  incidents: Incident[];
+  incidents: IIncident[];
   triggers: ITrigger[];
-  medications: Medication[];
-  symptoms: Symptom[];
+  medications: IMedication[];
+  symptoms: ISymptom[];
 }
 
 interface DataItem {
@@ -48,10 +48,10 @@ const prepareReportData = ({
 }: {
   startDate: Date;
   endDate: Date;
-  incidentList: Incident[];
-  medicationList: Medication[];
+  incidentList: IIncident[];
+  medicationList: IMedication[];
   triggerList: ITrigger[];
-  symptomList: Symptom[];
+  symptomList: ISymptom[];
 }): ReportPageData[] => {
   const data: { [date: string]: ReportPageData } = {};
 

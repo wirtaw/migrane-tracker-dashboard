@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import {
-  Incident,
+  IIncident,
   ITrigger,
-  Medication,
-  Symptom,
+  IMedication,
+  ISymptom,
   ILocationData,
 } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
@@ -17,10 +17,10 @@ interface DownloadDataFormProps {
 }
 
 interface ExportJSON {
-  incidents: Incident[];
+  incidents: IIncident[];
   triggers: ITrigger[];
-  medications: Medication[];
-  symptoms: Symptom[];
+  medications: IMedication[];
+  symptoms: ISymptom[];
   locationData: ILocationData[];
 }
 

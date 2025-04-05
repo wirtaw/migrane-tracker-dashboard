@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Incident } from '../../models/profileData.types';
+import { IIncident } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
 import { FormEvent } from '../../models/forms.types.ts';
 
@@ -24,7 +24,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [notesValue, setNotesValue] = useState<string>('');
 
-  const isValidIncident = (incident: Incident) => {
+  const isValidIncident = (incident: IIncident) => {
     if (!incident?.type) {
       return false;
     }
@@ -51,7 +51,7 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     const maxId = Math.max(...incidentList.map(({ id }) => id));
-    const incident: Incident = {
+    const incident: IIncident = {
       id: maxId + 1,
       userId,
       durationHours: durationHoursValue,
