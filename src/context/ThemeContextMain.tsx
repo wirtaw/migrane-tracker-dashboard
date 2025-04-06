@@ -1,13 +1,9 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { IThemeContextType } from './ThemeContext';
 
 type Theme = 'dark' | 'light';
 
-interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
-}
-
-const ThemeContextMain = createContext<ThemeContextType>({
+const ThemeContextMain = createContext<IThemeContextType>({
   theme: 'light',
   toggleTheme: () => {},
 });

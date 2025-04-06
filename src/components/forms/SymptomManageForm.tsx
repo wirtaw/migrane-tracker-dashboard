@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 
-interface SymptomManageFormProps {
+interface ISymptomManageFormProps {
   onSubmit: () => void;
 }
 
-export default function SymptomManageForm({ onSubmit }: SymptomManageFormProps) {
+export default function SymptomManageForm({ onSubmit }: ISymptomManageFormProps) {
   const { symptomEnumList, setSymptomEnumList } = useProfileDataContext();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([...symptomEnumList]);
   const [newSymptom, setNewSymptom] = useState('');

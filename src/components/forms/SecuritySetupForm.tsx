@@ -3,8 +3,9 @@ import sjcl, { SjclCipherEncrypted } from 'sjcl';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { ProfileSecurityData } from '../../models/profileData.types';
 import { env } from '../../config/env';
+import { useAuth } from '../../context/AuthContext';
 
-interface SecuritySetupFormProps {
+interface ISecuritySetupFormProps {
   onSubmit: () => void;
 }
 
@@ -38,13 +39,9 @@ const encryptProfilePassword = (data: ProfileSecurityData, password: string) => 
   return encrypt(password, key);
 };
 
-export default function SecuritySetupForm({ onSubmit }: SecuritySetupFormProps) {
-  const {
-    profileSettingsData,
-    setProfileSettingsData,
-    profileSecurityData,
-    setProfileSecurityData,
-  } = useProfileDataContext();
+export default function SecuritySetupForm({ onSubmit }: ISecuritySetupFormProps) {
+  const { profileSettingsData, setProfileSettingsData } = useAuth();
+  const { profileSecurityData, setProfileSecurityData } = useProfileDataContext();
   const [password, setPassword] = useState<string>(decryptProfilePassword(profileSecurityData));
   const [salt, setSalt] = useState<sjcl.BitArray>(sjcl.codec.hex.toBits(profileSecurityData.salt));
 

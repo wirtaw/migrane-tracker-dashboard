@@ -4,7 +4,7 @@ import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { IIncident, ILocationData } from '../models/profileData.types.ts';
 import { getIsoDateTimeLocal } from '../lib/utils.ts';
-import { FormEvent } from '../models/forms.types.ts';
+import { IFormEvent } from '../models/forms.types.ts';
 import { IGeomagneticData } from '../components/GeoMagneticWidget.tsx';
 import Modal from '../components/Modal';
 import Loader from '../components/Loader';
@@ -193,19 +193,19 @@ export default function CreateIncident() {
     e.preventDefault();
   };
 
-  const handleLatitudeChange = (event: FormEvent) => {
+  const handleLatitudeChange = (event: IFormEvent) => {
     setLatitudeValue(event.target.value.toString());
   };
 
-  const handleLongitudeChange = (event: FormEvent) => {
+  const handleLongitudeChange = (event: IFormEvent) => {
     setLongitudeValue(event.target.value.toString());
   };
 
-  const handleNumberChange = (event: FormEvent) => {
+  const handleNumberChange = (event: IFormEvent) => {
     setDurationHoursValue(Number(event.target.value));
   };
 
-  const handleDateChange = async (event: FormEvent) => {
+  const handleDateChange = async (event: IFormEvent) => {
     const dt: Date = new Date(event.target.value);
     if (dt.toString() !== 'Invalid Date') {
       setStartTimeValue(dt);
@@ -215,47 +215,47 @@ export default function CreateIncident() {
     }
   };
 
-  const handleSelectChange = (event: FormEvent) => {
+  const handleSelectChange = (event: IFormEvent) => {
     setTypeValue(event.target.value.toString());
   };
 
-  const handleTextareaChange = (event: FormEvent) => {
+  const handleTextareaChange = (event: IFormEvent) => {
     setNotesValue(event.target.value.toString());
   };
 
-  const handleForecastTemperatureChange = (event: FormEvent) => {
+  const handleForecastTemperatureChange = (event: IFormEvent) => {
     setForecastTemperature(Number(event.target.value));
   };
 
-  const handleForecastHumidityChange = (event: FormEvent) => {
+  const handleForecastHumidityChange = (event: IFormEvent) => {
     setHumidityValue(Number(event.target.value));
   };
 
-  const handleForecastPressureChange = (event: FormEvent) => {
+  const handleForecastPressureChange = (event: IFormEvent) => {
     setPressureValue(Number(event.target.value));
   };
 
-  const handleForecastCloudsChange = (event: FormEvent) => {
+  const handleForecastCloudsChange = (event: IFormEvent) => {
     setCloudsValue(Number(event.target.value));
   };
 
-  const handleForecastUviChange = (event: FormEvent) => {
+  const handleForecastUviChange = (event: IFormEvent) => {
     setUviValue(Number(event.target.value));
   };
 
-  const handleForecastWindChange = (event: FormEvent) => {
+  const handleForecastWindChange = (event: IFormEvent) => {
     setWindValue(Number(event.target.value));
   };
 
-  const handleSolarFluxChange = (event: FormEvent) => {
+  const handleSolarFluxChange = (event: IFormEvent) => {
     setSolarFlux(Number(event.target.value));
   };
 
-  const handleKIndexChange = (event: FormEvent) => {
+  const handleKIndexChange = (event: IFormEvent) => {
     setKIndex(Number(event.target.value));
   };
 
-  const handleAIndexChange = (event: FormEvent) => {
+  const handleAIndexChange = (event: IFormEvent) => {
     setAIndex(Number(event.target.value));
   };
 

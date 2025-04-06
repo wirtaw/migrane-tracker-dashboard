@@ -1,11 +1,11 @@
 import React from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 
-interface ResetUserDataFormProps {
+interface IResetUserDataFormProps {
   onSubmit: () => void;
 }
 
-export default function ResetUserDataForm({ onSubmit }: ResetUserDataFormProps) {
+export default function ResetUserDataForm({ onSubmit }: IResetUserDataFormProps) {
   const { setIncidentList, setTriggerList, setMedicationList, setSymptomList } =
     useProfileDataContext();
 

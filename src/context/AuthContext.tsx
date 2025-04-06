@@ -9,16 +9,16 @@ import {
   ISolarHistoricalParams,
 } from '../models/profileData.types';
 import {
-  WeatherData,
-  GeophysicalWeatherData,
+  IWeatherData,
+  IGeophysicalWeatherData,
   fetchOpenMeteoWeatherData,
   fetchGeophysicalWeatherData,
   fetchOpenMeteoWeatherDataHistorical,
   fetchGeophysicalWeatherDataHistorical,
-  RadiationTodayData,
+  IRadiationTodayData,
   fetchRadiationWeatherData,
 } from '../services/weather.ts';
-interface AuthContextType {
+interface IAuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
@@ -32,25 +32,25 @@ interface AuthContextType {
   geoMagneticLoading: boolean;
   setWeatherLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setGeoMagneticLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  forecastData: WeatherData | undefined;
-  geomagneticData: GeophysicalWeatherData | undefined;
+  forecastData: IWeatherData | undefined;
+  geomagneticData: IGeophysicalWeatherData | undefined;
   fetchForecast: (params: IProfileSettingsData) => Promise<void>;
   fetchGeomagnetic: () => Promise<void>;
   forecastError: string;
   geoMagneticError: string;
   locationDataList: ILocationData[];
   setLocationDataList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
-  fetchForecastHistorical: (params: IForecastHistoricalParams) => Promise<WeatherData | undefined>;
+  fetchForecastHistorical: (params: IForecastHistoricalParams) => Promise<IWeatherData | undefined>;
   fetchGeomagneticHistorical: (
     params: ISolarHistoricalParams
-  ) => Promise<GeophysicalWeatherData | undefined>;
+  ) => Promise<IGeophysicalWeatherData | undefined>;
   fetchSolarRadiation: (params: IProfileSettingsData) => Promise<void>;
-  solarRadiationData: RadiationTodayData[] | undefined;
+  solarRadiationData: IRadiationTodayData[] | undefined;
   solarRadiationLoading: boolean;
   solarRadiationError: string;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<IAuthContextType | undefined>(undefined);
 
 const userExists = async (supabase: SupabaseClient, userId: string | undefined) => {
   const { data: users, error } = await supabase
@@ -82,7 +82,7 @@ const fetchUserData = async (supabase: SupabaseClient, userId: string | undefine
 
 const fetchForecastData = async (latitude: string, longitude: string) => {
   try {
-    const response: WeatherData = await fetchOpenMeteoWeatherData({
+    const response: IWeatherData = await fetchOpenMeteoWeatherData({
       latitude: parseFloat(latitude),
       longitude: parseFloat(longitude),
     });
@@ -95,7 +95,7 @@ const fetchForecastData = async (latitude: string, longitude: string) => {
 
 const fetchGeomagneticData = async () => {
   try {
-    const response: GeophysicalWeatherData = await fetchGeophysicalWeatherData();
+    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherData();
     return response;
   } catch (error) {
     console.error('Error fetching geomagnetic data:', error);
@@ -105,7 +105,7 @@ const fetchGeomagneticData = async () => {
 
 const fetchForecastDataHistorical = async (latitude: number, longitude: number, dateTime: Date) => {
   try {
-    const response: WeatherData | undefined = await fetchOpenMeteoWeatherDataHistorical({
+    const response: IWeatherData | undefined = await fetchOpenMeteoWeatherDataHistorical({
       latitude,
       longitude,
       dateTime,
@@ -119,7 +119,7 @@ const fetchForecastDataHistorical = async (latitude: number, longitude: number, 
 
 const fetchGeomagneticDataHistorical = async (dateTime: Date) => {
   try {
-    const response: GeophysicalWeatherData = await fetchGeophysicalWeatherDataHistorical(dateTime);
+    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherDataHistorical(dateTime);
     return response;
   } catch (error) {
     console.error('Error fetching geomagnetic data:', error);
@@ -129,7 +129,7 @@ const fetchGeomagneticDataHistorical = async (dateTime: Date) => {
 
 const fetchSolarRadiationData = async (latitude: number, longitude: number) => {
   try {
-    const response: RadiationTodayData[] = await fetchRadiationWeatherData({
+    const response: IRadiationTodayData[] = await fetchRadiationWeatherData({
       latitude,
       longitude,
     });
@@ -163,11 +163,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchMagneticWeather: false,
     fetchWeather: false,
   });
-  const [forecastData, setForecastData] = useState<WeatherData | undefined>(undefined);
-  const [geomagneticData, setGeomagneticData] = useState<GeophysicalWeatherData | undefined>(
+  const [forecastData, setForecastData] = useState<IWeatherData | undefined>(undefined);
+  const [geomagneticData, setGeomagneticData] = useState<IGeophysicalWeatherData | undefined>(
     undefined
   );
-  const [solarRadiationData, setSolarRadiationData] = useState<RadiationTodayData[] | undefined>(
+  const [solarRadiationData, setSolarRadiationData] = useState<IRadiationTodayData[] | undefined>(
     undefined
   );
   const [profileLoading, setProfileLoading] = useState(false);

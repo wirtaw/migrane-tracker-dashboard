@@ -3,11 +3,11 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { IHeight } from '../../models/profileData.types';
 import { getIsoDate } from '../../lib/utils.ts';
 
-interface HeightFormProps {
+interface IHeightFormProps {
   onSubmit: () => void;
 }
 
-export default function HeightForm({ onSubmit }: HeightFormProps) {
+export default function HeightForm({ onSubmit }: IHeightFormProps) {
   const { heightList, setHeightList } = useProfileDataContext();
 
   const [selectedHeight, setSelectedHeight] = useState<IHeight[]>([...heightList]);

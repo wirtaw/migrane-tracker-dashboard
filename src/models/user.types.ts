@@ -1,4 +1,4 @@
-export interface UserUpdateDAO {
+export interface IUserUpdateDAO {
   birthdate: string;
   latitude: string;
   longitude: string;

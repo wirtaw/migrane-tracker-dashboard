@@ -3,12 +3,12 @@ import { DateTime } from 'luxon';
 
 import { IForecast } from '../../models/profileData.types.ts';
 
-interface IIForecastCardProps {
+interface IForecastCardProps {
   forecast: IForecast;
   className?: string;
 }
 
-export default function ForecastCard({ forecast, className }: IIForecastCardProps) {
+export default function ForecastCard({ forecast, className }: IForecastCardProps) {
   const classNameJoined = `flex gap-4 rounded-xl shadow-sm p-6 border-2 ${className || ''}`;
   return (
     <div className={classNameJoined}>

@@ -1,4 +1,4 @@
-interface EnvConfig {
+interface IEnvConfig {
   REDIRECT_URL: string;
   OPEN_WEATHER_API_KEY: string;
   OPEN_WEATHER_BASE_URL: string;
@@ -27,7 +27,7 @@ interface EnvConfig {
   MIGRAINE_API_HEADER_X_API_VALUE: string;
 }
 
-export const env: EnvConfig = {
+export const env: IEnvConfig = {
   REDIRECT_URL: import.meta.env.VITE_REDIRECT_URL.trim(),
   OPEN_WEATHER_API_KEY: import.meta.env.VITE_OPEN_WEATHER_API_KEY,
   OPEN_WEATHER_BASE_URL: import.meta.env.VITE_OPEN_WEATHER_BASE_URL,

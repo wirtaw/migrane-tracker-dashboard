@@ -1,11 +1,11 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 
-interface LifeMetricsProps {
+interface ILifeMetricsProps {
   birthDate: Date;
 }
 
-export default function LifeMetrics({ birthDate }: LifeMetricsProps) {
+export default function LifeMetrics({ birthDate }: ILifeMetricsProps) {
   if (!birthDate || typeof birthDate !== 'object' || birthDate.toString() === 'Invalid Date') {
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">

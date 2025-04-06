@@ -3,13 +3,13 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { ITrigger } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
-import { FormEvent } from '../../models/forms.types.ts';
+import { IFormEvent } from '../../models/forms.types.ts';
 
-interface TriggerFormProps {
+interface ITriggerFormProps {
   onSubmit: () => void;
 }
 
-export default function TriggerForm({ onSubmit }: TriggerFormProps) {
+export default function TriggerForm({ onSubmit }: ITriggerFormProps) {
   const { user, profileSettingsData } = useAuth();
   const { triggerEnumList, triggerList, setTriggerList, setFormErrorMessage } =
     useProfileDataContext();
@@ -53,15 +53,15 @@ export default function TriggerForm({ onSubmit }: TriggerFormProps) {
     onSubmit();
   };
 
-  const handleSelectChange = (event: FormEvent) => {
+  const handleSelectChange = (event: IFormEvent) => {
     setTypeValue(event.target.value.toString());
   };
 
-  const handleTextareaChange = (event: FormEvent) => {
+  const handleTextareaChange = (event: IFormEvent) => {
     setNoteValue(event.target.value.toString());
   };
 
-  const handleDateChange = (event: FormEvent) => {
+  const handleDateChange = (event: IFormEvent) => {
     setDatetimeAtValue(new Date(event.target.value));
   };
 

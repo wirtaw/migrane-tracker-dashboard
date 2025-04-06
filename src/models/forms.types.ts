@@ -1,4 +1,4 @@
-export interface FormEvent {
+export interface IFormEvent {
   target: {
     value: string | number | Date;
   };

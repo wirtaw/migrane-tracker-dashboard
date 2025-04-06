@@ -3,11 +3,11 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { IBloodPressure } from '../../models/profileData.types';
 import { getIsoDate } from '../../lib/utils.ts';
 
-interface BloodPressureFormProps {
+interface IBloodPressureFormProps {
   onSubmit: () => void;
 }
 
-const BloodPressureForm: React.FC<BloodPressureFormProps> = ({ onSubmit }) => {
+const BloodPressureForm: React.FC<IBloodPressureFormProps> = ({ onSubmit }) => {
   const { bloodPressureList, setBloodPressureList } = useProfileDataContext();
 
   const [selectedBloodPressure, setSelectedBloodPressure] = useState<IBloodPressure[]>([

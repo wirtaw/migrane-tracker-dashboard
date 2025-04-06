@@ -3,13 +3,13 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { IMedication } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
-import { FormEvent } from '../../models/forms.types.ts';
+import { IFormEvent } from '../../models/forms.types.ts';
 
-interface MedicationFormProps {
+interface IMedicationFormProps {
   onSubmit: () => void;
 }
 
-export default function MedicationForm({ onSubmit }: MedicationFormProps) {
+export default function MedicationForm({ onSubmit }: IMedicationFormProps) {
   const { profileSettingsData, user } = useAuth();
   const { medicationEnumList, medicationList, setMedicationList, setFormErrorMessage } =
     useProfileDataContext();
@@ -61,23 +61,23 @@ export default function MedicationForm({ onSubmit }: MedicationFormProps) {
     onSubmit();
   };
 
-  const handleSelectChange = (event: FormEvent) => {
+  const handleSelectChange = (event: IFormEvent) => {
     setTitleValue(event.target.value.toString());
   };
 
-  const handleNumberChange = (event: FormEvent) => {
+  const handleNumberChange = (event: IFormEvent) => {
     setDosageValue(Number(event.target.value));
   };
 
-  const handleSelectMetricChange = (event: FormEvent) => {
+  const handleSelectMetricChange = (event: IFormEvent) => {
     setDosageMetricValue(event.target.value.toString());
   };
 
-  const handleTextareaChange = (event: FormEvent) => {
+  const handleTextareaChange = (event: IFormEvent) => {
     setNotesValue(event.target.value.toString());
   };
 
-  const handleDateChange = (event: FormEvent) => {
+  const handleDateChange = (event: IFormEvent) => {
     setDatetimeAtValue(new Date(event.target.value));
   };
 

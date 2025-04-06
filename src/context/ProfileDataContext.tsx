@@ -14,7 +14,7 @@ import {
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
 
-interface ProfileDataContextProps {
+interface IProfileDataContextProps {
   triggerList: ITrigger[];
   setTriggerList: React.Dispatch<React.SetStateAction<ITrigger[]>>;
   incidentList: IIncident[];
@@ -49,7 +49,7 @@ interface ProfileDataContextProps {
   setLocationList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
 }
 
-const ProfileDataContext = createContext<ProfileDataContextProps | undefined>(undefined);
+const ProfileDataContext = createContext<IProfileDataContextProps | undefined>(undefined);
 
 export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();

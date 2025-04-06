@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 
-interface IncidentManageFormProps {
+interface IIncidentManageFormProps {
   onSubmit: () => void;
 }
 
-export default function IncidentManageForm({ onSubmit }: IncidentManageFormProps) {
+export default function IncidentManageForm({ onSubmit }: IIncidentManageFormProps) {
   const { incidentEnumList, setIncidentEnumList } = useProfileDataContext();
   const [selectedIncidents, setSelectedIncidents] = useState<string[]>([...incidentEnumList]);
   const [newIncident, setNewIncident] = useState('');

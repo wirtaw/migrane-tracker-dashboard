@@ -3,11 +3,11 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { IWeight } from '../../models/profileData.types';
 import { getIsoDate } from '../../lib/utils.ts';
 
-interface WeightFormProps {
+interface IWeightFormProps {
   onSubmit: () => void;
 }
 
-export default function WeightForm({ onSubmit }: WeightFormProps) {
+export default function WeightForm({ onSubmit }: IWeightFormProps) {
   const { weightList, setWeightList } = useProfileDataContext();
 
   const [selectedWeight, setSelectedWeight] = useState<IWeight[]>([...weightList]);

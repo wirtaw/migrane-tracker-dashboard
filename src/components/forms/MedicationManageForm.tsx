@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 
-interface MedicationManageFormProps {
+interface IMedicationManageFormProps {
   onSubmit: () => void;
 }
 
-export default function MedicationManageForm({ onSubmit }: MedicationManageFormProps) {
+export default function MedicationManageForm({ onSubmit }: IMedicationManageFormProps) {
   const { medicationEnumList, setMedicationEnumList } = useProfileDataContext();
   const [selectedMedications, setSelectedMedications] = useState<string[]>([...medicationEnumList]);
   const [newMedication, setNewMedication] = useState('');

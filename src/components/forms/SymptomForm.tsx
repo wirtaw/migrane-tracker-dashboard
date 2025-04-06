@@ -3,13 +3,13 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { ISymptom } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
-import { FormEvent } from '../../models/forms.types.ts';
+import { IFormEvent } from '../../models/forms.types.ts';
 
-interface SymptomFormProps {
+interface ISymptomFormProps {
   onSubmit: () => void;
 }
 
-export default function SymptomForm({ onSubmit }: SymptomFormProps) {
+export default function SymptomForm({ onSubmit }: ISymptomFormProps) {
   const { user, profileSettingsData } = useAuth();
   const { symptomEnumList, symptomList, setSymptomList, setFormErrorMessage } =
     useProfileDataContext();
@@ -55,19 +55,19 @@ export default function SymptomForm({ onSubmit }: SymptomFormProps) {
     onSubmit();
   };
 
-  const handleSelectChange = (event: FormEvent) => {
+  const handleSelectChange = (event: IFormEvent) => {
     setTypeValue(event.target.value.toString());
   };
 
-  const handleNumberChange = (event: FormEvent) => {
+  const handleNumberChange = (event: IFormEvent) => {
     setSeverityValue(Number(event.target.value));
   };
 
-  const handleTextareaChange = (event: FormEvent) => {
+  const handleTextareaChange = (event: IFormEvent) => {
     setNotesValue(event.target.value.toString());
   };
 
-  const handleDateChange = (event: FormEvent) => {
+  const handleDateChange = (event: IFormEvent) => {
     setDatetimeAtValue(new Date(event.target.value));
   };
 

@@ -15,7 +15,7 @@ import {
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import Loader from '../Loader';
 
-interface UploadDataFormProps {
+interface IUploadDataFormProps {
   onSubmit: () => void;
   decode: boolean;
 }
@@ -548,7 +548,7 @@ const mapLocationList = (jsonDataLogsForecast: unknown, maxId: number): ILocatio
   return locations;
 };
 
-export default function UploadDataForm({ onSubmit, decode }: UploadDataFormProps) {
+export default function UploadDataForm({ onSubmit, decode }: IUploadDataFormProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [warnMessage, setWarnMessage] = useState<string>('');

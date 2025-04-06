@@ -2,11 +2,11 @@ import React from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext.tsx';
 
-interface ThemeToggleProps {
+interface IThemeToggleProps {
   className?: string;
 }
 
-export default function ThemeToggle({ className }: ThemeToggleProps) {
+export default function ThemeToggle({ className }: IThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const classNameJoined = `rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${className || ''}`;
 

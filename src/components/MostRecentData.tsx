@@ -4,20 +4,20 @@ import { ReceiptText } from 'lucide-react';
 import { IIncident, ITrigger, IMedication, ISymptom } from '../models/profileData.types';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { getIsoDate, getIsoTime } from '../lib/utils.ts';
-import { FormEvent } from '../models/forms.types.ts';
+import { IFormEvent } from '../models/forms.types.ts';
 
-interface MostRecentDataProps {
+interface IMostRecentDataProps {
   targetDate?: Date;
 }
 
-interface FilteredData {
+interface IFilteredData {
   incidents: IIncident[];
   triggers: ITrigger[];
   medications: IMedication[];
   symptoms: ISymptom[];
 }
 
-export default function MostRecentData({ targetDate = new Date() }: MostRecentDataProps) {
+export default function MostRecentData({ targetDate = new Date() }: IMostRecentDataProps) {
   const { incidentList, triggerList, medicationList, symptomList } = useProfileDataContext();
   const [existDataExport, setExistDataExport] = useState<boolean>(false);
   const [days, setDays] = useState<number>(30);
@@ -47,7 +47,7 @@ export default function MostRecentData({ targetDate = new Date() }: MostRecentDa
     setExistDataExport(hasData);
   }, [incidentList, triggerList, medicationList, symptomList, targetDate]);
 
-  const filterData = useMemo<FilteredData>(() => {
+  const filterData = useMemo<IFilteredData>(() => {
     const dt = new Date(new Date().getTime() - days * 86400 * 1000);
     return {
       incidents:
@@ -71,7 +71,7 @@ export default function MostRecentData({ targetDate = new Date() }: MostRecentDa
 
   useEffect(() => {}, [filterData]);
 
-  const handleSelectChange = (event: FormEvent) => {
+  const handleSelectChange = (event: IFormEvent) => {
     setTypeValue(event.target.value.toString());
   };
 

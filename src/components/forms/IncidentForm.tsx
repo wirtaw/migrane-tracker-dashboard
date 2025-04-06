@@ -4,13 +4,13 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { IIncident } from '../../models/profileData.types';
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
-import { FormEvent } from '../../models/forms.types.ts';
+import { IFormEvent } from '../../models/forms.types.ts';
 
-interface IncidentFormProps {
+interface IIncidentFormProps {
   onSubmit: () => void;
 }
 
-export default function IncidentForm({ onSubmit }: IncidentFormProps) {
+export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
   const { user, profileSettingsData } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
   const { incidentEnumList, triggerEnumList, incidentList, setIncidentList, setFormErrorMessage } =
@@ -74,20 +74,20 @@ export default function IncidentForm({ onSubmit }: IncidentFormProps) {
     onSubmit();
   };
 
-  const handleNumberChange = (event: FormEvent) => {
+  const handleNumberChange = (event: IFormEvent) => {
     setDurationHoursValue(Number(event.target.value));
   };
 
-  const handleDateChange = (event: FormEvent) => {
+  const handleDateChange = (event: IFormEvent) => {
     setStartTimeValue(new Date(event.target.value));
     setDatetimeAtValue(new Date(event.target.value));
   };
 
-  const handleSelectChange = (event: FormEvent) => {
+  const handleSelectChange = (event: IFormEvent) => {
     setTypeValue(event.target.value.toString());
   };
 
-  const handleTextareaChange = (event: FormEvent) => {
+  const handleTextareaChange = (event: IFormEvent) => {
     setNotesValue(event.target.value.toString());
   };
 

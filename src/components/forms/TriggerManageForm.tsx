@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 
-interface TriggerManageFormProps {
+interface ITriggerManageFormProps {
   onSubmit: () => void;
 }
 
-export default function TriggerManageForm({ onSubmit }: TriggerManageFormProps) {
+export default function TriggerManageForm({ onSubmit }: ITriggerManageFormProps) {
   const { triggerEnumList, setTriggerEnumList } = useProfileDataContext();
   const [selectedTriggers, setSelectedTriggers] = useState<string[]>([...triggerEnumList]);
   const [newTrigger, setNewTrigger] = useState('');

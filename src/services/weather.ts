@@ -1,7 +1,7 @@
 import { fetchWeatherApi } from 'openmeteo';
 import { env } from '../config/env';
 
-interface OpenMeteoParams {
+interface IOpenMeteoParams {
   latitude: number;
   longitude: number;
   current: Array<string>;
@@ -9,7 +9,7 @@ interface OpenMeteoParams {
   wind_speed_unit: string;
 }
 
-interface OpenMeteoArchiveParams {
+interface IOpenMeteoArchiveParams {
   latitude: number;
   longitude: number;
   start_date: string;
@@ -20,7 +20,7 @@ interface OpenMeteoArchiveParams {
   timezone: string;
 }
 
-interface WeatherResponse {
+interface IWeatherResponse {
   alerts: Array<{
     description: string;
     start: number;
@@ -43,7 +43,7 @@ interface WeatherResponse {
   };
 }
 
-export interface WeatherData {
+export interface IWeatherData {
   temperature: number | undefined;
   humidity: number | undefined;
   pressure: number | undefined;
@@ -62,7 +62,7 @@ export interface WeatherData {
   }>;
 }
 
-export interface GeophysicalWeatherData {
+export interface IGeophysicalWeatherData {
   solarFlux: number;
   aIndex: number;
   kIndex: number;
@@ -70,18 +70,18 @@ export interface GeophysicalWeatherData {
   nextWeather: { level: string };
 }
 
-interface Coordinates {
+interface ICoordinates {
   latitude: number;
   longitude: number;
 }
 
-interface CoordinatesWithDate {
+interface ICoordinatesWithDate {
   latitude: number;
   longitude: number;
   dateTime: Date;
 }
 
-export interface RadiationTodayData {
+export interface IRadiationTodayData {
   date: string;
   UVIndex: number;
   ozone: number;
@@ -96,8 +96,8 @@ const MIGRAINE_API_URL: string = env.MIGRAINE_API_URL;
 const MIGRAINE_API_HEADER_X_API_KEY: string = env.MIGRAINE_API_HEADER_X_API_KEY;
 const MIGRAINE_API_HEADER_X_API_VALUE: string = env.MIGRAINE_API_HEADER_X_API_VALUE;
 
-function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
-  const result: GeophysicalWeatherData = {
+function parseGeophysicalAlert(text: string): IGeophysicalWeatherData {
+  const result: IGeophysicalWeatherData = {
     solarFlux: 0,
     aIndex: 0,
     kIndex: -1,
@@ -152,7 +152,10 @@ function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
   return result;
 }
 
-export async function fetchWeatherData({ latitude, longitude }: Coordinates): Promise<WeatherData> {
+export async function fetchWeatherData({
+  latitude,
+  longitude,
+}: ICoordinates): Promise<IWeatherData> {
   try {
     const response = await fetch(
       `${OPEN_WEATHER_BASE_URL}/onecall?lat=${latitude}&lon=${longitude}&units=${env.WEATHER_UNITS}&exclude=hourly,daily&appid=${env.OPEN_WEATHER_API_KEY}`
@@ -162,9 +165,9 @@ export async function fetchWeatherData({ latitude, longitude }: Coordinates): Pr
       throw new Error('Weather data fetch failed');
     }
 
-    const data: WeatherResponse = await response.json();
+    const data: IWeatherResponse = await response.json();
 
-    const weather: WeatherData = {
+    const weather: IWeatherData = {
       temperature: Math.round(data.current.temp),
       humidity: data.current.humidity,
       pressure: data.current.pressure,
@@ -190,9 +193,9 @@ const range = (start: number, stop: number, step: number) =>
 export async function fetchOpenMeteoWeatherData({
   latitude,
   longitude,
-}: Coordinates): Promise<WeatherData> {
+}: ICoordinates): Promise<IWeatherData> {
   try {
-    const params: OpenMeteoParams = {
+    const params: IOpenMeteoParams = {
       latitude,
       longitude,
       current: [
@@ -230,7 +233,7 @@ export async function fetchOpenMeteoWeatherData({
 
     const uvIndexMax = daily.variables(0)!.valuesArray()!;
 
-    const weather: WeatherData = {
+    const weather: IWeatherData = {
       temperature: Math.round(current.variables(0)!.value()),
       humidity: current.variables(1)!.value(),
       pressure: Math.round(current.variables(8)!.value()),
@@ -250,7 +253,7 @@ export async function fetchOpenMeteoWeatherData({
   }
 }
 
-export async function fetchGeophysicalWeatherData(): Promise<GeophysicalWeatherData> {
+export async function fetchGeophysicalWeatherData(): Promise<IGeophysicalWeatherData> {
   const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
 
   if (!responseGeoActivity.ok) {
@@ -259,7 +262,7 @@ export async function fetchGeophysicalWeatherData(): Promise<GeophysicalWeatherD
 
   const geoActivityData: string = await responseGeoActivity.text();
 
-  const geoActivityDataMapped: GeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
+  const geoActivityDataMapped: IGeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
 
   return geoActivityDataMapped;
 }
@@ -276,12 +279,12 @@ export async function fetchOpenMeteoWeatherDataHistorical({
   latitude,
   longitude,
   dateTime,
-}: CoordinatesWithDate): Promise<WeatherData | undefined> {
+}: ICoordinatesWithDate): Promise<IWeatherData | undefined> {
   try {
     if (typeof dateTime === 'undefined') {
       return;
     }
-    const params: OpenMeteoArchiveParams = {
+    const params: IOpenMeteoArchiveParams = {
       latitude,
       longitude,
       start_date: getDateRange(dateTime),
@@ -330,7 +333,7 @@ export async function fetchOpenMeteoWeatherDataHistorical({
     const isPressureValuesValid: boolean =
       pressureMslSpread.filter(item => !Number.isNaN(item)).length === pressureMslSpread.length;
 
-    const weather: WeatherData = {
+    const weather: IWeatherData = {
       temperature: isTemperatureValuesValid
         ? Math.round(temperature2m.reduce((acc, prev) => acc + prev, 0) / time.length)
         : undefined,
@@ -362,7 +365,7 @@ export async function fetchOpenMeteoWeatherDataHistorical({
 
 export async function fetchGeophysicalWeatherDataHistorical(
   dateTime: Date
-): Promise<GeophysicalWeatherData> {
+): Promise<IGeophysicalWeatherData> {
   console.info(`${dateTime.toISOString()}`);
   const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
 
@@ -372,7 +375,7 @@ export async function fetchGeophysicalWeatherDataHistorical(
 
   const geoActivityData: string = await responseGeoActivity.text();
 
-  const geoActivityDataMapped: GeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
+  const geoActivityDataMapped: IGeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
 
   return geoActivityDataMapped;
 }
@@ -380,7 +383,7 @@ export async function fetchGeophysicalWeatherDataHistorical(
 export async function fetchRadiationWeatherData({
   latitude,
   longitude,
-}: Coordinates): Promise<RadiationTodayData[] | []> {
+}: ICoordinates): Promise<IRadiationTodayData[] | []> {
   if (!MIGRAINE_API_URL || !MIGRAINE_API_HEADER_X_API_KEY || !MIGRAINE_API_HEADER_X_API_VALUE) {
     return [];
   }

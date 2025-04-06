@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 
 import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
 import { getIsoDate, getIsoTime } from '../lib/utils.ts';
-import { FormEvent } from '../models/forms.types.ts';
+import { IFormEvent } from '../models/forms.types.ts';
 import { IIncident, ITrigger, IMedication, ISymptom } from '../models/profileData.types.ts';
 import { useAuth } from '../context/AuthContext';
 
-interface ReportPageData {
+interface IReportPageData {
   date: string;
   incidents: IIncident[];
   triggers: ITrigger[];
@@ -14,17 +14,17 @@ interface ReportPageData {
   symptoms: ISymptom[];
 }
 
-interface DataItem {
+interface IDataItem {
   datetimeAt: Date;
 }
 
-interface AddItemOptions {
-  item: DataItem;
-  type: keyof ReportPageData;
-  data: { [date: string]: ReportPageData };
+interface IAddItemOptions {
+  item: IDataItem;
+  type: keyof IReportPageData;
+  data: { [date: string]: IReportPageData };
 }
 
-const addItem = ({ item, type, data }: AddItemOptions) => {
+const addItem = ({ item, type, data }: IAddItemOptions) => {
   const dt = getIsoDate(item.datetimeAt);
   if (!data[dt]) {
     data[dt] = {
@@ -52,10 +52,10 @@ const prepareReportData = ({
   medicationList: IMedication[];
   triggerList: ITrigger[];
   symptomList: ISymptom[];
-}): ReportPageData[] => {
-  const data: { [date: string]: ReportPageData } = {};
+}): IReportPageData[] => {
+  const data: { [date: string]: IReportPageData } = {};
 
-  const filterByDate = (list: DataItem[]) =>
+  const filterByDate = (list: IDataItem[]) =>
     list.filter(
       ({ datetimeAt }) =>
         (!startDate || datetimeAt >= startDate) && (!endDate || datetimeAt <= endDate)
@@ -77,7 +77,7 @@ export default function ReportPage() {
   const { profileSettingsData } = useAuth();
   const [startDate, setStartDate] = useState(new Date(dtNow.getTime() - 30 * 86400 * 1000));
   const [endDate, setEndDate] = useState(dtNow);
-  const [filteredData, setFilteredData] = useState<ReportPageData[]>(
+  const [filteredData, setFilteredData] = useState<IReportPageData[]>(
     prepareReportData({
       startDate,
       endDate,
@@ -88,7 +88,7 @@ export default function ReportPage() {
     })
   );
 
-  const handleStartDateChange = (event: FormEvent) => {
+  const handleStartDateChange = (event: IFormEvent) => {
     if (new Date(event.target.value) < endDate) {
       setStartDate(new Date(event.target.value));
       setFilteredData(
@@ -104,7 +104,7 @@ export default function ReportPage() {
     }
   };
 
-  const handleEndDateChange = (event: FormEvent) => {
+  const handleEndDateChange = (event: IFormEvent) => {
     if (new Date(event.target.value) > startDate) {
       setEndDate(new Date(event.target.value));
       setFilteredData(

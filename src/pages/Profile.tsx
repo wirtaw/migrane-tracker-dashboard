@@ -7,9 +7,9 @@ import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import SecuritySetupForm from '../components/forms/SecuritySetupForm';
-import { UserUpdateDAO } from '../models/user.types';
+import { IUserUpdateDAO } from '../models/user.types';
 
-interface Location {
+interface ILocation {
   latitude: number | null;
   longitude: number | null;
   error: string | null;
@@ -29,7 +29,7 @@ export default function Profile() {
   const [aggrementSaveKey, setAggrementSaveKey] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeModal, setActiveModal] = useState<'securitySetup' | null>(null);
-  const [location, setLocation] = useState<Location>({
+  const [location, setLocation] = useState<ILocation>({
     latitude: null,
     longitude: null,
     error: '',
@@ -50,7 +50,7 @@ export default function Profile() {
 
     try {
       if (supabase && user?.id) {
-        const payload: UserUpdateDAO = {
+        const payload: IUserUpdateDAO = {
           birthdate: formData.birthDate,
           latitude: formData.latitude,
           longitude: formData.longitude,
