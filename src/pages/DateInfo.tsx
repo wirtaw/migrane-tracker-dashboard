@@ -16,6 +16,7 @@ import ForecastCard from '../components/cards/ForecastCard';
 import TriggerCard from '../components/cards/TriggerCard';
 import MedicationCard from '../components/cards/MedicationCard';
 import SymptomCard from '../components/cards/SymptomsCard';
+import SolarCard from '../components/cards/SolarCard';
 
 export default function DateInfo() {
   const { date } = useParams();
@@ -72,7 +73,7 @@ export default function DateInfo() {
         )}
 
         {locationItems.length > 0 && (
-          <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+          <div className="lg:col-span-2 space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <section className="space-y-4">
               <div className="flex items-center gap-2">
                 <Info className="w-6 h-6 text-blue-500" />
@@ -80,24 +81,32 @@ export default function DateInfo() {
               </div>
               <div className="text-gray-600 dark:text-gray-300">
                 {locationItems.map(location => (
-                  <div key={'location-' + location.id}>
-                    <p>
-                      <span>
-                        Coordinates - {location.latitude} / {location.longitude}
-                      </span>
-                      <br />
-                      {location.forecast && (
-                        <>
-                          {location.forecast.map((forecast, index) => (
-                            <ForecastCard
-                              key={'location-' + location.id + '-forecast-' + index}
-                              forecast={forecast}
-                            />
-                          ))}
-                        </>
-                      )}
-                      <br />
-                    </p>
+                  <div key={'location-' + location.id} style={{ height: '110vh' }}>
+                    <span>
+                      Coordinates - {location.latitude} / {location.longitude}
+                    </span>
+                    <br />
+                    {location.forecast && (
+                      <ForecastCard
+                        key={'location-' + location.id + '-forecast-card'}
+                        forecast={location.forecast}
+                      />
+                    )}
+                    <br />
+                    {location.solar && (
+                      <SolarCard
+                        key={'location-' + location.id + '-solar-card'}
+                        solar={location.solar}
+                      />
+                    )}
+                    <br />
+                    {location.solarRadiation && (
+                      <>
+                        <span>UVIndex - {location.solarRadiation[0]?.uviIndex}</span>
+                        <br />
+                        <span>ozone - {location.solarRadiation[0]?.ozone}</span>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

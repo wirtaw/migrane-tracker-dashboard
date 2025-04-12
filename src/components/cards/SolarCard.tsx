@@ -14,16 +14,16 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
-import { IForecast } from '../../models/profileData.types.ts';
+import { ISolar } from '../../models/profileData.types.ts';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-interface IForecastCardProps {
-  forecast: IForecast[] | [];
+interface ISolarCardProps {
+  solar: ISolar[] | [];
   className?: string;
 }
 
-export default function ForecastCard({ forecast, className }: IForecastCardProps) {
+export default function SolarCard({ solar, className }: ISolarCardProps) {
   const classNameJoined = `flex gap-4 rounded-xl shadow-sm p-6 border-2 ${className || ''}`;
   const [loading, setLoading] = useState(true);
   const [options] = useState<ChartOptions<'line'>>({
@@ -44,14 +44,6 @@ export default function ForecastCard({ forecast, className }: IForecastCardProps
         display: true,
         position: 'left',
       },
-      y1: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        grid: {
-          drawOnChartArea: false,
-        },
-      },
     },
   });
   const [labels, setLabels] = useState<string[]>([]);
@@ -59,7 +51,7 @@ export default function ForecastCard({ forecast, className }: IForecastCardProps
     labels,
     datasets: [
       {
-        label: 'temperature',
+        label: 'kIndex',
         data: [0],
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -67,42 +59,10 @@ export default function ForecastCard({ forecast, className }: IForecastCardProps
         tension: 0.1,
       },
       {
-        label: 'pressure',
+        label: 'aIndex',
         data: [0],
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        yAxisID: 'y1',
-        tension: 1,
-      },
-      {
-        label: 'humidity',
-        data: [0],
-        borderColor: 'rgb(37, 148, 9)',
-        backgroundColor: 'rgba(37, 148, 9, 0.5)',
-        yAxisID: 'y',
-        tension: 1,
-      },
-      {
-        label: 'windSpeed',
-        data: [0],
-        borderColor: 'rgb(216, 196, 19)',
-        backgroundColor: 'rgba(216, 196, 19, 0.5)',
-        yAxisID: 'y',
-        tension: 0.1,
-      },
-      {
-        label: 'clouds',
-        data: [0],
-        borderColor: 'rgb(90, 90, 90)',
-        backgroundColor: 'rgba(90, 90, 90, 0.5)',
-        yAxisID: 'y',
-        tension: 1,
-      },
-      {
-        label: 'uvi',
-        data: [0],
-        borderColor: 'rgb(202, 15, 108)',
-        backgroundColor: 'rgba(202, 15, 108, 0.5)',
         yAxisID: 'y',
         tension: 0.1,
       },
@@ -114,45 +74,21 @@ export default function ForecastCard({ forecast, className }: IForecastCardProps
     const localData: ChartData<'line'> = { ...data };
     localData.datasets[0].data = [];
     localData.datasets[1].data = [];
-    localData.datasets[2].data = [];
-    localData.datasets[3].data = [];
-    localData.datasets[4].data = [];
-    localData.datasets[5].data = [];
 
-    for (const item of forecast) {
+    for (const item of solar) {
       const dt = DateTime.fromISO(item.datetime);
       let hasValue: boolean = false;
 
       if (dt.isValid) {
         hasValue = false;
 
-        if (item?.temperature) {
-          localData.datasets[0].data.push(item.temperature);
+        if (item?.kIndex) {
+          localData.datasets[0].data.push(item.kIndex);
           hasValue = true;
         }
 
-        if (item?.pressure) {
-          localData.datasets[1].data.push(item.pressure);
-          hasValue = true;
-        }
-
-        if (item?.humidity) {
-          localData.datasets[2].data.push(item.humidity);
-          hasValue = true;
-        }
-
-        if (item?.windSpeed) {
-          localData.datasets[3].data.push(item.windSpeed);
-          hasValue = true;
-        }
-
-        if (item?.clouds) {
-          localData.datasets[4].data.push(item.clouds);
-          hasValue = true;
-        }
-
-        if (item?.uvi) {
-          localData.datasets[5].data.push(item.uvi);
+        if (item?.aIndex) {
+          localData.datasets[1].data.push(item.aIndex);
           hasValue = true;
         }
 
@@ -166,7 +102,7 @@ export default function ForecastCard({ forecast, className }: IForecastCardProps
     localData.labels = localLabels;
     setData(localData);
     setLoading(false);
-  }, [forecast]);
+  }, [solar]);
 
   return (
     <div className={classNameJoined} style={{ width: '100%', height: 'auto' }}>
