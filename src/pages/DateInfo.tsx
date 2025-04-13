@@ -29,6 +29,7 @@ export default function DateInfo() {
   const [medicationItems, setMedicationItems] = useState<IMedication[]>([]);
   const [symptomItems, setSymptomItems] = useState<ISymptom[]>([]);
   const [locationItems, setLocationItems] = useState<ILocationData[]>([]);
+  const [exists, setExists] = useState(false);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -36,13 +37,36 @@ export default function DateInfo() {
     const date = dateValue ? DateTime.fromISO(dateValue) : DateTime.now();
     setSelectedDate(date.isValid ? date : DateTime.now());
 
-    setIncidentItems(incidentList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()));
-    setMedicationItems(
-      medicationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate())
-    );
-    setTriggerItems(triggerList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()));
-    setSymptomItems(symptomList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()));
-    setLocationItems(locationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()));
+    let exists = 0;
+
+    if (incidentList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()).length) {
+      setIncidentItems(
+        incidentList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate())
+      );
+      exists++;
+    }
+    if (medicationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()).length) {
+      setMedicationItems(
+        medicationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate())
+      );
+      exists++;
+    }
+    if (triggerList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()).length) {
+      setTriggerItems(triggerList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()));
+      exists++;
+    }
+    if (symptomList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()).length) {
+      setSymptomItems(symptomList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()));
+      exists++;
+    }
+    if (locationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()).length) {
+      setLocationItems(
+        locationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate())
+      );
+      exists++;
+    }
+
+    setExists(exists !== 0);
   }, [date, location.search]);
 
   return (
@@ -52,121 +76,141 @@ export default function DateInfo() {
           Date {selectedDate.toLocaleString()} Info
         </h1>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {incidentItems.length > 0 && (
-          <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info className="w-6 h-6 text-blue-500" />
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                  Incidents
-                </h2>
-              </div>
-              {incidentItems.map(incident => (
-                <IncidentCard
-                  key={'incident-' + selectedDate.toMillis() + '-card-' + incident.id}
-                  incident={incident}
-                />
-              ))}
-            </section>
-          </div>
-        )}
-
-        {locationItems.length > 0 && (
-          <div className="lg:col-span-2 space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info className="w-6 h-6 text-blue-500" />
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Location</h2>
-              </div>
-              <div className="text-gray-600 dark:text-gray-300">
-                {locationItems.map(location => (
-                  <div key={'location-' + location.id} style={{ height: '110vh' }}>
-                    <span>
-                      Coordinates - {location.latitude} / {location.longitude}
-                    </span>
-                    <br />
-                    {location.forecast && (
-                      <ForecastCard
-                        key={'location-' + location.id + '-forecast-card'}
-                        forecast={location.forecast}
-                      />
-                    )}
-                    <br />
-                    {location.solar && (
-                      <SolarCard
-                        key={'location-' + location.id + '-solar-card'}
-                        solar={location.solar}
-                      />
-                    )}
-                    <br />
-                    {location.solarRadiation && (
-                      <>
-                        <span>UVIndex - {location.solarRadiation[0]?.uviIndex}</span>
-                        <br />
-                        <span>ozone - {location.solarRadiation[0]?.ozone}</span>
-                      </>
-                    )}
-                  </div>
+      {exists && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {incidentItems.length > 0 && (
+            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Info className="w-6 h-6 text-blue-500" />
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    Incidents
+                  </h2>
+                </div>
+                {incidentItems.map(incident => (
+                  <IncidentCard
+                    key={'incident-' + selectedDate.toMillis() + '-card-' + incident.id}
+                    incident={incident}
+                  />
                 ))}
-              </div>
-            </section>
-          </div>
-        )}
+              </section>
+            </div>
+          )}
 
-        {triggerItems.length > 0 && (
+          {locationItems.length > 0 && (
+            <div className="lg:col-span-2 space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Info className="w-6 h-6 text-blue-500" />
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    Location
+                  </h2>
+                </div>
+                <div className="text-gray-600 dark:text-gray-300">
+                  {locationItems.map(location => (
+                    <div key={'location-' + location.id} style={{ height: '110vh' }}>
+                      <span>
+                        Coordinates - {location.latitude} / {location.longitude}
+                      </span>
+                      <br />
+                      {location.forecast && (
+                        <ForecastCard
+                          key={'location-' + location.id + '-forecast-card'}
+                          forecast={location.forecast}
+                        />
+                      )}
+                      <br />
+                      {location.solar && (
+                        <SolarCard
+                          key={'location-' + location.id + '-solar-card'}
+                          solar={location.solar}
+                        />
+                      )}
+                      <br />
+                      {location.solarRadiation && (
+                        <>
+                          <span>UVIndex - {location.solarRadiation[0]?.uviIndex}</span>
+                          <br />
+                          <span>ozone - {location.solarRadiation[0]?.ozone}</span>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {triggerItems.length > 0 && (
+            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Info className="w-6 h-6 text-blue-500" />
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    Triggers
+                  </h2>
+                </div>
+                {triggerItems.map(trigger => (
+                  <TriggerCard
+                    key={'trigger-' + selectedDate.toMillis() + '-card-' + trigger.id}
+                    trigger={trigger}
+                  />
+                ))}
+              </section>
+            </div>
+          )}
+
+          {medicationItems.length > 0 && (
+            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Info className="w-6 h-6 text-blue-500" />
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    Medications
+                  </h2>
+                </div>
+                {medicationItems.map(medication => (
+                  <MedicationCard
+                    key={'medication-' + selectedDate.toMillis() + '-card-' + medication.id}
+                    medication={medication}
+                  />
+                ))}
+              </section>
+            </div>
+          )}
+
+          {symptomItems.length > 0 && (
+            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+              <section className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Info className="w-6 h-6 text-blue-500" />
+                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    Symptoms
+                  </h2>
+                </div>
+                {symptomItems.map(symptom => (
+                  <SymptomCard
+                    key={'symptom-' + selectedDate.toMillis() + '-card-' + symptom.id}
+                    symptom={symptom}
+                  />
+                ))}
+              </section>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!exists && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info className="w-6 h-6 text-blue-500" />
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Triggers</h2>
+              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                No items
               </div>
-              {triggerItems.map(trigger => (
-                <TriggerCard
-                  key={'trigger-' + selectedDate.toMillis() + '-card-' + trigger.id}
-                  trigger={trigger}
-                />
-              ))}
             </section>
           </div>
-        )}
-
-        {medicationItems.length > 0 && (
-          <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info className="w-6 h-6 text-blue-500" />
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                  Medications
-                </h2>
-              </div>
-              {medicationItems.map(medication => (
-                <MedicationCard
-                  key={'medication-' + selectedDate.toMillis() + '-card-' + medication.id}
-                  medication={medication}
-                />
-              ))}
-            </section>
-          </div>
-        )}
-
-        {symptomItems.length > 0 && (
-          <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-            <section className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info className="w-6 h-6 text-blue-500" />
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Symptoms</h2>
-              </div>
-              {symptomItems.map(symptom => (
-                <SymptomCard
-                  key={'symptom-' + selectedDate.toMillis() + '-card-' + symptom.id}
-                  symptom={symptom}
-                />
-              ))}
-            </section>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </main>
   );
 }

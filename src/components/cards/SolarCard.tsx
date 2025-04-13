@@ -35,7 +35,7 @@ export default function SolarCard({ solar, className }: ISolarCardProps) {
       },
       title: {
         display: true,
-        text: 'Forecast',
+        text: 'Solar',
       },
     },
     scales: {

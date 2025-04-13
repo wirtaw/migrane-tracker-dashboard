@@ -237,3 +237,10 @@ export interface IForecastHistoricalParams {
 export interface ISolarHistoricalParams {
   dateTime: Date;
 }
+
+export interface ITyramineContentItem {
+  product: string;
+  allowedUse: string;
+  limitedUse: string;
+  striclyProhibitedUse: string;
+}

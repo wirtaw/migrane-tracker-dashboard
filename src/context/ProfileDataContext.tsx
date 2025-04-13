@@ -11,6 +11,7 @@ import {
   IErrorMessage,
   IBrokenData,
   ILocationData,
+  ITyramineContentItem,
 } from '../models/profileData.types';
 import { useAuth } from './AuthContext';
 
@@ -47,6 +48,8 @@ interface IProfileDataContextProps {
   setBrokenImportData: React.Dispatch<React.SetStateAction<IBrokenData>>;
   locationList: ILocationData[];
   setLocationList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
+  recommendationList: string[];
+  reducedTyramineMenuList: ITyramineContentItem[];
 }
 
 const ProfileDataContext = createContext<IProfileDataContextProps | undefined>(undefined);
@@ -127,6 +130,90 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     locations: null,
   });
 
+  const [recommendationList] = useState<string[]>([
+    'Avoid or significantly limit the consumption of foods containing tyramine (see table on the reverse side).',
+    'Avoid dieting and long intervals between meals.',
+    'Limit alcohol consumption, especially red wine.',
+    'Quit smoking.',
+    'Avoid physical overexertion and sudden lifestyle changes.',
+    'Increase physical activity (e.g., walking for up to 45 minutes at least 4 times a week).',
+    'Normalize your sleep schedule (both insufficient and excessive sleep can be harmful).',
+    'Try to avoid stressful situations (e.g., during an argument, simply leave the room instead of engaging in conflict).',
+    'Avoid using hormonal contraceptives if possible.',
+    'Ensure proper treatment of comorbid conditions (primarily arterial hypertension).',
+    'Maintain adequate magnesium intake levels.',
+    'Limit exposure to sources of bright light (computer monitors, television screens, sunlight), strong odors (perfume), and loud noises.',
+    'Do not self-medicate—migraine is a serious neurological condition. If the frequency or severity of attacks increases, consult your healthcare provider immediately.',
+  ]);
+
+  const [reducedTyramineMenuList] = useState<ITyramineContentItem[]>([
+    {
+      product: 'Drinks',
+      allowedUse: 'Decaffeinated coffee, fruit juices, sodas, carbonated drinks without caffeine.',
+      limitedUse:
+        'Coffee and tea no more than twice a day (1 cup), caffeinated sodas, hot chocolate.',
+      striclyProhibitedUse: 'Alcoholic drinks: sherry, vermouth, beer, wine. Non-alcoholic beer.',
+    },
+    {
+      product: 'Meat, Fish, Poultry, Eggs',
+      allowedUse: 'Freshly prepared steamed or boiled meat, poultry, fresh fish, fresh eggs.',
+      limitedUse: 'Bacon, sausages, hot dogs, smoked meat, caviar.',
+      striclyProhibitedUse:
+        'Preserved and canned products: marinated meat, smoked fish and meat. Liver.',
+    },
+    {
+      product: 'Dairy Products',
+      allowedUse: 'Whole milk (2% fat or less), mild cheese, processed cheese.',
+      limitedUse: 'Parmesan cheese, yogurt, sour cream – no more than 1/2 cup per day.',
+      striclyProhibitedUse: 'Long-aged cheeses.',
+    },
+    {
+      product: 'Bakery Products',
+      allowedUse: 'Yeast-free bread and factory-made baked goods (e.g., tomato bread).',
+      limitedUse: 'Homemade yeast bread (1 slice per day).',
+      striclyProhibitedUse: 'Any baked goods with additives.',
+    },
+    {
+      product: 'Vegetables',
+      allowedUse:
+        'Asparagus, carrots, spinach, tomatoes, boiled or fried onions, potatoes, zucchini, legumes, pumpkin, beets.',
+      limitedUse: 'Fresh onions.',
+      striclyProhibitedUse: 'Canned and marinated soy products and legumes. Soy sauce.',
+    },
+    {
+      product: 'Fruits',
+      allowedUse: 'Apples, pears, cherries, peaches, apricots.',
+      limitedUse:
+        'No more than 1/2 cup per day: citrus fruits (oranges, tangerines, grapefruits, pineapples, lemons). Avocadoes, bananas, dates, figs, red plums with raisins.',
+      striclyProhibitedUse: 'None.',
+    },
+    {
+      product: 'Nuts and Grains',
+      allowedUse: 'None.',
+      limitedUse: 'None.',
+      striclyProhibitedUse: 'All nuts and grains.',
+    },
+    {
+      product: 'Soups',
+      allowedUse: 'Homemade soups.',
+      limitedUse:
+        'Soups containing yeast extract or monosodium glutamate (e.g., Chinese cuisine), meat broths.',
+      striclyProhibitedUse: 'None.',
+    },
+    {
+      product: 'Desserts and Sweets',
+      allowedUse: 'Sugar, honey, cakes, cookies, jams, jelly, candies.',
+      limitedUse: 'Chocolate-containing products: ice cream (1 cup), chocolate candies (15 grams).',
+      striclyProhibitedUse: 'Meat-filled pastries.',
+    },
+    {
+      product: 'Spices',
+      allowedUse: 'Any.',
+      limitedUse: 'None.',
+      striclyProhibitedUse: 'None.',
+    },
+  ]);
+
   return (
     <ProfileDataContext.Provider
       value={{
@@ -162,6 +249,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setBrokenImportData,
         locationList,
         setLocationList,
+        recommendationList,
+        reducedTyramineMenuList,
       }}
     >
       {children}

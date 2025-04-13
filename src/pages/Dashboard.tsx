@@ -6,6 +6,7 @@ import WeatherWidget from '../components/WeatherWidget';
 import GeoMagneticWidget from '../components/GeoMagneticWidget';
 import TrackingButtons from '../components/TrackingButtons';
 import MostRecentData from '../components/MostRecentData';
+import MigrainePreventionTip from '../components/MigrainePreventionTip';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,6 +36,9 @@ export default function Dashboard() {
         </div>
         <div>
           <GeoMagneticWidget />
+        </div>
+        <div>
+          <MigrainePreventionTip />
         </div>
         <div>
           <MostRecentData />
