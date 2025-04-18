@@ -9,8 +9,8 @@ interface IIndexedRecommendations {
   item: string;
 }
 
-const shuffle = (array: IIndexedRecommendations[], factor: number = 0.5) => {
-  const indexes = array.map(({ id }) => +id).sort(() => Math.random() - factor);
+const shuffle = (array: IIndexedRecommendations[]) => {
+  const indexes = array.map(({ id }) => +id).sort(() => Math.random() - 0.5);
 
   return indexes.map(i => array[i - 1]);
 };
@@ -28,12 +28,17 @@ export default function MigrainePreventionTip() {
       })
     );
 
-    const randomRecommendationList: IIndexedRecommendations[] = shuffle(
-      indexedRecommendations,
-      0.5
-    );
+    const randomRecommendationList: IIndexedRecommendations[] = shuffle(indexedRecommendations);
 
-    setRecommendation(randomRecommendationList[0].item);
+    if (
+      randomRecommendationList &&
+      Array.isArray(randomRecommendationList) &&
+      randomRecommendationList[0]
+    ) {
+      setRecommendation(randomRecommendationList[0].item);
+    } else {
+      setRecommendation(recommendationList[0]);
+    }
   }, [recommendationList]);
 
   return (

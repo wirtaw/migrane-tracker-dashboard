@@ -59,6 +59,7 @@ export default function DateInfo() {
       setSymptomItems(symptomList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()));
       exists++;
     }
+    // TODO get in date raknge location data
     if (locationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()).length) {
       setLocationItems(
         locationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate())
