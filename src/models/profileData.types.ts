@@ -75,10 +75,8 @@ export interface ISleep {
 }
 
 export interface ISolar {
-  solarFlux: number | null;
   kIndex: number | null;
   aIndex: number | null;
-  bIndex: number | null;
   flareProbability: number | null;
   datetime: string;
 }
@@ -97,6 +95,8 @@ export interface IForecast {
 export interface ISolarRadiation {
   uviIndex: number | null;
   ozone: number | null;
+  solarFlux: number | null;
+  sunsPotNumber: number | null;
   datetime: string;
 }
 

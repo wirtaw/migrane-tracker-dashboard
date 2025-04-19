@@ -1,0 +1,26 @@
+export default function UVIndexIndicator({ uvi }: { uvi: number | undefined }) {
+  const getUVIColor = (uvi: number | undefined) => {
+    if (!uvi) return '';
+    if (uvi <= 2) return 'bg-green-500';
+    if (uvi <= 5) return 'bg-yellow-500';
+    if (uvi <= 7) return 'bg-orange-500';
+    if (uvi <= 10) return 'bg-red-500';
+    return 'bg-purple-500';
+  };
+
+  const getUVIText = (uvi: number | undefined) => {
+    if (!uvi) return '';
+    if (uvi <= 2) return 'Low';
+    if (uvi <= 5) return 'Moderate';
+    if (uvi <= 7) return 'High';
+    if (uvi <= 10) return 'Very High';
+    return 'Extreme';
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-3 h-3 rounded-full ${getUVIColor(uvi)}`} />
+      <span className="text-sm font-medium dark:text-gray-300">{getUVIText(uvi)}</span>
+    </div>
+  );
+}

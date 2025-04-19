@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { DateTime } from 'luxon';
 import { useParams, useLocation } from 'react-router-dom';
-import { Info } from 'lucide-react';
+import { Info, UmbrellaIcon } from 'lucide-react';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { getIsoDate } from '../lib/utils';
 import {
@@ -17,6 +17,10 @@ import TriggerCard from '../components/cards/TriggerCard';
 import MedicationCard from '../components/cards/MedicationCard';
 import SymptomCard from '../components/cards/SymptomsCard';
 import SolarCard from '../components/cards/SolarCard';
+import UVIndexIndicator from '../components/indicators/UVIndexIndicator';
+import SunspotNumberIndicator from '../components/indicators/SunspotNumberIndicator';
+import SolarFluxIndicator from '../components/indicators/SolarFluxIndicator';
+import OzoneIndicator from '../components/indicators/OzoneIndicator';
 
 export default function DateInfo() {
   const { date } = useParams();
@@ -130,9 +134,70 @@ export default function DateInfo() {
                       <br />
                       {location.solarRadiation && (
                         <>
-                          <span>UVIndex - {location.solarRadiation[0]?.uviIndex}</span>
-                          <br />
-                          <span>ozone - {location.solarRadiation[0]?.ozone}</span>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg">
+                              <UmbrellaIcon className="w-5 h-5 text-amber-500" />
+                              <div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  UV Index
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xl font-semibold dark:text-white">
+                                    {location.solarRadiation[0]?.uviIndex}
+                                  </span>
+                                  <UVIndexIndicator
+                                    uvi={location.solarRadiation[0]?.uviIndex || 0}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 p-4 from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg">
+                              <div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  Ozone
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xl font-semibold dark:text-white">
+                                    {location.solarRadiation[0]?.ozone}
+                                  </span>
+                                  <OzoneIndicator ozone={location.solarRadiation[0]?.ozone || 0} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg">
+                              <div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  Solar Flux
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xl font-semibold dark:text-white">
+                                    {location.solarRadiation[0]?.solarFlux}
+                                  </span>
+                                  <SolarFluxIndicator
+                                    solarFlux={location.solarRadiation[0]?.solarFlux || 0}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-lg">
+                              <div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                  Sunspot Number
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xl font-semibold dark:text-white">
+                                    {location.solarRadiation[0]?.sunsPotNumber}
+                                  </span>
+                                  <SunspotNumberIndicator
+                                    sunspotNumber={location.solarRadiation[0]?.sunsPotNumber || 0}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </>
                       )}
                     </div>
