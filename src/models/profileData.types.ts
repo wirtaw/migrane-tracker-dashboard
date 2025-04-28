@@ -97,7 +97,7 @@ export interface ISolarRadiation {
   ozone: number | null;
   solarFlux: number | null;
   sunsPotNumber: number | null;
-  datetime: string;
+  date: string;
 }
 
 export interface ILocationData {

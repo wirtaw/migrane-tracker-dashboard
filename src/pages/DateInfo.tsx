@@ -113,7 +113,7 @@ export default function DateInfo() {
                 </div>
                 <div className="text-gray-600 dark:text-gray-300">
                   {locationItems.map(location => (
-                    <div key={'location-' + location.id} style={{ height: '110vh' }}>
+                    <div key={'location-' + location.id}>
                       <span>
                         Coordinates - {location.latitude} / {location.longitude}
                       </span>
@@ -132,9 +132,14 @@ export default function DateInfo() {
                         />
                       )}
                       <br />
-                      {location.solarRadiation && (
-                        <>
-                          <div className="grid grid-cols-2 gap-4">
+                      {location.solarRadiation.map(solarRadiation => (
+                        <div key={'solarRadiation-' + solarRadiation?.date}>
+                          <div className="grid grid-cols-1 gap-4 pb-2">
+                            <div className="flex items-center gap-2 p-4 bg-gradient-to-br dark:from-[#d1d5db]-900/20 dark:to-[#374151]-900/20 from-[#d1d5db] via-[#6b7280] to-[#374151] rounded-lg text-gray-100 dark:text-gray-800">
+                              <div>{solarRadiation?.date}</div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 pb-2">
                             <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg">
                               <UmbrellaIcon className="w-5 h-5 text-amber-500" />
                               <div>
@@ -143,30 +148,28 @@ export default function DateInfo() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xl font-semibold dark:text-white">
-                                    {location.solarRadiation[0]?.uviIndex}
+                                    {solarRadiation?.uviIndex}
                                   </span>
-                                  <UVIndexIndicator
-                                    uvi={location.solarRadiation[0]?.uviIndex || 0}
-                                  />
+                                  <UVIndexIndicator uvi={solarRadiation?.uviIndex || 0} />
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3 p-4 from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg">
+                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg">
                               <div>
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
                                   Ozone
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xl font-semibold dark:text-white">
-                                    {location.solarRadiation[0]?.ozone}
+                                    {solarRadiation?.ozone}
                                   </span>
-                                  <OzoneIndicator ozone={location.solarRadiation[0]?.ozone || 0} />
+                                  <OzoneIndicator ozone={solarRadiation?.ozone || 0} />
                                 </div>
                               </div>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-2 gap-4 pb-2">
                             <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg">
                               <div>
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -174,11 +177,9 @@ export default function DateInfo() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xl font-semibold dark:text-white">
-                                    {location.solarRadiation[0]?.solarFlux}
+                                    {solarRadiation?.solarFlux}
                                   </span>
-                                  <SolarFluxIndicator
-                                    solarFlux={location.solarRadiation[0]?.solarFlux || 0}
-                                  />
+                                  <SolarFluxIndicator solarFlux={solarRadiation?.solarFlux || 0} />
                                 </div>
                               </div>
                             </div>
@@ -189,17 +190,17 @@ export default function DateInfo() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xl font-semibold dark:text-white">
-                                    {location.solarRadiation[0]?.sunsPotNumber}
+                                    {solarRadiation?.sunsPotNumber}
                                   </span>
                                   <SunspotNumberIndicator
-                                    sunspotNumber={location.solarRadiation[0]?.sunsPotNumber || 0}
+                                    sunspotNumber={solarRadiation?.sunsPotNumber || 0}
                                   />
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </>
-                      )}
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
