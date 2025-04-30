@@ -20,6 +20,7 @@ import { ProfileDataProvider } from './context/ProfileDataContext';
 import CreateIncident from './pages/CreateIncident';
 import DateInfo from './pages/DateInfo';
 import MigraineManagementSuite from './pages/MigraineManagementSuite';
+import IndicatorDetailsPage from './pages/IndicatorDetailsPage';
 
 export function App() {
   return (
@@ -51,6 +52,7 @@ export function App() {
             <Route path="create-incident" element={<CreateIncident />} />
             <Route path="date-info" element={<DateInfo />} />
             <Route path="migraine-management-suite" element={<MigraineManagementSuite />} />
+            <Route path="indicator-details" element={<IndicatorDetailsPage />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
