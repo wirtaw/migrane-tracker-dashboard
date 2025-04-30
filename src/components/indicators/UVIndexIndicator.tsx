@@ -1,3 +1,6 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
 export default function UVIndexIndicator({ uvi }: { uvi: number | undefined }) {
   const getUVIColor = (uvi: number | undefined) => {
     if (!uvi) return '';
@@ -21,6 +24,9 @@ export default function UVIndexIndicator({ uvi }: { uvi: number | undefined }) {
     <div className="flex items-center gap-2">
       <div className={`w-3 h-3 rounded-full ${getUVIColor(uvi)}`} />
       <span className="text-sm font-medium dark:text-gray-300">{getUVIText(uvi)}</span>
+      <Link to="/indicator-details#uv-index" className="ml-1 text-blue-500 hover:underline text-xs">
+        Details
+      </Link>
     </div>
   );
 }

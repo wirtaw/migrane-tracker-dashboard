@@ -1,10 +1,16 @@
 import React from 'react';
 import { Info, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export default function MigraineManagementSuite() {
   const { recommendationList, reducedTyramineMenuList } = useProfileDataContext();
+  const navigate = useNavigate();
+
+  const goBack = () => {
+    navigate(-1); // -1 goes back one step in the history
+  };
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -12,6 +18,12 @@ export default function MigraineManagementSuite() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
           Migraine Management Suite
         </h1>
+
+        <div className="space-y-8">
+          <button onClick={goBack} className="inline-block mt-4 text-blue-500 hover:underline">
+            Back
+          </button>
+        </div>
 
         <div className="space-y-8">
           <section className="space-y-4">
@@ -36,7 +48,10 @@ export default function MigraineManagementSuite() {
                 Diet with Reduced Tyramine Content for Migraine Patients (Based on S. Diamond, 1997)
               </h2>
             </div>
-            <table className="table-auto text-gray-800 dark:text-gray-200 border-collapse border border-gray-400">
+            <table
+              id="diet"
+              className="table-auto text-gray-800 dark:text-gray-200 border-collapse border border-gray-400"
+            >
               <thead>
                 <tr>
                   <th className="text-center border-spacing-2 border border-gray-300 p-2">
@@ -73,6 +88,12 @@ export default function MigraineManagementSuite() {
               </tbody>
             </table>
           </section>
+        </div>
+
+        <div className="space-y-8">
+          <button onClick={goBack} className="inline-block mt-4 text-blue-500 hover:underline">
+            Back
+          </button>
         </div>
       </div>
     </main>

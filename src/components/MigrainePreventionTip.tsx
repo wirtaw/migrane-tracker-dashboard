@@ -16,6 +16,7 @@ const shuffle = (array: IIndexedRecommendations[]) => {
 };
 
 export default function MigrainePreventionTip() {
+  const tablePhrase = '(see table on the reverse side)';
   const { recommendationList } = useProfileDataContext();
 
   const [recommendation, setRecommendation] = useState<string>('');
@@ -35,9 +36,9 @@ export default function MigrainePreventionTip() {
       Array.isArray(randomRecommendationList) &&
       randomRecommendationList[0]
     ) {
-      setRecommendation(randomRecommendationList[0].item);
+      setRecommendation(randomRecommendationList[0].item.replace(tablePhrase, ''));
     } else {
-      setRecommendation(recommendationList[0]);
+      setRecommendation(recommendationList[0].replace(tablePhrase, ''));
     }
   }, [recommendationList]);
 
@@ -48,7 +49,17 @@ export default function MigrainePreventionTip() {
         <h2 className="text-lg font-semibold dark:text-white"></h2>
       </div>
 
-      <div className="space-y-6 text-gray-900 dark:text-white">{recommendation}</div>
+      <div className="space-y-6 text-gray-900 dark:text-white">
+        {recommendation}
+        {recommendation.includes(tablePhrase) && (
+          <Link
+            to={`/migraine-management-suite#diet`}
+            className="text-blue-800 dark:text-blue-400 hover:text-blue-700 hover:text-underline"
+          >
+            See "Diet with Reduced Tyramine Content for Migraine Patients"
+          </Link>
+        )}
+      </div>
 
       <div className="flex justify-between pt-6">
         <div className="text-sm text-gray-600 dark:text-gray-400">

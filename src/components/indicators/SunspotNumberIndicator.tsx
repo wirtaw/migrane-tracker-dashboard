@@ -1,3 +1,6 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+
 export default function SunspotNumberIndicator({
   sunspotNumber,
 }: {
@@ -23,6 +26,12 @@ export default function SunspotNumberIndicator({
       <span className="text-sm font-medium dark:text-gray-300">
         {getSunspotNumberText(sunspotNumber)}
       </span>
+      <Link
+        to="/indicator-details#sunspot-number"
+        className="ml-1 text-blue-500 hover:underline text-xs"
+      >
+        Details
+      </Link>
     </div>
   );
 }

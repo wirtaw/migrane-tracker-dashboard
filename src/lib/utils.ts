@@ -29,3 +29,10 @@ export const getIsoDateTimeLocal = (date: Date): string => {
   // Construct the ISO datetime-local string
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
+
+export const IsNumber = (value: unknown): boolean =>
+  typeof value === 'number'
+    ? true
+    : typeof value === 'string'
+      ? !Number.isNaN(parseFloat(value))
+      : false;

@@ -15,6 +15,7 @@ import {
 import { Line } from 'react-chartjs-2';
 
 import { IForecast } from '../../models/profileData.types.ts';
+import { IsNumber } from '../../lib/utils.ts';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -126,32 +127,32 @@ export default function ForecastCard({ forecast, className }: IForecastCardProps
       if (dt.isValid) {
         hasValue = false;
 
-        if (item?.temperature) {
+        if (IsNumber(item?.temperature)) {
           localData.datasets[0].data.push(item.temperature);
           hasValue = true;
         }
 
-        if (item?.pressure) {
+        if (IsNumber(item?.pressure)) {
           localData.datasets[1].data.push(item.pressure);
           hasValue = true;
         }
 
-        if (item?.humidity) {
+        if (IsNumber(item?.humidity)) {
           localData.datasets[2].data.push(item.humidity);
           hasValue = true;
         }
 
-        if (item?.windSpeed) {
+        if (IsNumber(item?.windSpeed)) {
           localData.datasets[3].data.push(item.windSpeed);
           hasValue = true;
         }
 
-        if (item?.clouds) {
+        if (IsNumber(item?.clouds)) {
           localData.datasets[4].data.push(item.clouds);
           hasValue = true;
         }
 
-        if (item?.uvi) {
+        if (IsNumber(item?.uvi)) {
           localData.datasets[5].data.push(item.uvi);
           hasValue = true;
         }

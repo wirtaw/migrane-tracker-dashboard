@@ -1,5 +1,6 @@
 import React from 'react';
 import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle, RefreshCcw } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { env } from '../config/env';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
@@ -197,6 +198,17 @@ export default function GeoMagneticWidget() {
                 >
                   {env.NOAA_GOV_CURRENT_RESOURCE_TITLE}
                 </a>
+              </div>
+            </div>
+            <div className="flex justify-between pt-6">
+              <div className="text-sm text-gray-600 dark:text-gray-400">Details: </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <Link
+                  to="/indicator-details"
+                  className="ml-1 text-blue-500 hover:underline text-xs"
+                >
+                  Details
+                </Link>
               </div>
             </div>
           </>
