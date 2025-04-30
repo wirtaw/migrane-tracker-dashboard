@@ -150,7 +150,10 @@ export default function DateInfo() {
                                   <span className="text-xl font-semibold dark:text-white">
                                     {solarRadiation?.uviIndex}
                                   </span>
-                                  <UVIndexIndicator uvi={solarRadiation?.uviIndex || 0} />
+                                  <UVIndexIndicator
+                                    uvi={solarRadiation?.uviIndex || 0}
+                                    showDetails={true}
+                                  />
                                 </div>
                               </div>
                             </div>
@@ -179,7 +182,10 @@ export default function DateInfo() {
                                   <span className="text-xl font-semibold dark:text-white">
                                     {solarRadiation?.solarFlux}
                                   </span>
-                                  <SolarFluxIndicator solarFlux={solarRadiation?.solarFlux || 0} />
+                                  <SolarFluxIndicator
+                                    solarFlux={solarRadiation?.solarFlux || 0}
+                                    showDetails={true}
+                                  />
                                 </div>
                               </div>
                             </div>

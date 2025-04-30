@@ -33,6 +33,46 @@ const IndicatorDetailsPage = () => {
         </div>
 
         <div className="mb-6">
+          <h2 id="k-index" className="text-xl font-semibold mb-2">
+            K-Index
+          </h2>
+          <p>
+            The K-index is a quasi-logarithmic index that measures the maximum deviation of one
+            horizontal component of the Earth's magnetic field compared to a quiet day curve, within
+            a 3-hour interval. It ranges from 0 to 9.
+          </p>
+          <ul className="list-disc ml-5">
+            <li>0-2: Quiet geomagnetic conditions.</li>
+            <li>3: Unsettled.</li>
+            <li>4: Minor geomagnetic storm.</li>
+            <li>5: Moderate geomagnetic storm.</li>
+            <li>6: Strong geomagnetic storm.</li>
+            <li>7: Severe geomagnetic storm.</li>
+            <li>8-9: Extreme geomagnetic storm.</li>
+          </ul>
+        </div>
+
+        <div className="mb-6">
+          <h2 id="a-index" className="text-xl font-semibold mb-2">
+            A-Index
+          </h2>
+          <p>
+            The A-index is a daily average of the geomagnetic activity based on the 3-hourly
+            K-index. It provides a more linear scale for measuring the overall level of geomagnetic
+            disturbance.
+          </p>
+          <ul className="list-disc ml-5">
+            <li>Quiet (0-7): Minimal geomagnetic activity.</li>
+            <li>Unsettled (8-15): Slightly disturbed geomagnetic conditions.</li>
+            <li>Active (16-29): Increased geomagnetic activity.</li>
+            <li>Minor Storm (30-49): Low-level geomagnetic storm.</li>
+            <li>Major Storm (50-99): Significant geomagnetic storm.</li>
+            <li>Severe Storm (100-400): Intense geomagnetic storm.</li>
+            <li>Extreme Storm ({'>'}400): Very severe geomagnetic storm.</li>
+          </ul>
+        </div>
+
+        <div className="mb-6">
           <h2 id="ozone" className="text-xl font-semibold mb-2">
             Ozone
           </h2>

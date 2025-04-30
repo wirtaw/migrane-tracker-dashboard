@@ -125,7 +125,7 @@ export default function WeatherWidget() {
                     <span className="text-xl font-semibold dark:text-white">
                       {currentWeather.uvi}
                     </span>
-                    <UVIndexIndicator uvi={currentWeather.uvi} />
+                    <UVIndexIndicator uvi={currentWeather.uvi} showDetails={false} />
                   </div>
                 </div>
               </div>

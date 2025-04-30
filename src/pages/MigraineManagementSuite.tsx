@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 
 export default function MigraineManagementSuite() {
+  const tablePhrase = '(see table on the reverse side)';
   const { recommendationList, reducedTyramineMenuList } = useProfileDataContext();
   const navigate = useNavigate();
 
@@ -35,7 +36,9 @@ export default function MigraineManagementSuite() {
             </div>
             <ol className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
               {recommendationList.map((recommendation, index) => (
-                <li key={'recommendation-item-' + index}>{recommendation}</li>
+                <li key={'recommendation-item-' + index}>
+                  {recommendation.replace(tablePhrase, '')}
+                </li>
               ))}
             </ol>
           </section>

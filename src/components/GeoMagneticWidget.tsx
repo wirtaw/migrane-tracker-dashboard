@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import { env } from '../config/env';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
+import SolarFluxIndicator from '../components/indicators/SolarFluxIndicator';
+import KIndexIndicator from '../components/indicators/KIndexIndicator';
+import AIndexIndicator from '../components/indicators/AIndexIndicator';
 
 export interface IGeomagneticData {
   solarFlux: number;
@@ -41,19 +44,6 @@ function SpaceWeatherIndicator({ level }: { level: string }) {
     <div className="flex items-center gap-2">
       <div className={`w-3 h-3 rounded-full ${getStatusColor(level)}`} />
       <span className="text-sm font-medium dark:text-gray-300">{getStatusText(level)}</span>
-    </div>
-  );
-}
-
-function IndexBar({ value, max, colorClass }: { value: number; max: number; colorClass: string }) {
-  const percentage = (value / max) * 100;
-
-  return (
-    <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-      <div
-        className={`h-full ${colorClass} transition-all duration-300`}
-        style={{ width: `${percentage}%` }}
-      />
     </div>
   );
 }
@@ -120,13 +110,12 @@ export default function GeoMagneticWidget() {
                     </span>
                   </div>
                   <span className="text-sm font-medium dark:text-gray-300">
-                    {currentGeomagneticData.solarFlux}
+                    {currentGeomagneticData.solarFlux}/150
                   </span>
                 </div>
-                <IndexBar
-                  value={currentGeomagneticData.solarFlux}
-                  max={200}
-                  colorClass="bg-yellow-400"
+                <SolarFluxIndicator
+                  solarFlux={currentGeomagneticData.solarFlux}
+                  showDetails={false}
                 />
               </div>
 
@@ -138,14 +127,10 @@ export default function GeoMagneticWidget() {
                     <span className="text-sm text-gray-600 dark:text-gray-400">K-Index</span>
                   </div>
                   <span className="text-sm font-medium dark:text-gray-300">
-                    {currentGeomagneticData.kIndex}/9
+                    {currentGeomagneticData.kIndex}/10
                   </span>
                 </div>
-                <IndexBar
-                  value={currentGeomagneticData.kIndex}
-                  max={9}
-                  colorClass="bg-purple-500"
-                />
+                <KIndexIndicator kIndex={currentGeomagneticData.kIndex} showDetails={false} />
               </div>
 
               {/* A-Index */}
@@ -156,14 +141,10 @@ export default function GeoMagneticWidget() {
                     <span className="text-sm text-gray-600 dark:text-gray-400">A-Index</span>
                   </div>
                   <span className="text-sm font-medium dark:text-gray-300">
-                    {currentGeomagneticData.aIndex}/100
+                    {currentGeomagneticData.aIndex}/50
                   </span>
                 </div>
-                <IndexBar
-                  value={currentGeomagneticData.aIndex}
-                  max={100}
-                  colorClass="bg-blue-500"
-                />
+                <AIndexIndicator aIndex={currentGeomagneticData.aIndex} showDetails={false} />
               </div>
 
               {/* Space Weather Status */}
