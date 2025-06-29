@@ -72,7 +72,7 @@ export default function DateInfo() {
     }
 
     setExists(exists !== 0);
-  }, [date, location.search]);
+  }, [date, location.search, incidentList, locationList, medicationList, symptomList, triggerList]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
