@@ -669,6 +669,7 @@ export default function UploadDataForm({ onSubmit, decode }: IUploadDataFormProp
         // Locations
         maxId = Math.max(...locationList.map(({ id }) => id));
         const locations: ILocationData[] = mapLocationList(jsonDataLogsForecast, maxId);
+        console.dir(locations);
 
         setNewLocations(locations);
         setLocationList([...locationList, ...locations]);

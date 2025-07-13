@@ -5,10 +5,10 @@ export default function UVIndexIndicator({
   uvi,
   showDetails = true,
 }: {
-  uvi: number | undefined;
-  showDetails: boolean | undefined;
+  uvi: number | null;
+  showDetails: boolean | null;
 }) {
-  const getUVIColor = (uvi: number | undefined) => {
+  const getUVIColor = (uvi: number | null) => {
     if (!uvi) return '';
     if (uvi <= 2) return 'bg-green-500';
     if (uvi <= 5) return 'bg-yellow-500';
@@ -17,7 +17,7 @@ export default function UVIndexIndicator({
     return 'bg-purple-500';
   };
 
-  const getUVIText = (uvi: number | undefined) => {
+  const getUVIText = (uvi: number | null) => {
     if (!uvi) return '';
     if (uvi <= 2) return 'Low';
     if (uvi <= 5) return 'Moderate';
