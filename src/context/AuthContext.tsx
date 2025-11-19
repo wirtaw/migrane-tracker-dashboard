@@ -18,6 +18,7 @@ import {
   IRadiationTodayData,
   fetchRadiationWeatherData,
 } from '../services/weather.ts';
+import { syncUserWithBackend, fetchUserProfile } from '../services/migraineApi';
 interface IAuthContextType {
   user: User | null;
   session: Session | null;
@@ -52,18 +53,7 @@ interface IAuthContextType {
 
 const AuthContext = createContext<IAuthContextType | undefined>(undefined);
 
-const userExists = async (supabase: SupabaseClient, userId: string | undefined) => {
-  const { data: users, error } = await supabase
-    .from('migrane_tracker-users')
-    .select('user_id,email,username')
-    .eq('user_id', userId);
 
-  if (error) {
-    throw error;
-  }
-
-  return users;
-};
 
 const fetchUserData = async (supabase: SupabaseClient, userId: string | undefined) => {
   const { data, error } = await supabase
@@ -206,27 +196,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (_event === 'INITIAL_SESSION') {
         // handle initial session
       } else if (_event === 'SIGNED_IN') {
-        const users = await userExists(supabase, session?.user.id);
-        if (!users?.length) {
-          const { error: error2 } = await supabase
-            .from('migrane_tracker-users')
-            .insert([
-              {
-                user_id: session?.user.id,
-                email: session?.user?.email,
-              },
-            ])
-            .select();
-
-          if (error2) {
-            setSession(null);
-            throw error2;
+        // Sync with backend and fetch profile
+        if (session?.access_token) {
+          try {
+            const authResponse = await syncUserWithBackend(session.access_token);
+            const userProfile = await fetchUserProfile(authResponse.token);
+            console.log('User profile fetched:', userProfile);
+          } catch (err) {
+            console.error('Failed to sync with backend or fetch profile', err);
           }
+        }
 
-          //console.dir(inserted);
-        } else {
-          setProfileLoading(true);
-          const userData = await fetchUserData(supabase, session?.user.id);
+        setProfileLoading(true);
+        const userData = await fetchUserData(supabase, session?.user.id);
 
           if (userData) {
             setProfileSettingsData({
@@ -286,7 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
           }
           setProfileLoading(false);
-        }
+
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
         // handle sign out event

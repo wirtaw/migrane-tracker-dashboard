@@ -25,6 +25,7 @@ interface IEnvConfig {
   MIGRAINE_API_URL: string;
   MIGRAINE_API_HEADER_X_API_KEY: string;
   MIGRAINE_API_HEADER_X_API_VALUE: string;
+  MIGRAINE_BACKEND_API_URL: string;
 }
 
 export const env: IEnvConfig = {
@@ -55,4 +56,5 @@ export const env: IEnvConfig = {
   MIGRAINE_API_URL: import.meta.env.VITE_MIGRAINE_API_URL || '',
   MIGRAINE_API_HEADER_X_API_KEY: import.meta.env.VITE_MIGRAINE_API_HEADER_X_API_KEY || '',
   MIGRAINE_API_HEADER_X_API_VALUE: import.meta.env.VITE_MIGRAINE_API_HEADER_X_API_VALUE || '',
+  MIGRAINE_BACKEND_API_URL: import.meta.env.VITE_MIGRAINE_BACKEND_API_URL || '',
 };
