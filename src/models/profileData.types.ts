@@ -244,3 +244,10 @@ export interface ITyramineContentItem {
   limitedUse: string;
   striclyProhibitedUse: string;
 }
+
+export interface IApiSession {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+  userId: string;
+}

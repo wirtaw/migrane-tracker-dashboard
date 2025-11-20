@@ -1,8 +1,6 @@
 export interface IUserUpdateDAO {
-  birthdate: string;
+  birthDate: string;
   latitude: string;
   longitude: string;
-  salt: string | null;
-  key: string | null;
-  isSecurityFinished: boolean | null;
+  emailNotifications: boolean;
 }

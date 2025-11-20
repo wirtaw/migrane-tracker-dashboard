@@ -8,6 +8,7 @@ import AddButton from './../components/AddButton';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import SecuritySetupForm from '../components/forms/SecuritySetupForm';
 import { IUserUpdateDAO } from '../models/user.types';
+import { updateProfile } from '../services/migraineApi';
 
 interface ILocation {
   latitude: number | null;
@@ -18,7 +19,7 @@ interface ILocation {
 export default function Profile() {
   const { profileSecurityData } = useProfileDataContext();
   const { theme, toggleTheme } = useTheme();
-  const { user, profileSettingsData, setProfileSettingsData } = useAuth();
+  const { user, profileSettingsData, setProfileSettingsData, apiSession } = useAuth();
   const [formData, setFormData] = useState({
     ...profileSettingsData,
     salt: profileSecurityData.salt,
@@ -51,35 +52,17 @@ export default function Profile() {
     try {
       if (supabase && user?.id) {
         const payload: IUserUpdateDAO = {
-          birthdate: formData.birthDate,
+          birthDate: formData.birthDate,
           latitude: formData.latitude,
           longitude: formData.longitude,
-          salt: null,
-          key: null,
-          isSecurityFinished: null,
+          emailNotifications: formData.emailNotifications || false,
         };
 
-        if (aggrementSaveSalt) {
-          payload.salt = profileSecurityData.salt;
+        if (!apiSession) {
+          throw new Error('No active session');
         }
 
-        if (aggrementSaveKey) {
-          payload.key = profileSecurityData.key;
-        }
-
-        if (profileSettingsData.securitySetup) {
-          payload.isSecurityFinished = true;
-        }
-
-        const { data, error } = await supabase
-          .from('migrane_tracker-users')
-          .update(payload)
-          .eq('user_id', user.id)
-          .select();
-
-        if (error) {
-          throw error;
-        }
+        const data = await updateProfile(apiSession.accessToken, payload);
         setSaveStatus('success');
         console.log('Saved:', data);
         setProfileSettingsData({

@@ -19,6 +19,29 @@ export interface AuthResponse {
   token: string;
 }
 
+export interface UserProfile {
+  userId: string;
+  email?: string;
+  longitude?: string;
+  latitude?: string;
+  birthDate?: string;
+  emailNotifications?: boolean;
+  dailySummary?: boolean;
+  personalHealthData?: boolean;
+  securitySetup?: boolean;
+  salt?: string;
+  key?: string;
+  isSecurityFinished?: boolean;
+  role: Role;
+}
+
+export interface UpdateProfile {
+  longitude?: string;
+  latitude?: string;
+  birthdate?: string;
+  emailNotifications?: boolean;
+}
+
 export const syncUserWithBackend = async (token: string): Promise<AuthResponse> => {
   try {
     const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/auth/oauth`, {
@@ -40,7 +63,7 @@ export const syncUserWithBackend = async (token: string): Promise<AuthResponse> 
   }
 };
 
-export const fetchUserProfile = async (token: string): Promise<UserPayload> => {
+export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
   try {
     const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/auth/profile`, {
       method: 'GET',
@@ -57,6 +80,31 @@ export const fetchUserProfile = async (token: string): Promise<UserPayload> => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching user profile:', error);
+    throw error;
+  }
+};
+
+export const updateProfile = async (
+  token: string,
+  profile: UpdateProfile
+): Promise<UserProfile> => {
+  try {
+    const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/users/profile`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(profile),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update user profile: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating user profile:', error);
     throw error;
   }
 };

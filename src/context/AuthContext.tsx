@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session, SupabaseClient } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase.ts';
 import { env } from '../config/env';
 import {
@@ -7,6 +7,7 @@ import {
   ILocationData,
   IForecastHistoricalParams,
   ISolarHistoricalParams,
+  IApiSession,
 } from '../models/profileData.types';
 import {
   IWeatherData,
@@ -22,6 +23,7 @@ import { syncUserWithBackend, fetchUserProfile } from '../services/migraineApi';
 interface IAuthContextType {
   user: User | null;
   session: Session | null;
+  apiSession: IApiSession | null;
   loading: boolean;
   signInWithGithub: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -52,23 +54,6 @@ interface IAuthContextType {
 }
 
 const AuthContext = createContext<IAuthContextType | undefined>(undefined);
-
-
-
-const fetchUserData = async (supabase: SupabaseClient, userId: string | undefined) => {
-  const { data, error } = await supabase
-    .from('migrane_tracker-users')
-    .select('birthdate, latitude, longitude, salt, key, isSecurityFinished')
-    .eq('user_id', userId)
-    .single();
-
-  if (error) {
-    console.error('Error fetching user data:', error);
-    return null; // Return null to indicate an error
-  }
-
-  return data;
-};
 
 const fetchForecastData = async (latitude: string, longitude: string) => {
   try {
@@ -133,6 +118,7 @@ const fetchSolarRadiationData = async (latitude: number, longitude: number) => {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [apiSession, setApiSession] = useState<IApiSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileSettingsData, setProfileSettingsData] = useState<IProfileSettingsData>({
     birthDate: '',
@@ -196,32 +182,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (_event === 'INITIAL_SESSION') {
         // handle initial session
       } else if (_event === 'SIGNED_IN') {
-        // Sync with backend and fetch profile
+        setProfileLoading(true);
         if (session?.access_token) {
           try {
             const authResponse = await syncUserWithBackend(session.access_token);
             const userProfile = await fetchUserProfile(authResponse.token);
-            console.log('User profile fetched:', userProfile);
-          } catch (err) {
-            console.error('Failed to sync with backend or fetch profile', err);
-          }
-        }
+            const apiSession = {
+              accessToken: authResponse.token,
+              refreshToken: session.refresh_token,
+              expiresAt: session.expires_at || 600,
+              userId: session.user.id,
+            };
+            setApiSession(apiSession);
 
-        setProfileLoading(true);
-        const userData = await fetchUserData(supabase, session?.user.id);
-
-          if (userData) {
             setProfileSettingsData({
               ...profileSettingsData,
-              birthDate: userData.birthdate?.toString() || '',
-              latitude: userData.latitude?.toString() || '',
-              longitude: userData.longitude?.toString() || '',
-              profileFilled: !!userData.birthdate && !!userData.latitude && !!userData.longitude,
+              birthDate: userProfile.birthDate || '',
+              latitude: userProfile.latitude || '',
+              longitude: userProfile.longitude || '',
+              profileFilled:
+                !!userProfile.birthDate && !!userProfile.latitude && !!userProfile.longitude,
             });
 
-            const { latitude, longitude } = userData;
+            const { latitude, longitude } = userProfile;
 
-            if (latitude && longitude) {
+            if (latitude && longitude && latitude !== '0' && longitude !== '0') {
               const cachedForecast = sessionStorage.getItem(`forecast_${session?.user.id}`);
               const cachedGeomagnetic = sessionStorage.getItem(`geomagnetic_${session?.user.id}`);
               const cachedSolarRadiation = sessionStorage.getItem(
@@ -256,7 +241,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               if (cachedSolarRadiation) {
                 setSolarRadiationData(JSON.parse(cachedSolarRadiation));
               } else {
-                const solar = await fetchSolarRadiationData(latitude, longitude);
+                const solar = await fetchSolarRadiationData(
+                  parseInt(latitude),
+                  parseInt(longitude)
+                );
                 if (solar) {
                   setSolarRadiationData(solar);
                   sessionStorage.setItem(
@@ -266,9 +254,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
               }
             }
-          }
-          setProfileLoading(false);
 
+            setProfileLoading(false);
+          } catch (err) {
+            console.error('Failed to sync with backend or fetch profile', err);
+            setProfileLoading(false);
+          }
+        }
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
         // handle sign out event
@@ -432,6 +424,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         session,
+        apiSession,
         loading,
         signInWithGithub,
         signInWithGoogle,
