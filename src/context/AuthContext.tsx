@@ -102,12 +102,19 @@ const fetchGeomagneticDataHistorical = async (dateTime: Date) => {
   }
 };
 
-const fetchSolarRadiationData = async (latitude: number, longitude: number) => {
+const fetchSolarRadiationData = async (
+  latitude: number,
+  longitude: number,
+  token?: string
+) => {
   try {
-    const response: IRadiationTodayData[] = await fetchRadiationWeatherData({
-      latitude,
-      longitude,
-    });
+    const response: IRadiationTodayData[] = await fetchRadiationWeatherData(
+      {
+        latitude,
+        longitude,
+      },
+      token
+    );
     return response;
   } catch (error) {
     console.error('Error fetching solar radiation data:', error);
@@ -403,7 +410,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSolarRadiationLoading(true);
         const solar = await fetchSolarRadiationData(
           parseFloat(profileSettingsData.latitude),
-          parseFloat(profileSettingsData.longitude)
+          parseFloat(profileSettingsData.longitude),
+          apiSession?.accessToken
         );
 
         if (solar) {
