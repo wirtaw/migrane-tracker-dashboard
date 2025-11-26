@@ -382,25 +382,17 @@ export async function fetchRadiationWeatherData(
   { latitude, longitude }: ICoordinates,
   token?: string
 ): Promise<IRadiationTodayData[] | []> {
-  if (!env.MIGRAINE_BACKEND_API_URL) {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     return [];
   }
 
-  const headers = new Headers();
-  if (token) {
-    headers.append('Authorization', `Bearer ${token}`);
-  }
-
   const responseRadiation = await fetch(
-    `${env.MIGRAINE_BACKEND_API_URL}/radiation?latitude=${latitude}&longitude=${longitude}`,
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/solar?latitude=${latitude}&longitude=${longitude}`,
     {
       method: 'GET',
       headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        Origin: `${env.MIGRAINE_BACKEND_API_URL}`,
-        Referer: `${TEMIS_BASE_RESOURCE_URL}`,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       },
     }
   );

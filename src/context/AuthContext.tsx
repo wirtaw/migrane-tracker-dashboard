@@ -216,9 +216,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (latitude && longitude && latitude !== '0' && longitude !== '0') {
               const cachedForecast = sessionStorage.getItem(`forecast_${session?.user.id}`);
               const cachedGeomagnetic = sessionStorage.getItem(`geomagnetic_${session?.user.id}`);
-              const cachedSolarRadiation = sessionStorage.getItem(
-                `solar_radiation_${session?.user.id}`
-              );
 
               if (cachedForecast) {
                 setForecastData(JSON.parse(cachedForecast));
@@ -245,20 +242,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
               }
 
-              if (cachedSolarRadiation) {
-                setSolarRadiationData(JSON.parse(cachedSolarRadiation));
-              } else {
-                const solar = await fetchSolarRadiationData(
-                  parseInt(latitude),
-                  parseInt(longitude)
+              const solar = await fetchSolarRadiationData(
+                parseFloat(latitude),
+                parseFloat(longitude),
+                apiSession.accessToken
+              );
+              if (solar) {
+                setSolarRadiationData(solar);
+                sessionStorage.setItem(
+                  `solar_radiation_${session?.user.id}`,
+                  JSON.stringify(solar)
                 );
-                if (solar) {
-                  setSolarRadiationData(solar);
-                  sessionStorage.setItem(
-                    `solar_radiation_${session?.user.id}`,
-                    JSON.stringify(solar)
-                  );
-                }
               }
             }
 
