@@ -12,8 +12,7 @@ export default function DataManagement() {
   const [activeModal, setActiveModal] = useState<'uploadJSON' | 'exportJSON' | 'resetData' | null>(
     null
   );
-  const [importWithDecode, setImportWithDecode] = useState<boolean>(false);
-  const [exportWithDecode, setExportWithDecode] = useState<boolean>(false);
+
   const [hasBrokenImportData, setHasBrokenImportData] = useState<boolean>(false);
   const [hasUserData, setHasUserData] = useState<boolean>(false);
   const { brokenImportData, incidentList, triggerList, medicationList, symptomList } =
@@ -175,20 +174,6 @@ export default function DataManagement() {
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Buttons</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 <div className="prose dark:prose-invert max-w-none">
-                  <div className="hidden">
-                    <label className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        name="aggrementSaveSalt"
-                        checked={importWithDecode}
-                        onChange={() => setImportWithDecode(!importWithDecode)}
-                        className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">
-                        Check this box to import data with decoding.
-                      </span>
-                    </label>
-                  </div>
                   <div className="mt-5">
                     <label htmlFor="uploadJSON" className="text-gray-600 dark:text-gray-300">
                       <AddButton
@@ -202,22 +187,9 @@ export default function DataManagement() {
                     </label>
                   </div>
                 </div>
+
                 {hasUserData && (
                   <div className="prose dark:prose-invert max-w-none">
-                    <div className="hidden">
-                      <label className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          name="exportWithDecode"
-                          checked={exportWithDecode}
-                          onChange={() => setExportWithDecode(!exportWithDecode)}
-                          className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
-                        />
-                        <span className="text-gray-700 dark:text-gray-300">
-                          Check this box to export data with decoding.
-                        </span>
-                      </label>
-                    </div>
                     <div className="mt-5">
                       <label htmlFor="exportJSON" className="text-gray-600 dark:text-gray-300">
                         <AddButton
@@ -259,14 +231,14 @@ export default function DataManagement() {
         onClose={() => setActiveModal(null)}
         title="Upload JSON Data"
       >
-        <UploadDataForm onSubmit={() => setActiveModal(null)} decode={importWithDecode} />
+        <UploadDataForm onSubmit={() => setActiveModal(null)} />
       </Modal>
       <Modal
         isOpen={activeModal === 'exportJSON'}
         onClose={() => setActiveModal(null)}
         title="Export JSON Data"
       >
-        <DownloadDataForm onSubmit={() => setActiveModal(null)} decode={exportWithDecode} />
+        <DownloadDataForm onSubmit={() => setActiveModal(null)} />
       </Modal>
       <Modal
         isOpen={activeModal === 'resetData'}

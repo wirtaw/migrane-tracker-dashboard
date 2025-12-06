@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import sjcl, { SjclCipherEncrypted } from 'sjcl';
+
 import {
   IIncident,
   ITrigger,
@@ -17,12 +17,10 @@ import Loader from '../Loader';
 
 interface IUploadDataFormProps {
   onSubmit: () => void;
-  decode: boolean;
+
 }
 
-const decrypt = (data: string | SjclCipherEncrypted, key: string) => {
-  return JSON.parse(sjcl.decrypt(key, data));
-};
+
 
 const brokenIncidents: IBrokenIncident[] = [];
 const brokenTriggers: IBrokenTrigger[] = [];
@@ -548,7 +546,7 @@ const mapLocationList = (jsonDataLogsForecast: unknown, maxId: number): ILocatio
   return locations;
 };
 
-export default function UploadDataForm({ onSubmit, decode }: IUploadDataFormProps) {
+export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [warnMessage, setWarnMessage] = useState<string>('');
@@ -567,7 +565,7 @@ export default function UploadDataForm({ onSubmit, decode }: IUploadDataFormProp
     setMedicationList,
     symptomList,
     setSymptomList,
-    profileSecurityData,
+
     setBrokenImportData,
     medicationEnumList,
     setMedicationEnumList,
@@ -604,17 +602,7 @@ export default function UploadDataForm({ onSubmit, decode }: IUploadDataFormProp
         return;
       }
       try {
-        let data;
-        if (decode && profileSecurityData?.key) {
-          const decoded: string = decrypt(e.target.result, profileSecurityData?.key);
-          if (!decoded) {
-            setErrorMessage('File is not base64 encoded');
-            return;
-          }
-          data = JSON.parse(decoded);
-        } else {
-          data = JSON.parse(e.target.result);
-        }
+        const data = JSON.parse(e.target.result);
         const {
           incidents: jsonDataIncidents,
           triggers: jsonDataTriggers,

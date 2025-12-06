@@ -68,9 +68,9 @@ const fetchForecastData = async (latitude: string, longitude: string) => {
   }
 };
 
-const fetchGeomagneticData = async () => {
+const fetchGeomagneticData = async (token?: string) => {
   try {
-    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherData();
+    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherData(token);
     return response;
   } catch (error) {
     console.error('Error fetching geomagnetic data:', error);
@@ -137,8 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userId: '',
     profileFilled: false,
     securitySetup: false,
-    salt: '',
-    key: '',
+
     fetchDataErrors: {
       forecast: '',
       magneticWeather: '',
@@ -231,7 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               if (cachedGeomagnetic) {
                 setGeomagneticData(JSON.parse(cachedGeomagnetic));
               } else {
-                const geomagnetic = await fetchGeomagneticData();
+                const geomagnetic = await fetchGeomagneticData(apiSession.accessToken);
 
                 if (geomagnetic) {
                   setGeomagneticData(geomagnetic);
@@ -357,7 +356,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchGeomagnetic = async () => {
     try {
       setGeoMagneticLoading(true);
-      const geomagnetic = await fetchGeomagneticData();
+      const geomagnetic = await fetchGeomagneticData(apiSession?.accessToken);
       setGeomagneticData(geomagnetic);
       if (geomagnetic) {
         sessionStorage.setItem(`geomagnetic_${user?.id}`, JSON.stringify(geomagnetic));

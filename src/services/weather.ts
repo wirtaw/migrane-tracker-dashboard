@@ -85,14 +85,32 @@ export interface IRadiationTodayData {
   date: string;
   UVIndex: number;
   ozone: number;
+  kpIndex?: number;
+  aRunning?: number;
+  Kp1?: number;
+  Kp2?: number;
+  Kp3?: number;
+  Kp4?: number;
+  Kp5?: number;
+  Kp6?: number;
+  Kp7?: number;
+  Kp8?: number;
+  ap1?: number;
+  ap2?: number;
+  ap3?: number;
+  ap4?: number;
+  ap5?: number;
+  ap6?: number;
+  ap7?: number;
+  ap8?: number;
+  solarFlux?: number;
+  sunsPotNumber?: number;
 }
 
 const OPEN_WEATHER_BASE_URL: string = env.OPEN_WEATHER_BASE_URL;
 const NOAA_GOV_CURRENT_BASE_URL: string = env.NOAA_GOV_CURRENT_BASE_URL;
 const OPEN_METEO_BASE_URL: string = env.OPEN_METEO_BASE_URL;
 const OPEN_METEO_ARCHIVE_URL: string = env.OPEN_METEO_ARCHIVE_URL;
-const TEMIS_BASE_RESOURCE_URL: string = env.TEMIS_BASE_RESOURCE_URL;
-
 
 function parseGeophysicalAlert(text: string): IGeophysicalWeatherData {
   const result: IGeophysicalWeatherData = {
@@ -251,18 +269,37 @@ export async function fetchOpenMeteoWeatherData({
   }
 }
 
-export async function fetchGeophysicalWeatherData(): Promise<IGeophysicalWeatherData> {
-  const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
+export async function fetchGeophysicalWeatherData(
+  token?: string
+): Promise<IGeophysicalWeatherData> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    return {
+      solarFlux: 0,
+      aIndex: 0,
+      kIndex: -1,
+      pastWeather: { level: '' },
+      nextWeather: { level: '' },
+    };
+  }
+
+  const responseGeoActivity = await fetch(
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/geophysical/live`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   if (!responseGeoActivity.ok) {
     throw new Error('Weather data fetch failed');
   }
 
-  const geoActivityData: string = await responseGeoActivity.text();
+  const geoActivityData: IGeophysicalWeatherData = await responseGeoActivity.json();
 
-  const geoActivityDataMapped: IGeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
-
-  return geoActivityDataMapped;
+  return geoActivityData;
 }
 
 const getDateRange = (dateTime: Date) => {

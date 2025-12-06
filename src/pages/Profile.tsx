@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
-import { User, Calendar, MapPin, Settings, EarthLock, Shield } from 'lucide-react';
+import { User, Calendar, MapPin, Settings } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase.ts';
-import Modal from './../components/Modal';
-import AddButton from './../components/AddButton';
-import { useProfileDataContext } from '../context/ProfileDataContext';
-import SecuritySetupForm from '../components/forms/SecuritySetupForm';
+
 import { IUserUpdateDAO } from '../models/user.types';
 import { updateProfile } from '../services/migraineApi';
 
@@ -17,19 +14,14 @@ interface ILocation {
 }
 
 export default function Profile() {
-  const { profileSecurityData } = useProfileDataContext();
+
   const { theme, toggleTheme } = useTheme();
   const { user, profileSettingsData, setProfileSettingsData, apiSession } = useAuth();
   const [formData, setFormData] = useState({
     ...profileSettingsData,
-    salt: profileSecurityData.salt,
-    key: profileSecurityData.key,
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [aggrementSaveSalt, setAggrementSaveSalt] = useState(false);
-  const [aggrementSaveKey, setAggrementSaveKey] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [activeModal, setActiveModal] = useState<'securitySetup' | null>(null);
   const [location, setLocation] = useState<ILocation>({
     latitude: null,
     longitude: null,
@@ -241,81 +233,7 @@ export default function Profile() {
                   )}
                 </div>
               </div>
-              <div className="space-y-4">
-                {!profileSecurityData?.isInit &&
-                  (profileSecurityData.salt || profileSecurityData.key) && (
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-indigo-500" />
-                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Security
-                      </h2>
-                    </div>
-                  )}
-                <div className="grid grid-cols-2 gap-4">
-                  {!profileSecurityData?.isInit && profileSecurityData.salt && (
-                    <div>
-                      <label
-                        htmlFor="salt"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >
-                        Salt
-                      </label>
-                      <input
-                        type="text"
-                        id="salt"
-                        name="salt"
-                        value={profileSecurityData.salt}
-                        readOnly
-                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2"
-                        autoComplete="off"
-                      />
-                      <label className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          name="aggrementSaveSalt"
-                          checked={aggrementSaveSalt}
-                          onChange={() => setAggrementSaveSalt(!aggrementSaveSalt)}
-                          className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
-                        />
-                        <span className="text-gray-700 dark:text-gray-300">
-                          I agree to save the salt
-                        </span>
-                      </label>
-                    </div>
-                  )}
-                  {!profileSecurityData?.isInit && profileSecurityData.key && (
-                    <div>
-                      <label
-                        htmlFor="key"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                      >
-                        Key
-                      </label>
-                      <input
-                        type="text"
-                        id="key"
-                        name="key"
-                        value={profileSecurityData.key}
-                        readOnly
-                        className="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2"
-                        autoComplete="off"
-                      />
-                      <label className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          name="aggrementSaveKey"
-                          checked={aggrementSaveKey}
-                          onChange={() => setAggrementSaveKey(!aggrementSaveKey)}
-                          className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-5 w-5"
-                        />
-                        <span className="text-gray-700 dark:text-gray-300">
-                          I agree to save the key
-                        </span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
+
 
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -371,23 +289,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              {!profileSettingsData?.securitySetup &&
-                aggrementSaveSalt &&
-                (!profileSecurityData.salt || !profileSecurityData.key) && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                      <EarthLock className="w-5 h-5 text-indigo-500" />
-                      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Security
-                      </h2>
-                    </div>
-                    <AddButton
-                      label="Setup Security"
-                      id="securitySetup"
-                      onClick={() => setActiveModal('securitySetup')}
-                    />
-                  </div>
-                )}
+
             </div>
 
             <div className="flex items-center justify-end gap-4">
@@ -412,13 +314,7 @@ export default function Profile() {
           </form>
         </div>
       </main>
-      <Modal
-        isOpen={activeModal === 'securitySetup'}
-        onClose={() => setActiveModal(null)}
-        title="Setup Security"
-      >
-        <SecuritySetupForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
+
     </>
   );
 }

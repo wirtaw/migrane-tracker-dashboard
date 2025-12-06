@@ -1,19 +1,16 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import sjcl, { SjclCipherEncrypted } from 'sjcl';
+
 import { IJSONData } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import Loader from '../Loader';
 
 interface IDownloadDataFormProps {
   onSubmit: () => void;
-  decode: boolean;
 }
 
-const encrypt = (data: string | SjclCipherEncrypted, key: string) => {
-  return JSON.stringify(sjcl.encrypt(key, JSON.stringify(data)));
-};
 
-export default function DownloadDataForm({ onSubmit, decode }: IDownloadDataFormProps) {
+
+export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [warnMessage, setWarnMessage] = useState<string>('');
@@ -93,13 +90,10 @@ export default function DownloadDataForm({ onSubmit, decode }: IDownloadDataForm
   ]);
 
   useEffect(() => {
-    const jsonString =
-      decode && profileSecurityData?.key
-        ? encrypt(JSON.stringify(exportData), profileSecurityData.key)
-        : JSON.stringify(exportData, null, 2);
+    const jsonString = JSON.stringify(exportData, null, 2);
     setExportString(jsonString);
     setWarnMessage('');
-  }, [exportData, decode, profileSecurityData]);
+  }, [exportData, profileSecurityData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,8 +148,7 @@ export default function DownloadDataForm({ onSubmit, decode }: IDownloadDataForm
           Download JSON file
         </label>
         <div className="text-gray-900 dark:text-white hidden">
-          exists {existDataExport.toString()} / decode {decode.toString()} / key{' '}
-          {profileSecurityData?.key}
+          exists {existDataExport.toString()}
         </div>
         <details className="text-gray-600 dark:text-gray-300 mt-5">
           <pre className="bg-gray-100 p-4 rounded-md text-black">{exportString}</pre>

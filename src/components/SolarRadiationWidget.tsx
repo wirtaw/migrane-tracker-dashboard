@@ -106,20 +106,49 @@ export default function SolarRadiationWidget() {
                 colorClass="bg-blue-500"
               />
             </div>
-          </div>
-
-          <div className="flex justify-between pt-6">
-            <div className="text-sm text-gray-600 dark:text-gray-400">Source: </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              <a
-                href={env.TEMIS_BASE_RESOURCE_URL}
-                target="_blank"
-                className="text-blue-600 visited:text-purple-600 underline "
-              >
-                {env.TEMIS_BASE_RESOURCE_TITLE}
-              </a>
+            {/* Kp Index */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Waves className="w-4 h-4 text-purple-500" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Kp Index</span>
+                </div>
+                <span className="text-sm font-medium dark:text-gray-300">
+                  {currentSolarRadiationData[0].kpIndex ?? 'N/A'}
+                </span>
+              </div>
+              <IndexBar
+                value={currentSolarRadiationData[0].kpIndex ?? 0}
+                max={9}
+                colorClass="bg-purple-500"
+              />
+            </div>
+            {/* Solar Flux & Sunspots */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-orange-500" />
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Solar Flux</span>
+                </div>
+                <div className="text-lg font-semibold dark:text-white">
+                  {currentSolarRadiationData[0].solarFlux === -1
+                    ? 'N/A'
+                    : currentSolarRadiationData[0].solarFlux}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Sunspots</span>
+                </div>
+                <div className="text-lg font-semibold dark:text-white">
+                  {currentSolarRadiationData[0].sunsPotNumber}
+                </div>
+              </div>
             </div>
           </div>
+
+
         </>
       )}
     </div>

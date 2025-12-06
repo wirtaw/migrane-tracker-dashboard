@@ -122,8 +122,7 @@ export interface IProfileSettingsData {
   personalHealthData: boolean;
   securitySetup: boolean;
   profileFilled: boolean;
-  salt: string;
-  key: string;
+
   fetchDataErrors: {
     forecast: string;
     magneticWeather: string;
@@ -135,8 +134,7 @@ export interface IProfileSettingsData {
 export interface ProfileSecurityData {
   userId: string;
   password: string;
-  salt: string;
-  key: string;
+
   isInit: boolean;
 }
 
