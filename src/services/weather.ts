@@ -62,12 +62,26 @@ export interface IWeatherData {
   }>;
 }
 
+export interface NextWeather {
+  kpIndex: {
+    observed: string;
+    expected: string;
+    rationale: string;
+  };
+  solarRadiation: {
+    rationale: string;
+  };
+  radioBlackout: {
+    rationale: string;
+  };
+}
+
 export interface IGeophysicalWeatherData {
   solarFlux: number;
   aIndex: number;
   kIndex: number;
   pastWeather: { level: string };
-  nextWeather: { level: string };
+  nextWeather: NextWeather;
 }
 
 interface ICoordinates {
@@ -108,65 +122,9 @@ export interface IRadiationTodayData {
 }
 
 const OPEN_WEATHER_BASE_URL: string = env.OPEN_WEATHER_BASE_URL;
-const NOAA_GOV_CURRENT_BASE_URL: string = env.NOAA_GOV_CURRENT_BASE_URL;
+
 const OPEN_METEO_BASE_URL: string = env.OPEN_METEO_BASE_URL;
 const OPEN_METEO_ARCHIVE_URL: string = env.OPEN_METEO_ARCHIVE_URL;
-
-function parseGeophysicalAlert(text: string): IGeophysicalWeatherData {
-  const result: IGeophysicalWeatherData = {
-    solarFlux: 0,
-    aIndex: 0,
-    kIndex: -1,
-    pastWeather: { level: '' },
-    nextWeather: { level: '' },
-  };
-
-  if (!text) {
-    return result;
-  }
-
-  const lines = text.split('\n');
-
-  if (!lines.length) {
-    return result;
-  }
-
-  // Extract solar flux and A-index
-  const solarFluxLine: string | undefined = lines.find(line => line.includes('Solar flux'));
-  const solarFluxMatch = solarFluxLine
-    ? solarFluxLine.match(/Solar flux (\d+) and estimated planetary A-index (\d+)/)
-    : null;
-  if (solarFluxMatch) {
-    result.solarFlux = parseInt(solarFluxMatch[1], 10);
-    result.aIndex = parseInt(solarFluxMatch[2], 10);
-  }
-
-  // Extract K-index
-  const kIndexLine: string | undefined = lines.find(line => line.includes('K-index'));
-  const kIndexMatch = kIndexLine
-    ? kIndexLine.match(/K-index at \d+ UTC on \d+ \w+ was (\d+\.\d+)/)
-    : null;
-  if (kIndexMatch) {
-    result.kIndex = parseFloat(kIndexMatch[1]);
-  }
-
-  // Extract space weather summaries
-  const pastSpaceWeatherLine: string | undefined = lines.find(line =>
-    line.startsWith('Space weather for the past 24 hours')
-  );
-  result.pastWeather.level = pastSpaceWeatherLine
-    ? pastSpaceWeatherLine.split(' has been ')[1].trim().replace('.', '')
-    : '';
-
-  const nextSpaceWeatherLine: string | undefined = lines.find(line =>
-    line.startsWith('Space weather for the next 24 hours')
-  );
-  result.nextWeather.level = nextSpaceWeatherLine
-    ? nextSpaceWeatherLine.split(' is predicted to be ')[1].trim().replace('.', '')
-    : '';
-
-  return result;
-}
 
 export async function fetchWeatherData({
   latitude,
@@ -276,14 +234,20 @@ export async function fetchGeophysicalWeatherData(
     return {
       solarFlux: 0,
       aIndex: 0,
-      kIndex: -1,
+      kIndex: 0,
       pastWeather: { level: '' },
-      nextWeather: { level: '' },
+      nextWeather: {
+        kpIndex: { observed: '', expected: '', rationale: '' },
+        solarRadiation: { rationale: '' },
+        radioBlackout: { rationale: '' },
+      },
     };
   }
 
+  const dateStr = getDateRange(new Date());
+
   const responseGeoActivity = await fetch(
-    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/geophysical/live`,
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/solar/geophysical/historical?date=${dateStr}`,
     {
       method: 'GET',
       headers: {
@@ -399,20 +363,29 @@ export async function fetchOpenMeteoWeatherDataHistorical({
 }
 
 export async function fetchGeophysicalWeatherDataHistorical(
-  dateTime: Date
+  dateTime: Date,
+  token: string
 ): Promise<IGeophysicalWeatherData> {
-  console.info(`${dateTime.toISOString()}`);
-  const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
+  const dateStr = getDateRange(dateTime);
+
+  const responseGeoActivity = await fetch(
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/solar/geophysical/historical?date=${dateStr}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 
   if (!responseGeoActivity.ok) {
-    throw new Error('Weather data fetch failed');
+    throw new Error('Geophysical weather data fetch failed');
   }
 
-  const geoActivityData: string = await responseGeoActivity.text();
+  const geoActivityData: IGeophysicalWeatherData = await responseGeoActivity.json();
 
-  const geoActivityDataMapped: IGeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
-
-  return geoActivityDataMapped;
+  return geoActivityData;
 }
 
 export async function fetchRadiationWeatherData(
@@ -428,8 +401,8 @@ export async function fetchRadiationWeatherData(
     {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     }
   );

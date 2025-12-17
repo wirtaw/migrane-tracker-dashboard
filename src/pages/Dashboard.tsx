@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import BiorhythmChart from '../components/BiorhythmChart';
 import CalendarView from '../components/CalendarView';
 import LifeMetrics from '../components/LifeMetrics';
@@ -27,29 +27,26 @@ export default function Dashboard() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content Column */}
+        <div className="lg:col-span-2 space-y-6">
           <CalendarView weekDays={weekDays} firstDayOfMonth={firstDayOfMonth} days={days} />
-        </div>
-        <div>
-          <WeatherWidget />
-        </div>
-        <div>
+
           <GeoMagneticWidget />
-        </div>
-        <div>
-          <MigrainePreventionTip />
-        </div>
-        <div>
-          <MostRecentData />
-        </div>
-        <div>
-          <TrackingButtons />
-        </div>
-        <div>
+
           <BiorhythmChart birthDate={birthDate} />
         </div>
-        <div>
+
+        {/* Sidebar Column */}
+        <div className="space-y-6">
+          <WeatherWidget />
+
+          <MigrainePreventionTip />
+
+          <MostRecentData />
+
+          <TrackingButtons />
+
           <LifeMetrics birthDate={birthDate} />
         </div>
       </div>

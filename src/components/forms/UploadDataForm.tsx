@@ -17,10 +17,7 @@ import Loader from '../Loader';
 
 interface IUploadDataFormProps {
   onSubmit: () => void;
-
 }
-
-
 
 const brokenIncidents: IBrokenIncident[] = [];
 const brokenTriggers: IBrokenTrigger[] = [];

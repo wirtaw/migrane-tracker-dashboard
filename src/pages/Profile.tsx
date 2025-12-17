@@ -14,7 +14,6 @@ interface ILocation {
 }
 
 export default function Profile() {
-
   const { theme, toggleTheme } = useTheme();
   const { user, profileSettingsData, setProfileSettingsData, apiSession } = useAuth();
   const [formData, setFormData] = useState({
@@ -234,7 +233,6 @@ export default function Profile() {
                 </div>
               </div>
 
-
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Settings className="w-5 h-5 text-indigo-500" />
@@ -288,8 +286,6 @@ export default function Profile() {
                   </label>
                 </div>
               </div>
-
-
             </div>
 
             <div className="flex items-center justify-end gap-4">
@@ -314,7 +310,6 @@ export default function Profile() {
           </form>
         </div>
       </main>
-
     </>
   );
 }

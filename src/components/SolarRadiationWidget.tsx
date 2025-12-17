@@ -1,8 +1,9 @@
 import React from 'react';
 import { Zap, Waves, Clock, AlertCircle, RefreshCcw } from 'lucide-react';
-import { env } from '../config/env';
 import Loader from './Loader';
 import { useAuth } from '../context/AuthContext';
+
+import { IRadiationTodayData } from '../services/weather';
 
 function IndexBar({ value, max, colorClass }: { value: number; max: number; colorClass: string }) {
   const percentage = (value / max) * 100;
@@ -17,20 +18,26 @@ function IndexBar({ value, max, colorClass }: { value: number; max: number; colo
   );
 }
 
-export default function SolarRadiationWidget() {
+interface ISolarRadiationWidgetProps {
+  data?: IRadiationTodayData[];
+}
+
+export default function SolarRadiationWidget({ data }: ISolarRadiationWidgetProps) {
   const {
     solarRadiationData: solarweather,
-    loading,
+    loading: authLoading,
     solarRadiationError: error,
     fetchSolarRadiation,
     profileSettingsData,
   } = useAuth();
 
-  if (loading) {
+  const isLoading = data ? false : authLoading;
+
+  if (isLoading) {
     return <Loader />;
   }
 
-  const currentSolarRadiationData = error || !solarweather ? [] : [...solarweather];
+  const currentSolarRadiationData = data ? data : error || !solarweather ? [] : [...solarweather];
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
@@ -39,21 +46,23 @@ export default function SolarRadiationWidget() {
           <Zap className="w-5 h-5 text-amber-500" />
           <h2 className="text-lg font-semibold dark:text-white">Solar Radiation</h2>
         </div>
-        {error && (
+        {!data && error && (
           <div className="flex items-center gap-1 text-amber-500 text-sm">
             <AlertCircle className="w-4 h-4" />
             <span>Using default data</span>
           </div>
         )}
-        <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
-          <p>
-            Reload{' '}
-            <RefreshCcw
-              className="w-3 h-3 hover"
-              onClick={() => fetchSolarRadiation(profileSettingsData)}
-            />
-          </p>
-        </div>
+        {!data && (
+          <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
+            <p>
+              Reload{' '}
+              <RefreshCcw
+                className="w-3 h-3 hover"
+                onClick={() => fetchSolarRadiation(profileSettingsData)}
+              />
+            </p>
+          </div>
+        )}
       </div>
 
       {currentSolarRadiationData?.length && (
@@ -131,7 +140,7 @@ export default function SolarRadiationWidget() {
                   <span className="text-xs text-gray-600 dark:text-gray-400">Solar Flux</span>
                 </div>
                 <div className="text-lg font-semibold dark:text-white">
-                  {currentSolarRadiationData[0].solarFlux === -1
+                  {currentSolarRadiationData[0].solarFlux === 0
                     ? 'N/A'
                     : currentSolarRadiationData[0].solarFlux}
                 </div>
@@ -142,13 +151,13 @@ export default function SolarRadiationWidget() {
                   <span className="text-xs text-gray-600 dark:text-gray-400">Sunspots</span>
                 </div>
                 <div className="text-lg font-semibold dark:text-white">
-                  {currentSolarRadiationData[0].sunsPotNumber}
+                  {currentSolarRadiationData[0].sunsPotNumber === 0
+                    ? 'N/A'
+                    : currentSolarRadiationData[0].sunsPotNumber}
                 </div>
               </div>
             </div>
           </div>
-
-
         </>
       )}
     </div>

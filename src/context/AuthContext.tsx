@@ -92,9 +92,12 @@ const fetchForecastDataHistorical = async (latitude: number, longitude: number, 
   }
 };
 
-const fetchGeomagneticDataHistorical = async (dateTime: Date) => {
+const fetchGeomagneticDataHistorical = async (dateTime: Date, token: string) => {
   try {
-    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherDataHistorical(dateTime);
+    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherDataHistorical(
+      dateTime,
+      token
+    );
     return response;
   } catch (error) {
     console.error('Error fetching geomagnetic data:', error);
@@ -102,11 +105,7 @@ const fetchGeomagneticDataHistorical = async (dateTime: Date) => {
   }
 };
 
-const fetchSolarRadiationData = async (
-  latitude: number,
-  longitude: number,
-  token?: string
-) => {
+const fetchSolarRadiationData = async (latitude: number, longitude: number, token?: string) => {
   try {
     const response: IRadiationTodayData[] = await fetchRadiationWeatherData(
       {
@@ -387,7 +386,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchGeomagneticHistorical = async (solarHistoricalParams: ISolarHistoricalParams) => {
     try {
-      const geomagnetic = await fetchGeomagneticDataHistorical(solarHistoricalParams.dateTime);
+      if (!apiSession?.accessToken) {
+        return;
+      }
+      const geomagnetic = await fetchGeomagneticDataHistorical(
+        solarHistoricalParams.dateTime,
+        apiSession.accessToken
+      );
 
       return geomagnetic;
     } catch (err) {

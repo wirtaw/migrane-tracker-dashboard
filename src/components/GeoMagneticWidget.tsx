@@ -1,4 +1,3 @@
-import React from 'react';
 import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle, RefreshCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { env } from '../config/env';
@@ -8,12 +7,26 @@ import SolarFluxIndicator from '../components/indicators/SolarFluxIndicator';
 import KIndexIndicator from '../components/indicators/KIndexIndicator';
 import AIndexIndicator from '../components/indicators/AIndexIndicator';
 
+export interface NextWeather {
+  kpIndex: {
+    observed: string;
+    expected: string;
+    rationale: string;
+  };
+  solarRadiation: {
+    rationale: string;
+  };
+  radioBlackout: {
+    rationale: string;
+  };
+}
+
 export interface IGeomagneticData {
   solarFlux: number;
   kIndex: number;
   aIndex: number;
   pastWeather: { level: string };
-  nextWeather: { level: string };
+  nextWeather: NextWeather;
 }
 
 function SpaceWeatherIndicator({ level }: { level: string }) {
@@ -48,13 +61,20 @@ function SpaceWeatherIndicator({ level }: { level: string }) {
   );
 }
 
-export default function GeoMagneticWidget() {
+interface IGeoMagneticWidgetProps {
+  data?: IGeomagneticData; // Assuming IGeophysicalWeatherData is IGeomagneticData
+}
+
+export default function GeoMagneticWidget({ data }: IGeoMagneticWidgetProps) {
   const {
     geomagneticData: geophysicalweather,
-    loading,
+    loading: authLoading,
     geoMagneticError: error,
     fetchGeomagnetic,
   } = useAuth();
+
+  // Use passed data if available, otherwise fallback to context
+  const isLoading = data ? false : authLoading;
 
   const geomagneticData = {
     solarFlux: undefined,
@@ -64,16 +84,25 @@ export default function GeoMagneticWidget() {
       level: undefined,
     },
     nextWeather: {
-      level: undefined,
+      kpIndex: { observed: '', expected: '', rationale: '' },
+      solarRadiation: { rationale: '' },
+      radioBlackout: { rationale: '' },
     },
   };
 
-  if (loading) {
+  if (isLoading) {
     return <Loader />;
   }
 
-  const currentGeomagneticData =
-    error || !geophysicalweather ? geomagneticData : { ...geomagneticData, ...geophysicalweather };
+  const currentGeomagneticData = data
+    ? data
+    : error || !geophysicalweather
+      ? geomagneticData
+      : { ...geomagneticData, ...geophysicalweather };
+
+  // ... rest of the render logic remains similar, but using currentGeomagneticData
+  // Need to handle the Reload button - if data is passed, reload might not be relevant or should call a different function
+  // For now, I'll hide the reload button if data is passed via props (historical view)
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
@@ -82,22 +111,24 @@ export default function GeoMagneticWidget() {
           <Zap className="w-5 h-5 text-amber-500" />
           <h2 className="text-lg font-semibold dark:text-white">Geomagnetic Activity</h2>
         </div>
-        {error && (
+        {!data && error && (
           <div className="flex items-center gap-1 text-amber-500 text-sm">
             <AlertCircle className="w-4 h-4" />
             <span>Using default data</span>
           </div>
         )}
-        <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
-          <p>
-            Reload <RefreshCcw className="w-3 h-3 hover" onClick={() => fetchGeomagnetic()} />
-          </p>
-        </div>
+        {!data && (
+          <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
+            <p>
+              Reload <RefreshCcw className="w-3 h-3 hover" onClick={() => fetchGeomagnetic()} />
+            </p>
+          </div>
+        )}
       </div>
 
-      {currentGeomagneticData?.solarFlux &&
-        currentGeomagneticData?.kIndex &&
-        currentGeomagneticData?.aIndex && (
+      {currentGeomagneticData?.solarFlux !== undefined &&
+        currentGeomagneticData?.kIndex !== undefined &&
+        currentGeomagneticData?.aIndex !== undefined && (
           <>
             <div className="grid gap-6">
               {/* Solar Flux */}
@@ -164,7 +195,24 @@ export default function GeoMagneticWidget() {
                     <AlertTriangle className="w-4 h-4 text-orange-500" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">Forecast</span>
                   </div>
-                  <SpaceWeatherIndicator level={currentGeomagneticData.nextWeather.level} />
+
+                  <div className="space-y-4">
+                    {/* Forecast Details */}
+                    {Object.entries(currentGeomagneticData.nextWeather).map(([key, value]) => {
+                      if (typeof value === 'object' && value !== null && 'rationale' in value) {
+                        const typedValue = value as { rationale: string };
+                        return (
+                          <div key={key} className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className="font-semibold capitalize">
+                              {key.replace(/([A-Z])/g, ' $1').trim()}:{' '}
+                            </span>
+                            {typedValue.rationale}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                  </div>
                 </div>
               </div>
             </div>

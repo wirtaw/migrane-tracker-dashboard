@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Activity,
@@ -8,6 +8,7 @@ import {
   FolderKanban,
   Settings,
   ArchiveRestore,
+  CloudSun,
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 
@@ -92,6 +93,15 @@ export default function Main() {
             link: {
               title: 'Suite Page',
               path: '/migraine-management-suite',
+            },
+          },
+          {
+            icon: <CloudSun className="w-8 h-8 text-amber-500" />,
+            title: 'Historical Weather',
+            description: 'Lookup past weather and geomagnetic data',
+            link: {
+              title: 'Lookup Weather',
+              path: '/historical-weather',
             },
           },
         ].map((feature, index) => (

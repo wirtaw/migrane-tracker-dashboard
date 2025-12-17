@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -21,6 +20,7 @@ import CreateIncident from './pages/CreateIncident';
 import DateInfo from './pages/DateInfo';
 import MigraineManagementSuite from './pages/MigraineManagementSuite';
 import IndicatorDetailsPage from './pages/IndicatorDetailsPage';
+import HistoricalWeather from './pages/HistoricalWeather';
 
 export function App() {
   return (
@@ -53,6 +53,7 @@ export function App() {
             <Route path="date-info" element={<DateInfo />} />
             <Route path="migraine-management-suite" element={<MigraineManagementSuite />} />
             <Route path="indicator-details" element={<IndicatorDetailsPage />} />
+            <Route path="historical-weather" element={<HistoricalWeather />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

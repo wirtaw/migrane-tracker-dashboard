@@ -8,8 +8,6 @@ interface IDownloadDataFormProps {
   onSubmit: () => void;
 }
 
-
-
 export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState<boolean>(false);
