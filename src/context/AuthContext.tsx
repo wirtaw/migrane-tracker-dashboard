@@ -55,12 +55,15 @@ interface IAuthContextType {
 
 const AuthContext = createContext<IAuthContextType | undefined>(undefined);
 
-const fetchForecastData = async (latitude: string, longitude: string) => {
+const fetchForecastData = async (latitude: string, longitude: string, token?: string) => {
   try {
-    const response: IWeatherData = await fetchOpenMeteoWeatherData({
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
-    });
+    const response: IWeatherData = await fetchOpenMeteoWeatherData(
+      {
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+      },
+      token
+    );
     return response;
   } catch (error) {
     console.error('Error fetching forecast data:', error);
@@ -78,13 +81,21 @@ const fetchGeomagneticData = async (token?: string) => {
   }
 };
 
-const fetchForecastDataHistorical = async (latitude: number, longitude: number, dateTime: Date) => {
+const fetchForecastDataHistorical = async (
+  latitude: number,
+  longitude: number,
+  dateTime: Date,
+  token?: string
+) => {
   try {
-    const response: IWeatherData | undefined = await fetchOpenMeteoWeatherDataHistorical({
-      latitude,
-      longitude,
-      dateTime,
-    });
+    const response: IWeatherData | undefined = await fetchOpenMeteoWeatherDataHistorical(
+      {
+        latitude,
+        longitude,
+        dateTime,
+      },
+      token
+    );
     return response;
   } catch (error) {
     console.error('Error fetching forecast data:', error);
@@ -212,18 +223,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const { latitude, longitude } = userProfile;
 
             if (latitude && longitude && latitude !== '0' && longitude !== '0') {
-              const cachedForecast = sessionStorage.getItem(`forecast_${session?.user.id}`);
               const cachedGeomagnetic = sessionStorage.getItem(`geomagnetic_${session?.user.id}`);
 
-              if (cachedForecast) {
-                setForecastData(JSON.parse(cachedForecast));
-              } else {
-                const forecast = await fetchForecastData(latitude, longitude);
+              const forecast = await fetchForecastData(
+                latitude,
+                longitude,
+                apiSession.accessToken
+              );
 
-                if (forecast) {
-                  setForecastData(forecast);
-                  sessionStorage.setItem(`forecast_${session?.user.id}`, JSON.stringify(forecast));
-                }
+              if (forecast) {
+                setForecastData(forecast);
+                sessionStorage.setItem(`forecast_${session?.user.id}`, JSON.stringify(forecast));
               }
 
               if (cachedGeomagnetic) {
@@ -337,7 +347,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setWeatherLoading(true);
         const forecast = await fetchForecastData(
           profileSettingsData.latitude,
-          profileSettingsData.longitude
+          profileSettingsData.longitude,
+          apiSession?.accessToken
         );
         setForecastData(forecast);
         if (forecast) {
@@ -374,7 +385,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const forecast = await fetchForecastDataHistorical(
           forecastHistoricalParams.latitude,
           forecastHistoricalParams.longitude,
-          forecastHistoricalParams.dateTime
+          forecastHistoricalParams.dateTime,
+          apiSession?.accessToken
         );
         return forecast;
       }

@@ -47,7 +47,10 @@ export default function HistoricalWeather() {
       // Fetch calls in parallel
       const [fetchedGeo, fetchedWeather, fetchedSolar] = await Promise.allSettled([
         fetchGeophysicalWeatherDataHistorical(dateTime, apiSession.accessToken),
-        fetchOpenMeteoWeatherDataHistorical({ latitude: lat, longitude: lon, dateTime }),
+        fetchOpenMeteoWeatherDataHistorical(
+          { latitude: lat, longitude: lon, dateTime },
+          apiSession.accessToken
+        ),
         // Note: fetchRadiationWeatherData currently fetches "today" or recent data.
         // The endpoint /api/v1/solar likely supports parameters, but the client function might need adjustment
         // or we just use it as is for now if it supports date overlap logic or if we only want "current" solar for that location?
