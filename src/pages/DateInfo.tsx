@@ -82,194 +82,200 @@ export default function DateInfo() {
         </h1>
       </div>
       {exists && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {incidentItems.length > 0 && (
-            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Info className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                    Incidents
-                  </h2>
-                </div>
-                {incidentItems.map(incident => (
-                  <IncidentCard
-                    key={'incident-' + selectedDate.toMillis() + '-card-' + incident.id}
-                    incident={incident}
-                  />
-                ))}
-              </section>
-            </div>
-          )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+          {/* Main Column (2/3) - Location Data */}
+          <div className="lg:col-span-2 space-y-8">
+            {locationItems.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-6 h-6 text-blue-500" />
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                      Location
+                    </h2>
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-300">
+                    {locationItems.map(location => (
+                      <div key={'location-' + location.id}>
+                        <span>
+                          Coordinates - {location.latitude} / {location.longitude}
+                        </span>
+                        <br />
+                        {location.forecast && (
+                          <ForecastCard
+                            key={'location-' + location.id + '-forecast-card'}
+                            forecast={location.forecast}
+                          />
+                        )}
+                        <br />
+                        {location.solar && (
+                          <SolarCard
+                            key={'location-' + location.id + '-solar-card'}
+                            solar={location.solar}
+                          />
+                        )}
+                        <br />
+                        {location.solarRadiation.map(solarRadiation => (
+                          <div key={'solarRadiation-' + solarRadiation?.date}>
+                            <div className="grid grid-cols-1 gap-4 pb-2">
+                              <div className="flex items-center gap-2 p-4 bg-gradient-to-br dark:from-[#d1d5db]-900/20 dark:to-[#374151]-900/20 from-[#d1d5db] via-[#6b7280] to-[#374151] rounded-lg text-gray-100 dark:text-gray-800">
+                                <div>{solarRadiation?.date}</div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 pb-2">
+                              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg">
+                                <UmbrellaIcon className="w-5 h-5 text-amber-500" />
+                                <div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    UV Index
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xl font-semibold dark:text-white">
+                                      {solarRadiation?.uviIndex}
+                                    </span>
+                                    <UVIndexIndicator
+                                      uvi={solarRadiation?.uviIndex || 0}
+                                      showDetails={true}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg">
+                                <div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    Ozone
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xl font-semibold dark:text-white">
+                                      {solarRadiation?.ozone}
+                                    </span>
+                                    <OzoneIndicator ozone={solarRadiation?.ozone || 0} />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
 
-          {locationItems.length > 0 && (
-            <div className="lg:col-span-2 space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Info className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                    Location
-                  </h2>
-                </div>
-                <div className="text-gray-600 dark:text-gray-300">
-                  {locationItems.map(location => (
-                    <div key={'location-' + location.id}>
-                      <span>
-                        Coordinates - {location.latitude} / {location.longitude}
-                      </span>
-                      <br />
-                      {location.forecast && (
-                        <ForecastCard
-                          key={'location-' + location.id + '-forecast-card'}
-                          forecast={location.forecast}
-                        />
-                      )}
-                      <br />
-                      {location.solar && (
-                        <SolarCard
-                          key={'location-' + location.id + '-solar-card'}
-                          solar={location.solar}
-                        />
-                      )}
-                      <br />
-                      {location.solarRadiation.map(solarRadiation => (
-                        <div key={'solarRadiation-' + solarRadiation?.date}>
-                          <div className="grid grid-cols-1 gap-4 pb-2">
-                            <div className="flex items-center gap-2 p-4 bg-gradient-to-br dark:from-[#d1d5db]-900/20 dark:to-[#374151]-900/20 from-[#d1d5db] via-[#6b7280] to-[#374151] rounded-lg text-gray-100 dark:text-gray-800">
-                              <div>{solarRadiation?.date}</div>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 pb-2">
-                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg">
-                              <UmbrellaIcon className="w-5 h-5 text-amber-500" />
-                              <div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                  UV Index
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xl font-semibold dark:text-white">
-                                    {solarRadiation?.uviIndex}
-                                  </span>
-                                  <UVIndexIndicator
-                                    uvi={solarRadiation?.uviIndex || 0}
-                                    showDetails={true}
-                                  />
+                            <div className="grid grid-cols-2 gap-4 pb-2">
+                              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg">
+                                <div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    Solar Flux
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xl font-semibold dark:text-white">
+                                      {solarRadiation?.solarFlux}
+                                    </span>
+                                    <SolarFluxIndicator
+                                      solarFlux={solarRadiation?.solarFlux || 0}
+                                      showDetails={true}
+                                    />
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 rounded-lg">
-                              <div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                  Ozone
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xl font-semibold dark:text-white">
-                                    {solarRadiation?.ozone}
-                                  </span>
-                                  <OzoneIndicator ozone={solarRadiation?.ozone || 0} />
+                              <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-lg">
+                                <div>
+                                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    Sunspot Number
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xl font-semibold dark:text-white">
+                                      {solarRadiation?.sunsPotNumber}
+                                    </span>
+                                    <SunspotNumberIndicator
+                                      sunspotNumber={solarRadiation?.sunsPotNumber || 0}
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
+          </div>
 
-                          <div className="grid grid-cols-2 gap-4 pb-2">
-                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg">
-                              <div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                  Solar Flux
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xl font-semibold dark:text-white">
-                                    {solarRadiation?.solarFlux}
-                                  </span>
-                                  <SolarFluxIndicator
-                                    solarFlux={solarRadiation?.solarFlux || 0}
-                                    showDetails={true}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-lg">
-                              <div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                  Sunspot Number
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xl font-semibold dark:text-white">
-                                    {solarRadiation?.sunsPotNumber}
-                                  </span>
-                                  <SunspotNumberIndicator
-                                    sunspotNumber={solarRadiation?.sunsPotNumber || 0}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+          {/* Sidebar Column (1/3) - Lists */}
+          <div className="space-y-6">
+            {incidentItems.length > 0 && (
+              <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-6 h-6 text-blue-500" />
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                      Incidents
+                    </h2>
+                  </div>
+                  {incidentItems.map(incident => (
+                    <IncidentCard
+                      key={'incident-' + selectedDate.toMillis() + '-card-' + incident.id}
+                      incident={incident}
+                    />
                   ))}
-                </div>
-              </section>
-            </div>
-          )}
+                </section>
+              </div>
+            )}
 
-          {triggerItems.length > 0 && (
-            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Info className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                    Triggers
-                  </h2>
-                </div>
-                {triggerItems.map(trigger => (
-                  <TriggerCard
-                    key={'trigger-' + selectedDate.toMillis() + '-card-' + trigger.id}
-                    trigger={trigger}
-                  />
-                ))}
-              </section>
-            </div>
-          )}
+            {triggerItems.length > 0 && (
+              <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-6 h-6 text-blue-500" />
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                      Triggers
+                    </h2>
+                  </div>
+                  {triggerItems.map(trigger => (
+                    <TriggerCard
+                      key={'trigger-' + selectedDate.toMillis() + '-card-' + trigger.id}
+                      trigger={trigger}
+                    />
+                  ))}
+                </section>
+              </div>
+            )}
 
-          {medicationItems.length > 0 && (
-            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Info className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                    Medications
-                  </h2>
-                </div>
-                {medicationItems.map(medication => (
-                  <MedicationCard
-                    key={'medication-' + selectedDate.toMillis() + '-card-' + medication.id}
-                    medication={medication}
-                  />
-                ))}
-              </section>
-            </div>
-          )}
+            {medicationItems.length > 0 && (
+              <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-6 h-6 text-blue-500" />
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                      Medications
+                    </h2>
+                  </div>
+                  {medicationItems.map(medication => (
+                    <MedicationCard
+                      key={'medication-' + selectedDate.toMillis() + '-card-' + medication.id}
+                      medication={medication}
+                    />
+                  ))}
+                </section>
+              </div>
+            )}
 
-          {symptomItems.length > 0 && (
-            <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <section className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Info className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                    Symptoms
-                  </h2>
-                </div>
-                {symptomItems.map(symptom => (
-                  <SymptomCard
-                    key={'symptom-' + selectedDate.toMillis() + '-card-' + symptom.id}
-                    symptom={symptom}
-                  />
-                ))}
-              </section>
-            </div>
-          )}
+            {symptomItems.length > 0 && (
+              <div className="space-y-8 pb-5 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <section className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Info className="w-6 h-6 text-blue-500" />
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                      Symptoms
+                    </h2>
+                  </div>
+                  {symptomItems.map(symptom => (
+                    <SymptomCard
+                      key={'symptom-' + selectedDate.toMillis() + '-card-' + symptom.id}
+                      symptom={symptom}
+                    />
+                  ))}
+                </section>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

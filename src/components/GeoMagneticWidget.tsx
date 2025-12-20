@@ -66,15 +66,10 @@ interface IGeoMagneticWidgetProps {
 }
 
 export default function GeoMagneticWidget({ data }: IGeoMagneticWidgetProps) {
-  const {
-    geomagneticData: geophysicalweather,
-    loading: authLoading,
-    geoMagneticError: error,
-    fetchGeomagnetic,
-  } = useAuth();
+  const { geomagneticState, fetchGeomagnetic } = useAuth();
 
   // Use passed data if available, otherwise fallback to context
-  const isLoading = data ? false : authLoading;
+  const isLoading = data ? false : geomagneticState.loading;
 
   const geomagneticData = {
     solarFlux: undefined,
@@ -96,9 +91,9 @@ export default function GeoMagneticWidget({ data }: IGeoMagneticWidgetProps) {
 
   const currentGeomagneticData = data
     ? data
-    : error || !geophysicalweather
+    : geomagneticState.error || !geomagneticState.data
       ? geomagneticData
-      : { ...geomagneticData, ...geophysicalweather };
+      : { ...geomagneticData, ...geomagneticState.data };
 
   // ... rest of the render logic remains similar, but using currentGeomagneticData
   // Need to handle the Reload button - if data is passed, reload might not be relevant or should call a different function
@@ -111,7 +106,7 @@ export default function GeoMagneticWidget({ data }: IGeoMagneticWidgetProps) {
           <Zap className="w-5 h-5 text-amber-500" />
           <h2 className="text-lg font-semibold dark:text-white">Geomagnetic Activity</h2>
         </div>
-        {!data && error && (
+        {!data && geomagneticState.error && (
           <div className="flex items-center gap-1 text-amber-500 text-sm">
             <AlertCircle className="w-4 h-4" />
             <span>Using default data</span>

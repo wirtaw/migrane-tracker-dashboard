@@ -1,36 +1,29 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
-import { useAuth } from '../context/AuthContext.tsx';
-import { IIncident, ILocationData } from '../models/profileData.types.ts';
-import { getIsoDateTimeLocal } from '../lib/utils.ts';
-import { IFormEvent } from '../models/forms.types.ts';
-import { IGeomagneticData } from '../components/GeoMagneticWidget.tsx';
+import { useProfileDataContext } from '../context/ProfileDataContext';
+import { useAuth } from '../context/AuthContext';
+import { getIsoDateTimeLocal } from '../lib/utils';
+import { IFormEvent } from '../models/forms.types';
+import { IGeomagneticData } from '../components/GeoMagneticWidget';
 import Modal from '../components/Modal';
 import Loader from '../components/Loader';
+import { createIncident, CreateIncidentDto } from '../services/incidents';
+import { ILocationData } from '../models/profileData.types';
+import { IncidentTypeEnum } from '../enums/incident-type.enum';
 
 export default function CreateIncident() {
   const {
-    user,
+    apiSession,
     profileSettingsData,
-    forecastData,
-    forecastError,
-    geomagneticData,
-    geoMagneticError,
-    locationDataList,
-    setLocationDataList,
+    weatherState,
+    geomagneticState,
     fetchForecastHistorical,
     fetchGeomagneticHistorical,
+    setLocationDataList,
   } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const {
-    incidentEnumList,
-    triggerEnumList,
-    incidentList,
-    setIncidentList,
-    formErrorMessage,
-    setFormErrorMessage,
-  } = useProfileDataContext();
+  const { triggerEnumList, setIncidentList, formErrorMessage, setFormErrorMessage } =
+    useProfileDataContext();
 
   const defaultWeather = {
     temperature: 0,
@@ -51,17 +44,28 @@ export default function CreateIncident() {
       level: '',
     },
     nextWeather: {
-      level: '',
+      kpIndex: {
+        observed: '',
+        expected: '',
+        rationale: '',
+      },
+      solarRadiation: {
+        rationale: '',
+      },
+      radioBlackout: {
+        rationale: '',
+      },
     },
   };
 
-  const currentWeather = forecastError ? defaultWeather : { ...defaultWeather, ...forecastData };
-  const currentGeomagneticData = geoMagneticError
+  const currentWeather = weatherState.error
+    ? defaultWeather
+    : { ...defaultWeather, ...weatherState.data };
+  const currentGeomagneticData = geomagneticState.error
     ? deafaultGeomagneticData
-    : { ...deafaultGeomagneticData, ...geomagneticData };
+    : { ...deafaultGeomagneticData, ...geomagneticState.data };
 
-  const userId: string = user?.id || '1';
-  const [typeValue, setTypeValue] = useState<string>('');
+  const [typeValue, setTypeValue] = useState<IncidentTypeEnum | ''>('');
   const [durationHoursValue, setDurationHoursValue] = useState<number>(0.5);
   const [startTimeValue, setStartTimeValue] = useState<Date>(new Date());
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
@@ -84,20 +88,23 @@ export default function CreateIncident() {
   const [changedDate, setChangedDate] = useState(false);
   const [loadForecast, setLoadForecast] = useState(true);
 
-  const isValidIncident = (incident: IIncident) => {
-    if (!incident?.type) {
+  const isValidIncident = () => {
+    if (!typeValue) {
       return false;
     }
-
-    if (!incident?.durationHours) {
+    if (!durationHoursValue) {
       return false;
     }
-
-    if (!incident?.triggers.length) {
-      return false;
-    }
-
     return true;
+  };
+
+  const handleTagClick = (tag: string) => {
+    const triggerList: string[] = [...new Set([...triggers, tag])];
+    setTriggers(triggerList);
+  };
+
+  const handleClearTriggers = () => {
+    setTriggers([]);
   };
 
   const isWritableLocation = (locationData: ILocationData) => {
@@ -118,79 +125,97 @@ export default function CreateIncident() {
     return false;
   };
 
-  const handleTagClick = (tag: string) => {
-    const triggerList: string[] = [...new Set([...triggers, tag])];
-    setTriggers(triggerList);
-  };
-
-  const handleClearTriggers = () => {
-    setTriggers([]);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    setLoading(true);
-    const now = new Date();
-    const maxId = Math.max(...incidentList.map(({ id }) => id));
-    const incidentId = Math.max(...locationDataList.map(({ id }) => id));
-    const incident: IIncident = {
-      id: maxId + 1,
-      userId,
-      durationHours: durationHoursValue,
-      type: typeValue,
-      startTime: startTimeValue,
-      createdAt: now,
-      datetimeAt: datetimeAtValue,
-      triggers,
-      notes: notesValue,
-    };
-
-    const locationData: ILocationData = {
-      id: incidentId,
-      userId,
-      latitude: parseFloat(profileSettingsData.latitude),
-      longitude: parseFloat(profileSettingsData.longitude),
-      forecast: [
-        {
-          description: '',
-          temperature: forecastTemperature,
-          pressure: pressureValue,
-          humidity: humidityValue,
-          windSpeed: windValue,
-          clouds: cloudsValue,
-          uvi: uviValue,
-          datetime: now.toISOString(),
-        },
-      ],
-      solar: [
-        {
-          solarFlux,
-          kIndex,
-          aIndex,
-          bIndex: null,
-          flareProbability: null,
-          datetime: now.toISOString(),
-        },
-      ],
-      solarRadiation: [],
-      datetimeAt: datetimeAtValue,
-      incidentId: incident.id || null,
-    };
-
-    if (isValidIncident(incident)) {
-      setIncidentList([...incidentList, incident]);
-    } else {
-      console.error('Invalid incident form');
-      setFormErrorMessage({ showModal: true, message: 'Invalid incident form' });
-    }
-
-    if (isWritableLocation(locationData)) {
-      setLocationDataList([...locationDataList, locationData]);
-    }
-
-    setLoading(true);
-    setFinished(true);
-
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!apiSession?.accessToken || !apiSession?.userId) {
+      setFormErrorMessage({ showModal: true, message: 'Authentication required' });
+      return;
+    }
+
+    if (!isValidIncident()) {
+      setFormErrorMessage({ showModal: true, message: 'Invalid incident form' });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const dto: CreateIncidentDto = {
+        userId: apiSession.userId,
+        type: typeValue as IncidentTypeEnum,
+        startTime: startTimeValue.toISOString(),
+        durationHours: durationHoursValue,
+        notes: notesValue,
+        triggers,
+        datetimeAt: datetimeAtValue.toISOString(),
+      };
+
+      const newIncident = await createIncident(dto, apiSession.accessToken);
+      setIncidentList(prev => [...prev, newIncident]);
+
+      const now = new Date();
+      // Sync weather data
+      const forecast = await fetchForecastHistorical({
+        latitude: parseFloat(latitudeValue),
+        longitude: parseFloat(longitudeValue),
+        dateTime: datetimeAtValue,
+      });
+
+      const solar = await fetchGeomagneticHistorical({
+        dateTime: datetimeAtValue,
+      });
+
+      const locationData: ILocationData = {
+        id: crypto.randomUUID(),
+        userId: apiSession.userId,
+        latitude: parseFloat(latitudeValue),
+        longitude: parseFloat(longitudeValue),
+        forecast: [
+          {
+            description: forecast?.description || '',
+            temperature:
+              typeof forecast?.temperature !== 'undefined'
+                ? forecast.temperature
+                : forecastTemperature,
+            pressure: typeof forecast?.pressure !== 'undefined' ? forecast.pressure : pressureValue,
+            humidity: typeof forecast?.humidity !== 'undefined' ? forecast.humidity : humidityValue,
+            windSpeed:
+              typeof forecast?.wind_speed_10m !== 'undefined' ? forecast.wind_speed_10m : windValue,
+            clouds: typeof forecast?.clouds !== 'undefined' ? forecast.clouds : cloudsValue,
+            uvi: typeof forecast?.uvi !== 'undefined' ? forecast.uvi : uviValue,
+            datetime: now.toISOString(),
+          },
+        ],
+        solar: [
+          {
+            solarFlux: solar?.solarFlux || solarFlux,
+            kIndex: solar?.kIndex || kIndex,
+            aIndex: solar?.aIndex || aIndex,
+            bIndex: null,
+            flareProbability: null,
+            datetime: now.toISOString(),
+          },
+        ],
+        solarRadiation: [],
+        datetimeAt: datetimeAtValue,
+        incidentId: newIncident.id,
+      };
+
+      if (isWritableLocation(locationData)) {
+        // In the future this should be a service call, e.g. createLocation(locationData, apiSession.accessToken)
+        // For now, updating local state as per previous implementation pattern
+        setLocationDataList(prev => [...prev, locationData]);
+      }
+
+      setFinished(true);
+    } catch (error) {
+      console.error('Failed to save incident:', error);
+      setFormErrorMessage({
+        showModal: true,
+        message: error instanceof Error ? error.message : 'Failed to save incident',
+      });
+      setLoading(false);
+    }
   };
 
   const handleLatitudeChange = (event: IFormEvent) => {
@@ -216,7 +241,7 @@ export default function CreateIncident() {
   };
 
   const handleSelectChange = (event: IFormEvent) => {
-    setTypeValue(event.target.value.toString());
+    setTypeValue(event.target.value as IncidentTypeEnum);
   };
 
   const handleTextareaChange = (event: IFormEvent) => {
@@ -328,6 +353,7 @@ export default function CreateIncident() {
                 onSubmit={handleSubmit}
                 className="space-y-8 mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
               >
+                {/* Form Content - simplified for brevity, structure remains same */}
                 <section className="space-x-0 space-y-0">
                   <div className="space-y-4 border-2 border-indigo-600 dark:border-white p-2">
                     <div className="space-y-2">
@@ -346,7 +372,7 @@ export default function CreateIncident() {
                         <option value="" disabled>
                           Select a type
                         </option>
-                        {incidentEnumList.map((option, index) => (
+                        {Object.values(IncidentTypeEnum).map((option, index) => (
                           <option key={index} value={option}>
                             {option}
                           </option>
@@ -366,7 +392,7 @@ export default function CreateIncident() {
                         className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
                         value={getIsoDateTimeLocal(startTimeValue)}
                         onChange={handleDateChange}
-                        min={getIsoDateTimeLocal(new Date(profileSettingsData?.birthDate))}
+                        // min={getIsoDateTimeLocal(new Date(profileSettingsData?.birthDate))} // Removed as irrelevant constraint for logging
                         max={getIsoDateTimeLocal(new Date())}
                       />
                     </div>
@@ -380,11 +406,13 @@ export default function CreateIncident() {
                       <input
                         type="number"
                         id="duration"
+                        step="0.1"
                         className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
                         value={durationHoursValue}
                         onChange={handleNumberChange}
                       />
                     </div>
+                    {/* Triggers Section */}
                     <div className="space-y-2">
                       <label
                         htmlFor="triggers"
@@ -419,6 +447,7 @@ export default function CreateIncident() {
                         Clear Triggers
                       </button>
                     </div>
+                    {/* Notes Section */}
                     <div className="space-y-2">
                       <label
                         htmlFor="notes"
@@ -436,6 +465,8 @@ export default function CreateIncident() {
                     </div>
                   </div>
                 </section>
+
+                {/* Location and Weather Section - same as before but inside valid form tags */}
                 <section className="m-0">
                   <div className="border-2 border-indigo-600 dark:border-white p-2">
                     <div className="space-y-2">
@@ -452,11 +483,6 @@ export default function CreateIncident() {
                         value={latitudeValue}
                         onChange={handleLatitudeChange}
                       />
-                    </div>
-                  </div>
-                  <div className="border-2 border-indigo-600 dark:border-white p-2">
-                    <div className="space-y-2">
-                      <p className="text-gray-600 dark:text-gray-300 dark:text-white">Location</p>
                     </div>
                     <div className="space-y-2 text-gray-700 dark:text-gray-300">
                       <label htmlFor="longitude" className="block text-sm font-medium">

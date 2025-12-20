@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase.ts';
+import { supabase } from '../lib/supabase';
 import { env } from '../config/env';
 import {
   IProfileSettingsData,
@@ -18,8 +18,26 @@ import {
   fetchGeophysicalWeatherDataHistorical,
   IRadiationTodayData,
   fetchRadiationWeatherData,
-} from '../services/weather.ts';
+} from '../services/weather';
 import { syncUserWithBackend, fetchUserProfile } from '../services/migraineApi';
+interface IWeatherState {
+  data: IWeatherData | undefined;
+  loading: boolean;
+  error: string;
+}
+
+interface IGeomagneticState {
+  data: IGeophysicalWeatherData | undefined;
+  loading: boolean;
+  error: string;
+}
+
+interface ISolarRadiationState {
+  data: IRadiationTodayData[] | undefined;
+  loading: boolean;
+  error: string;
+}
+
 interface IAuthContextType {
   user: User | null;
   session: Session | null;
@@ -31,16 +49,11 @@ interface IAuthContextType {
   profileSettingsData: IProfileSettingsData;
   setProfileSettingsData: React.Dispatch<React.SetStateAction<IProfileSettingsData>>;
   profileLoading: boolean;
-  weatherLoading: boolean;
-  geoMagneticLoading: boolean;
-  setWeatherLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setGeoMagneticLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  forecastData: IWeatherData | undefined;
-  geomagneticData: IGeophysicalWeatherData | undefined;
+  weatherState: IWeatherState;
+  geomagneticState: IGeomagneticState;
+  solarRadiationState: ISolarRadiationState;
   fetchForecast: (params: IProfileSettingsData) => Promise<void>;
   fetchGeomagnetic: () => Promise<void>;
-  forecastError: string;
-  geoMagneticError: string;
   locationDataList: ILocationData[];
   setLocationDataList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
   fetchForecastHistorical: (params: IForecastHistoricalParams) => Promise<IWeatherData | undefined>;
@@ -48,9 +61,6 @@ interface IAuthContextType {
     params: ISolarHistoricalParams
   ) => Promise<IGeophysicalWeatherData | undefined>;
   fetchSolarRadiation: (params: IProfileSettingsData) => Promise<void>;
-  solarRadiationData: IRadiationTodayData[] | undefined;
-  solarRadiationLoading: boolean;
-  solarRadiationError: string;
 }
 
 const AuthContext = createContext<IAuthContextType | undefined>(undefined);
@@ -155,20 +165,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchMagneticWeather: false,
     fetchWeather: false,
   });
-  const [forecastData, setForecastData] = useState<IWeatherData | undefined>(undefined);
-  const [geomagneticData, setGeomagneticData] = useState<IGeophysicalWeatherData | undefined>(
-    undefined
-  );
-  const [solarRadiationData, setSolarRadiationData] = useState<IRadiationTodayData[] | undefined>(
-    undefined
-  );
+
+  const [weatherState, setWeatherState] = useState<IWeatherState>({
+    data: undefined,
+    loading: false,
+    error: '',
+  });
+
+  const [geomagneticState, setGeomagneticState] = useState<IGeomagneticState>({
+    data: undefined,
+    loading: false,
+    error: '',
+  });
+
+  const [solarRadiationState, setSolarRadiationState] = useState<ISolarRadiationState>({
+    data: undefined,
+    loading: false,
+    error: '',
+  });
+
   const [profileLoading, setProfileLoading] = useState(false);
-  const [weatherLoading, setWeatherLoading] = useState(false);
-  const [geoMagneticLoading, setGeoMagneticLoading] = useState(false);
-  const [solarRadiationLoading, setSolarRadiationLoading] = useState(false);
-  const [forecastError, setForecastError] = useState<string>('');
-  const [geoMagneticError, setGeoMagneticError] = useState<string>('');
-  const [solarRadiationError, setSolarRadiationError] = useState<string>('');
   const [locationDataList, setLocationDataList] = useState<ILocationData[]>([]);
 
   useEffect(() => {
@@ -223,31 +239,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const { latitude, longitude } = userProfile;
 
             if (latitude && longitude && latitude !== '0' && longitude !== '0') {
-              const cachedGeomagnetic = sessionStorage.getItem(`geomagnetic_${session?.user.id}`);
-
-              const forecast = await fetchForecastData(
-                latitude,
-                longitude,
-                apiSession.accessToken
-              );
+              const forecast = await fetchForecastData(latitude, longitude, apiSession.accessToken);
 
               if (forecast) {
-                setForecastData(forecast);
-                sessionStorage.setItem(`forecast_${session?.user.id}`, JSON.stringify(forecast));
+                setWeatherState(prev => ({ ...prev, data: forecast }));
               }
 
-              if (cachedGeomagnetic) {
-                setGeomagneticData(JSON.parse(cachedGeomagnetic));
-              } else {
-                const geomagnetic = await fetchGeomagneticData(apiSession.accessToken);
+              const geomagnetic = await fetchGeomagneticData(apiSession.accessToken);
 
-                if (geomagnetic) {
-                  setGeomagneticData(geomagnetic);
-                  sessionStorage.setItem(
-                    `geomagnetic_${session?.user.id}`,
-                    JSON.stringify(geomagnetic)
-                  );
-                }
+              if (geomagnetic) {
+                setGeomagneticState(prev => ({ ...prev, data: geomagnetic }));
               }
 
               const solar = await fetchSolarRadiationData(
@@ -256,11 +257,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 apiSession.accessToken
               );
               if (solar) {
-                setSolarRadiationData(solar);
-                sessionStorage.setItem(
-                  `solar_radiation_${session?.user.id}`,
-                  JSON.stringify(solar)
-                );
+                setSolarRadiationState(prev => ({ ...prev, data: solar }));
               }
             }
 
@@ -344,38 +341,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchForecast = async (profileSettingsData: IProfileSettingsData) => {
     try {
       if (profileSettingsData.latitude && profileSettingsData.longitude) {
-        setWeatherLoading(true);
+        setWeatherState(prev => ({ ...prev, loading: true, error: '' }));
         const forecast = await fetchForecastData(
           profileSettingsData.latitude,
           profileSettingsData.longitude,
           apiSession?.accessToken
         );
-        setForecastData(forecast);
-        if (forecast) {
-          sessionStorage.setItem(`forecast_${user?.id}`, JSON.stringify(forecast));
-        }
-        setWeatherLoading(false);
+        setWeatherState(prev => ({
+          ...prev,
+          data: forecast,
+          loading: false,
+        }));
       }
     } catch (err) {
       const errMessage: string = `Failed to fetch weather data. ${JSON.stringify(err)}`;
       console.error(new Error(errMessage));
-      setForecastError(errMessage);
+      setWeatherState(prev => ({ ...prev, error: errMessage, loading: false }));
     }
   };
 
   const fetchGeomagnetic = async () => {
     try {
-      setGeoMagneticLoading(true);
+      setGeomagneticState(prev => ({ ...prev, loading: true, error: '' }));
       const geomagnetic = await fetchGeomagneticData(apiSession?.accessToken);
-      setGeomagneticData(geomagnetic);
-      if (geomagnetic) {
-        sessionStorage.setItem(`geomagnetic_${user?.id}`, JSON.stringify(geomagnetic));
-      }
-      setGeoMagneticLoading(false);
+      setGeomagneticState(prev => ({
+        ...prev,
+        data: geomagnetic,
+        loading: false,
+      }));
     } catch (err) {
       const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
       console.error(new Error(errMessage));
-      setGeoMagneticError(errMessage);
+      setGeomagneticState(prev => ({ ...prev, error: errMessage, loading: false }));
     }
   };
 
@@ -410,14 +407,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
       console.error(new Error(errMessage));
-      setGeoMagneticError(errMessage);
+      setGeomagneticState(prev => ({ ...prev, error: errMessage }));
     }
   };
 
   const fetchSolarRadiation = async (profileSettingsData: IProfileSettingsData) => {
     try {
       if (profileSettingsData.latitude && profileSettingsData.longitude) {
-        setSolarRadiationLoading(true);
+        setSolarRadiationState(prev => ({ ...prev, loading: true, error: '' }));
         const solar = await fetchSolarRadiationData(
           parseFloat(profileSettingsData.latitude),
           parseFloat(profileSettingsData.longitude),
@@ -425,15 +422,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
 
         if (solar) {
-          setSolarRadiationData(solar);
-          sessionStorage.setItem(`solar_radiation_${user?.id}`, JSON.stringify(solar));
+          setSolarRadiationState(prev => ({
+            ...prev,
+            data: solar,
+            loading: false,
+          }));
+        } else {
+          setSolarRadiationState(prev => ({ ...prev, loading: false }));
         }
-        setSolarRadiationLoading(false);
       }
     } catch (err) {
       const errMessage: string = `Failed to fetch solar radiation data. ${JSON.stringify(err)}`;
       console.error(new Error(errMessage));
-      setSolarRadiationError(errMessage);
+      setSolarRadiationState(prev => ({ ...prev, error: errMessage, loading: false }));
     }
   };
 
@@ -450,24 +451,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profileSettingsData,
         setProfileSettingsData,
         profileLoading,
-        weatherLoading,
-        geoMagneticLoading,
-        setWeatherLoading,
-        setGeoMagneticLoading,
-        forecastData,
-        geomagneticData,
+        weatherState,
+        geomagneticState,
+        solarRadiationState,
         fetchForecast,
         fetchGeomagnetic,
-        forecastError,
-        geoMagneticError,
         locationDataList,
         setLocationDataList,
         fetchForecastHistorical,
         fetchGeomagneticHistorical,
         fetchSolarRadiation,
-        solarRadiationData,
-        solarRadiationLoading,
-        solarRadiationError,
       }}
     >
       {children}

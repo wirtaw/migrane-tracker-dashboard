@@ -23,21 +23,19 @@ interface ISolarRadiationWidgetProps {
 }
 
 export default function SolarRadiationWidget({ data }: ISolarRadiationWidgetProps) {
-  const {
-    solarRadiationData: solarweather,
-    loading: authLoading,
-    solarRadiationError: error,
-    fetchSolarRadiation,
-    profileSettingsData,
-  } = useAuth();
+  const { solarRadiationState, fetchSolarRadiation, profileSettingsData } = useAuth();
 
-  const isLoading = data ? false : authLoading;
+  const isLoading = data ? false : solarRadiationState.loading;
 
   if (isLoading) {
     return <Loader />;
   }
 
-  const currentSolarRadiationData = data ? data : error || !solarweather ? [] : [...solarweather];
+  const currentSolarRadiationData = data
+    ? data
+    : solarRadiationState.error || !solarRadiationState.data
+      ? []
+      : [...solarRadiationState.data];
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
@@ -46,7 +44,7 @@ export default function SolarRadiationWidget({ data }: ISolarRadiationWidgetProp
           <Zap className="w-5 h-5 text-amber-500" />
           <h2 className="text-lg font-semibold dark:text-white">Solar Radiation</h2>
         </div>
-        {!data && error && (
+        {!data && solarRadiationState.error && (
           <div className="flex items-center gap-1 text-amber-500 text-sm">
             <AlertCircle className="w-4 h-4" />
             <span>Using default data</span>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Calendar, MapPin, Settings } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase.ts';
+import { supabase } from '../lib/supabase';
 
 import { IUserUpdateDAO } from '../models/user.types';
 import { updateProfile } from '../services/migraineApi';

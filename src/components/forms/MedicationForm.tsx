@@ -1,64 +1,68 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { IMedication } from '../../models/profileData.types';
+
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
 import { IFormEvent } from '../../models/forms.types.ts';
-
+import { createMedication, CreateMedicationDto } from '../../services/medications';
 interface IMedicationFormProps {
   onSubmit: () => void;
 }
 
 export default function MedicationForm({ onSubmit }: IMedicationFormProps) {
-  const { profileSettingsData, user } = useAuth();
-  const { medicationEnumList, medicationList, setMedicationList, setFormErrorMessage } =
+  const { profileSettingsData, apiSession } = useAuth();
+  const { medicationEnumList, setMedicationList, setFormErrorMessage, setMedicationEnumList } =
     useProfileDataContext();
 
-  const userId: string = user?.id || '1';
   const [titleValue, setTitleValue] = useState<string>('');
   const [dosageValue, setDosageValue] = useState<number>(0);
   const [dosageMetricValue, setDosageMetricValue] = useState<string>('mg');
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [notesValue, setNotesValue] = useState<string>('');
 
-  const isValidMedication = (medication: IMedication) => {
-    if (!medication?.title) {
-      return false;
-    }
-
-    if (!medication?.dosage) {
-      return false;
-    }
-
-    if (!medication?.datetimeAt) {
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    const maxId = Math.max(...medicationList.map(({ id }) => id));
-    const medication: IMedication = {
-      id: maxId + 1,
-      userId,
-      title: titleValue,
-      dosage: `${dosageValue}${dosageMetricValue}`,
-      notes: notesValue,
-      createdAt: new Date(),
-      datetimeAt: datetimeAtValue,
-      updateAt: new Date(),
-    };
-
-    if (isValidMedication(medication)) {
-      setMedicationList([...medicationList, medication]);
-    } else {
-      console.error('Invalid medication form');
-      setFormErrorMessage({ showModal: true, message: 'Invalid medication form' });
-    }
-
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit();
+
+    if (!titleValue || !dosageValue || !datetimeAtValue) {
+      setFormErrorMessage({ showModal: true, message: 'Please fill in all required fields' });
+      return;
+    }
+
+    if (!apiSession?.accessToken) {
+      setFormErrorMessage({ showModal: true, message: 'Authentication session missing' });
+      return;
+    }
+
+    if (!apiSession?.userId) {
+      setFormErrorMessage({ showModal: true, message: 'User ID missing' });
+      return;
+    }
+
+    try {
+      const dto: CreateMedicationDto = {
+        userId: apiSession.userId,
+        title: titleValue,
+        dosage: `${dosageValue}${dosageMetricValue}`,
+        notes: notesValue,
+        datetimeAt: datetimeAtValue.toISOString(),
+      };
+
+      const newMedication = await createMedication(dto, apiSession.accessToken);
+
+      setMedicationList(prev => [...prev, newMedication]);
+
+      if (!medicationEnumList.includes(newMedication.title)) {
+        setMedicationEnumList(prev => [...prev, newMedication.title]);
+      }
+
+      onSubmit();
+    } catch (error) {
+      console.error('Failed to create medication:', error);
+      setFormErrorMessage({
+        showModal: true,
+        message: error instanceof Error ? error.message : 'Failed to create medication',
+      });
+    }
   };
 
   const handleSelectChange = (event: IFormEvent) => {

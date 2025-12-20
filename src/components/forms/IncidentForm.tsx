@@ -2,41 +2,35 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { IIncident } from '../../models/profileData.types';
-import { getIsoDateTimeLocal } from '../../lib/utils.ts';
-import { IFormEvent } from '../../models/forms.types.ts';
+import { getIsoDateTimeLocal } from '../../lib/utils';
+import { IFormEvent } from '../../models/forms.types';
+import { createIncident, CreateIncidentDto } from '../../services/incidents';
+import { IncidentTypeEnum } from '../../enums/incident-type.enum';
 
 interface IIncidentFormProps {
   onSubmit: () => void;
 }
 
 export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
-  const { user, profileSettingsData } = useAuth();
+  const { apiSession } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { incidentEnumList, triggerEnumList, incidentList, setIncidentList, setFormErrorMessage } =
-    useProfileDataContext();
+  const { triggerEnumList, setIncidentList, setFormErrorMessage } = useProfileDataContext();
   const navigate = useNavigate();
 
-  const userId: string = user?.id || '1';
-  const [typeValue, setTypeValue] = useState<string>('');
+  const [typeValue, setTypeValue] = useState<IncomingType | ''>('');
+  type IncomingType = IncidentTypeEnum;
   const [durationHoursValue, setDurationHoursValue] = useState<number>(0.5);
   const [startTimeValue, setStartTimeValue] = useState<Date>(new Date());
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [notesValue, setNotesValue] = useState<string>('');
 
-  const isValidIncident = (incident: IIncident) => {
-    if (!incident?.type) {
+  const isValidIncident = () => {
+    if (!typeValue) {
       return false;
     }
-
-    if (!incident?.durationHours) {
+    if (!durationHoursValue) {
       return false;
     }
-
-    if (!incident?.triggers.length) {
-      return false;
-    }
-
     return true;
   };
 
@@ -49,29 +43,40 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
     setTriggers([]);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    const maxId = Math.max(...incidentList.map(({ id }) => id));
-    const incident: IIncident = {
-      id: maxId + 1,
-      userId,
-      durationHours: durationHoursValue,
-      type: typeValue,
-      startTime: startTimeValue,
-      createdAt: new Date(),
-      datetimeAt: datetimeAtValue,
-      triggers,
-      notes: notesValue,
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    if (isValidIncident(incident)) {
-      setIncidentList([...incidentList, incident]);
-    } else {
-      console.error('Invalid incident form');
-      setFormErrorMessage({ showModal: true, message: 'Invalid incident form' });
+    if (!apiSession?.accessToken || !apiSession?.userId) {
+      setFormErrorMessage({ showModal: true, message: 'Authentication required' });
+      return;
     }
 
-    e.preventDefault();
-    onSubmit();
+    if (!isValidIncident()) {
+      setFormErrorMessage({ showModal: true, message: 'Please fill in all required fields' });
+      return;
+    }
+
+    try {
+      const dto: CreateIncidentDto = {
+        userId: apiSession.userId,
+        type: typeValue as IncidentTypeEnum,
+        startTime: startTimeValue.toISOString(),
+        durationHours: durationHoursValue,
+        notes: notesValue,
+        triggers,
+        datetimeAt: datetimeAtValue.toISOString(),
+      };
+
+      const newIncident = await createIncident(dto, apiSession.accessToken);
+      setIncidentList(prev => [...prev, newIncident]);
+      onSubmit();
+    } catch (error) {
+      console.error('Failed to save incident:', error);
+      setFormErrorMessage({
+        showModal: true,
+        message: error instanceof Error ? error.message : 'Failed to save incident',
+      });
+    }
   };
 
   const handleNumberChange = (event: IFormEvent) => {
@@ -84,7 +89,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
   };
 
   const handleSelectChange = (event: IFormEvent) => {
-    setTypeValue(event.target.value.toString());
+    setTypeValue(event.target.value as IncidentTypeEnum);
   };
 
   const handleTextareaChange = (event: IFormEvent) => {
@@ -122,7 +127,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
           <option value="" disabled>
             Select a type
           </option>
-          {incidentEnumList.map((option, index) => (
+          {Object.values(IncidentTypeEnum).map((option, index) => (
             <option key={index} value={option}>
               {option}
             </option>
@@ -143,7 +148,6 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
           value={getIsoDateTimeLocal(startTimeValue)}
           onChange={handleDateChange}
-          min={getIsoDateTimeLocal(new Date(profileSettingsData?.birthDate))}
           max={getIsoDateTimeLocal(new Date())}
         />
       </div>
@@ -158,6 +162,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
         <input
           type="number"
           id="duration"
+          step="0.1"
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
           value={durationHoursValue}
           onChange={handleNumberChange}

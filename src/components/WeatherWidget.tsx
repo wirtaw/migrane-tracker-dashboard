@@ -20,15 +20,9 @@ interface IWeatherWidgetProps {
 }
 
 export default function WeatherWidget({ data }: IWeatherWidgetProps) {
-  const {
-    forecastData,
-    weatherLoading: authLoading,
-    forecastError: error,
-    fetchForecast,
-    profileSettingsData,
-  } = useAuth();
+  const { weatherState, fetchForecast, profileSettingsData } = useAuth();
 
-  const isLoading = data ? false : authLoading;
+  const isLoading = data ? false : weatherState.loading;
 
   if (isLoading) {
     return <Loader />;
@@ -44,13 +38,14 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
     icon: undefined,
     clouds: undefined,
     uvi: undefined,
+    alerts: [],
   };
 
   const currentWeather = data
     ? data
-    : error || !forecastData
+    : weatherState.error || !weatherState.data
       ? defaultWeather
-      : { ...defaultWeather, ...forecastData };
+      : { ...defaultWeather, ...weatherState.data };
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
@@ -59,7 +54,7 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
           <Sun className="w-5 h-5 text-yellow-500" />
           <h2 className="text-lg font-semibold dark:text-white">Weather</h2>
         </div>
-        {!data && error && (
+        {!data && weatherState.error && (
           <div className="flex items-center gap-1 text-amber-500 text-sm">
             <AlertCircle className="w-4 h-4" />
             <span>Using default data</span>

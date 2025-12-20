@@ -11,7 +11,8 @@
         "knip": "knip -c ./knip.json",
         "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
         "prepare": "husky",
-        "update": "ncu -i --format=group"
+        "update": "ncu -i --format=group",
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.75.0",

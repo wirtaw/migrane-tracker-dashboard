@@ -8,68 +8,70 @@ export interface ITrigger {
 }
 
 export interface ISymptom {
-  id: number;
+  id: string;
   userId: string;
   type: string;
   severity: number;
-  notes: string;
+  note: string | undefined;
   createdAt: Date;
   datetimeAt: Date;
 }
 
+import { IncidentTypeEnum } from '../enums/incident-type.enum';
+
 export interface IIncident {
-  id: number;
+  id: string;
   userId: string;
-  type: string;
+  type: IncidentTypeEnum;
   startTime: Date;
   durationHours: number;
-  notes: string;
+  notes?: string;
   triggers: string[];
   createdAt: Date;
   datetimeAt: Date;
 }
 
 export interface IMedication {
-  id: number;
+  id: string;
   userId: string;
   title: string;
   dosage: string;
-  notes: string;
+  notes: string | undefined;
   datetimeAt: Date;
   createdAt: Date;
   updateAt: Date;
 }
 
 export interface IWeight {
-  id: number;
+  id: string;
   userId: string;
   weight: number;
-  notes: string;
+  notes: string | undefined;
   datetimeAt: Date;
 }
 
 export interface IHeight {
-  id: number;
+  id: string;
   userId: string;
   height: number;
-  notes: string;
+  notes: string | undefined;
   datetimeAt: Date;
 }
 
 export interface IBloodPressure {
-  id: number;
+  id: string;
   userId: string;
   systolic: number;
   diastolic: number;
-  notes: string;
+  notes: string | undefined;
   datetimeAt: Date;
 }
 
 export interface ISleep {
-  id: number;
+  id: string;
   userId: string;
   rate: number;
-  notes: string;
+  notes: string | undefined;
   startedAt: Date;
   datetimeAt: Date;
 }
@@ -77,6 +79,8 @@ export interface ISleep {
 export interface ISolar {
   kIndex: number | null;
   aIndex: number | null;
+  bIndex: number | null;
+  solarFlux: number | null;
   flareProbability: number | null;
   datetime: string;
 }
@@ -101,7 +105,7 @@ export interface ISolarRadiation {
 }
 
 export interface ILocationData {
-  id: number;
+  id: string;
   userId: string;
   latitude: number;
   longitude: number;
@@ -109,7 +113,7 @@ export interface ILocationData {
   solar: ISolar[] | [];
   solarRadiation: ISolarRadiation[] | [];
   datetimeAt: Date;
-  incidentId: number | null;
+  incidentId: string | null;
 }
 
 export interface IProfileSettingsData {

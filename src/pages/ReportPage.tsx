@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-import { useProfileDataContext } from '../context/ProfileDataContext.tsx';
-import { getIsoDate, getIsoTime } from '../lib/utils.ts';
-import { IFormEvent } from '../models/forms.types.ts';
-import { IIncident, ITrigger, IMedication, ISymptom } from '../models/profileData.types.ts';
+import { useProfileDataContext } from '../context/ProfileDataContext';
+import { getIsoDate, getIsoTime } from '../lib/utils';
+import { IFormEvent } from '../models/forms.types';
+import { IIncident, ITrigger, IMedication, ISymptom } from '../models/profileData.types';
 import { useAuth } from '../context/AuthContext';
 
 interface IReportPageData {
@@ -246,9 +246,9 @@ export default function ReportPage() {
                         <p className="text-gray-600 dark:text-gray-300">
                           <strong>Start Time:</strong> {getIsoTime(symptom.createdAt)}
                         </p>
-                        {symptom.notes && (
+                        {symptom.note && (
                           <p className="text-gray-600 dark:text-gray-300">
-                            <strong>Notes:</strong> {symptom.notes}
+                            <strong>Notes:</strong> {symptom.note}
                           </p>
                         )}
                       </div>

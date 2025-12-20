@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon } from 'lucide-react';
 import MedicationManageForm from './../components/forms/MedicationManageForm';
-import IncidentManageForm from '../components/forms/IncidentManageForm';
-import TriggerManageForm from '../components/forms/TriggerManageForm';
-import SymptomManageForm from '../components/forms/SymptomManageForm';
+import SymptomTypeManageForm from '../components/forms/SymptomTypeManageForm';
 import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
+import TriggerTypeManageForm from '../components/forms/TriggerTypeManageForm';
 
 export default function Settings() {
   const [activeModal, setActiveModal] = useState<
@@ -97,21 +96,15 @@ export default function Settings() {
         onClose={() => setActiveModal(null)}
         title="Manage Symptoms"
       >
-        <SymptomManageForm onSubmit={() => setActiveModal(null)} />
+        <SymptomTypeManageForm />
       </Modal>
-      <Modal
-        isOpen={activeModal === 'incident'}
-        onClose={() => setActiveModal(null)}
-        title="Manage Incidents"
-      >
-        <IncidentManageForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
+
       <Modal
         isOpen={activeModal === 'trigger'}
         onClose={() => setActiveModal(null)}
         title="Manage Triggers"
       >
-        <TriggerManageForm onSubmit={() => setActiveModal(null)} />
+        <TriggerTypeManageForm />
       </Modal>
     </>
   );

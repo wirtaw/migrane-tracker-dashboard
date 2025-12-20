@@ -13,6 +13,11 @@ import {
   ILocationData,
   ITyramineContentItem,
 } from '../models/profileData.types';
+import { fetchTriggers } from '../services/triggers';
+import { fetchSymptoms } from '../services/symptoms';
+import { fetchMedications } from '../services/medications';
+import { fetchHeights, fetchWeights, fetchBloodPressures } from '../services/health-logs';
+import { fetchIncidents } from '../services/incidents';
 import { useAuth } from './AuthContext';
 
 interface IProfileDataContextProps {
@@ -55,7 +60,7 @@ interface IProfileDataContextProps {
 const ProfileDataContext = createContext<IProfileDataContextProps | undefined>(undefined);
 
 export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
+  const { user, apiSession } = useAuth();
   const userId: string = user?.id || '1';
   const [triggerList, setTriggerList] = useState<ITrigger[]>([]);
   const [incidentList, setIncidentList] = useState<IIncident[]>([]);
@@ -109,8 +114,6 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
 
   const [profileSecurityData, setProfileSecurityData] = useState<ProfileSecurityData>({
     password: '',
-    salt: '',
-    key: '',
     userId,
     isInit: false,
   });
@@ -213,6 +216,63 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
       striclyProhibitedUse: 'None.',
     },
   ]);
+
+  React.useEffect(() => {
+    if (apiSession?.accessToken) {
+      // Fetch Triggers
+      fetchTriggers(apiSession.accessToken)
+        .then(data => {
+          setTriggerList(data);
+          const historyTypes = Array.from(new Set(data.map(t => t.type)));
+          setTriggerEnumList(prev => {
+            const uniqueTypes = new Set([...prev, ...historyTypes]);
+            return Array.from(uniqueTypes);
+          });
+        })
+        .catch(err => console.error('Failed to fetch triggers', err));
+
+      // Fetch Symptoms
+      fetchSymptoms(apiSession.accessToken)
+        .then(data => {
+          setSymptomList(data);
+          const historyTypes = Array.from(new Set(data.map(s => s.type)));
+          setSymptomEnumList(prev => {
+            const uniqueTypes = new Set([...prev, ...historyTypes]);
+            return Array.from(uniqueTypes);
+          });
+        })
+        .catch(err => console.error('Failed to fetch symptoms', err));
+
+      // Fetch Medications
+      fetchMedications(apiSession.accessToken)
+        .then(data => {
+          setMedicationList(data);
+          const historyTitles = Array.from(new Set(data.map(m => m.title)));
+          setMedicationEnumList(prev => {
+            const uniqueTitles = new Set([...prev, ...historyTitles]);
+            return Array.from(uniqueTitles);
+          });
+        })
+        .catch(err => console.error('Failed to fetch medications', err));
+
+      // Fetch Health Logs
+      fetchHeights(apiSession.accessToken)
+        .then(setHeightList)
+        .catch(err => console.error('Failed to fetch heights', err));
+
+      fetchWeights(apiSession.accessToken)
+        .then(setWeightList)
+        .catch(err => console.error('Failed to fetch weights', err));
+
+      fetchBloodPressures(apiSession.accessToken)
+        .then(setBloodPressureList)
+        .catch(err => console.error('Failed to fetch blood pressures', err));
+
+      fetchIncidents(apiSession.accessToken)
+        .then(setIncidentList)
+        .catch(err => console.error('Failed to fetch incidents', err));
+    }
+  }, [apiSession?.accessToken]);
 
   return (
     <ProfileDataContext.Provider
