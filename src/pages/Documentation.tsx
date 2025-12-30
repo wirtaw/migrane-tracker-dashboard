@@ -66,6 +66,11 @@ export default function Documentation() {
                   <b>Purpose:</b> Essential for accurate weather and solar activity data retrieval.
                 </li>
                 <li>
+                  {' '}
+                  Auto-Detect: This feature uses your device's location to automatically detect your
+                  location coordinates.
+                </li>
+                <li>
                   <b>How to Modify:</b> Similar to the birthdate, access the "Profile"{' '}
                   <Link to="/profile" className="text-blue-500 dark:text-blue-500 underline">
                     section
@@ -173,6 +178,19 @@ export default function Documentation() {
                   "Phonophobia," "Throbbing Pain," etc.
                 </li>
               </ul>
+              <p>Dark Mode: </p>
+              <ul>
+                <li>
+                  <b>Purpose:</b> Allows you to switch between light and dark modes.
+                </li>
+                <li>
+                  <b>How to Use:</b> Look for a "Dark Mode" or "Theme" section in{' '}
+                  <Link to="/settings" className="text-blue-500 dark:text-blue-500 underline">
+                    "Settings"
+                  </Link>{' '}
+                  You can toggle between light and dark modes.
+                </li>
+              </ul>
             </div>
           </section>
           <section className="space-y-4 mt-5">
@@ -206,6 +224,24 @@ export default function Documentation() {
                     <li>
                       <b>Export:</b> Click "Export," and the application will generate a JSON file
                       containing your data. Save this file to your desired location.
+                    </li>
+                    <li>
+                      <b>Clear storage:</b> Click "Clear storage," and the application will clear
+                      all your data. This will remove all your data from the application.
+                    </li>
+                    <li>
+                      <b>Import Database:</b> Click "Import Database," select your JSON file, and
+                      follow the prompts to map the data fields from your file to the corresponding
+                      fields in The Migraine Tracker.
+                    </li>
+                    <li>
+                      <b>Export Database:</b> Click "Export Database," and the application will
+                      generate a JSON file containing your data. Save this file to your desired
+                      location.
+                    </li>
+                    <li>
+                      <b>Delete all:</b> Click "Delete all," and the application will delete all
+                      your data.
                     </li>
                   </ol>
                 </li>
@@ -334,10 +370,6 @@ export default function Documentation() {
               <p className="text-gray-600 dark:text-gray-300 dark:text-white mt-5">
                 <b>Incorrect Weather Data:</b> Double-check that your location coordinates are
                 accurate in your profile settings.
-              </p>
-              <p className="text-gray-600 dark:text-gray-300 dark:text-white mt-5">
-                <b>Lost Encrypt Key:</b> If you lose your encryption key, you will permanently lose
-                access to your encrypted data. There is no way to recover it.
               </p>
             </div>
           </section>
