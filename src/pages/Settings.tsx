@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Settings as SettingsIcon } from 'lucide-react';
 import MedicationManageForm from './../components/forms/MedicationManageForm';
 import SymptomTypeManageForm from '../components/forms/SymptomTypeManageForm';
 import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
 import TriggerTypeManageForm from '../components/forms/TriggerTypeManageForm';
+import LocationManageForm from '../components/forms/LocationManageForm';
 
 export default function Settings() {
   const [activeModal, setActiveModal] = useState<
-    'symptom' | 'medication' | 'incident' | 'trigger' | null
+    'symptom' | 'medication' | 'incident' | 'trigger' | 'location' | null
   >(null);
 
   return (
@@ -82,6 +83,19 @@ export default function Settings() {
               />
             </div>
           </div>
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex flex-col items-center text-center">
+              <h2 className="mt-4 mb-5 text-lg font-semibold text-gray-900 dark:text-white">
+                Locations
+              </h2>
+              <AddButton
+                id="manageLocations"
+                label="Manage Locations"
+                onClick={() => setActiveModal('location')}
+              />
+            </div>
+          </div>
         </div>
       </main>
       <Modal
@@ -105,6 +119,13 @@ export default function Settings() {
         title="Manage Triggers"
       >
         <TriggerTypeManageForm />
+      </Modal>
+      <Modal
+        isOpen={activeModal === 'location'}
+        onClose={() => setActiveModal(null)}
+        title="Manage Locations"
+      >
+        <LocationManageForm onSubmit={() => setActiveModal(null)} />
       </Modal>
     </>
   );

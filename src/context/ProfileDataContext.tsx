@@ -18,6 +18,7 @@ import { fetchSymptoms } from '../services/symptoms';
 import { fetchMedications } from '../services/medications';
 import { fetchHeights, fetchWeights, fetchBloodPressures } from '../services/health-logs';
 import { fetchIncidents } from '../services/incidents';
+import { LocationsService } from '../services/locations';
 import { useAuth } from './AuthContext';
 
 interface IProfileDataContextProps {
@@ -271,6 +272,10 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
       fetchIncidents(apiSession.accessToken)
         .then(setIncidentList)
         .catch(err => console.error('Failed to fetch incidents', err));
+
+      LocationsService.getLocations(apiSession.accessToken)
+        .then(setLocationList)
+        .catch(err => console.error('Failed to fetch locations', err));
     }
   }, [apiSession?.accessToken]);
 

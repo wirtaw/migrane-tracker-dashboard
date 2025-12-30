@@ -95,7 +95,7 @@ export async function updateTrigger(
   return parseTriggerDates(data);
 }
 
-export async function deleteTrigger(id: number, token: string): Promise<void> {
+export async function deleteTrigger(id: string, token: string): Promise<void> {
   if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     throw new Error('Delete trigger failed: Missing configuration or token');
   }

@@ -1,5 +1,5 @@
 export interface ITrigger {
-  id: number;
+  id: string;
   userId: string;
   type: string;
   note: string;

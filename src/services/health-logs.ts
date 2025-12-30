@@ -1,5 +1,5 @@
 import { env } from '../config/env';
-import { IWeight, IHeight, IBloodPressure } from '../models/profileData.types';
+import { IWeight, IHeight, IBloodPressure, ISleep } from '../models/profileData.types';
 
 // DTOs
 export interface CreateWeightDto {
@@ -149,4 +149,33 @@ export async function deleteBloodPressure(id: string, token: string): Promise<vo
     }
   );
   if (!response.ok) throw new Error('Failed to delete blood pressure');
+}
+
+// Sleep
+export async function fetchSleeps(token: string): Promise<ISleep[]> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/sleeps`, {
+    headers: getHeaders(token),
+  });
+  if (!response.ok) throw new Error('Failed to fetch sleeps');
+  const data = await response.json();
+  return data.map((item: unknown) => parseDates<ISleep>(item));
+}
+
+export async function createSleep(dto: CreateSleepDto, token: string): Promise<ISleep> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/sleep`, {
+    method: 'POST',
+    headers: getHeaders(token),
+    body: JSON.stringify(dto),
+  });
+  if (!response.ok) throw new Error('Failed to create sleep');
+  const data = await response.json();
+  return parseDates<ISleep>(data);
+}
+
+export async function deleteSleep(id: string, token: string): Promise<void> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/sleep/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(token),
+  });
+  if (!response.ok) throw new Error('Failed to delete sleep');
 }
