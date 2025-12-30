@@ -43,7 +43,7 @@ export default function MedicationForm({ onSubmit }: IMedicationFormProps) {
         userId: apiSession.userId,
         title: titleValue,
         dosage: `${dosageValue}${dosageMetricValue}`,
-        notes: notesValue,
+        notes: notesValue || undefined,
         datetimeAt: datetimeAtValue.toISOString(),
       };
 

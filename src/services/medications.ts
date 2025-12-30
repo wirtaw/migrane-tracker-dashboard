@@ -40,7 +40,7 @@ export async function fetchMedications(token: string): Promise<IMedication[]> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch medications');
+    throw new Error(`Failed to fetch medications: ${response.status} ${response.statusText}`);
   }
 
   const data = await response.json();

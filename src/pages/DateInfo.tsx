@@ -64,10 +64,20 @@ export default function DateInfo() {
       exists++;
     }
     // TODO get in date raknge location data
-    if (locationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate()).length) {
-      setLocationItems(
-        locationList.filter(item => getIsoDate(item.datetimeAt) === date.toISODate())
-      );
+    // Locations filtering: matches date OR matches an incident on this date
+    const dateIncidents = incidentList.filter(
+      item => getIsoDate(item.datetimeAt) === date.toISODate()
+    );
+    const incidentIds = dateIncidents.map(i => i.id.toString());
+
+    const matchingLocations = locationList.filter(item => {
+      const isDateMatch = getIsoDate(item.datetimeAt) === date.toISODate();
+      const isIncidentMatch = item.incidentId ? incidentIds.includes(item.incidentId) : false;
+      return isDateMatch || isIncidentMatch;
+    });
+
+    if (matchingLocations.length) {
+      setLocationItems(matchingLocations);
       exists++;
     }
 

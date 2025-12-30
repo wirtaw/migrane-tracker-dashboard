@@ -200,9 +200,10 @@ const mapTriggerList = (jsonDataTriggers: unknown, maxId: number): ITrigger[] | 
     }
 
     const setId = id || maxId + 1;
+    const stringId = setId.toString();
 
     triggers.push({
-      id: setId,
+      id: stringId,
       userId: userId.toString(),
       datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
       type,
@@ -317,7 +318,7 @@ const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): ISymptom[] | 
 
     if (!userId) {
       brokenSymptoms.push({
-        id: '0',
+        id: 0,
         userId: userId.toString(),
         datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
         type,
@@ -534,14 +535,14 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
         } = data;
 
         // Incidents
-        let maxId = Math.max(...incidentList.map(({ id }) => id));
+        let maxId = Math.max(...incidentList.map(({ id }) => parseInt(id)));
         const incidents: IIncident[] = mapIncidentList(jsonDataIncidents, maxId);
 
         setNewIncidents(incidents);
         setIncidentList([...incidentList, ...incidents]);
 
         // Triggers
-        maxId = Math.max(...triggerList.map(({ id }) => id));
+        maxId = Math.max(...triggerList.map(({ id }) => parseInt(id)));
         const triggers: ITrigger[] = mapTriggerList(jsonDataTriggers, maxId);
 
         setNewTriggers(triggers);
@@ -553,7 +554,7 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
         }
 
         // Medications
-        maxId = Math.max(...medicationList.map(({ id }) => id));
+        maxId = Math.max(...medicationList.map(({ id }) => parseInt(id)));
         const medications: IMedication[] = mapMedicationList(jsonDataMedications, maxId);
 
         setNewMedications(medications);
@@ -565,7 +566,7 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
         }
 
         // Symptoms
-        maxId = Math.max(...symptomList.map(({ id }) => id));
+        maxId = Math.max(...symptomList.map(({ id }) => parseInt(id)));
         const symptoms: ISymptom[] = mapSymptomList(jsonDataSymptoms, maxId);
 
         setNewSymptoms(symptoms);
