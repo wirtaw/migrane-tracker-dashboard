@@ -1,72 +1,100 @@
 import React, { useState } from 'react';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Trigger } from '../../models/profileData.types';
-import { getIsoDateTimeLocal } from '../../lib/utils.ts';
-import { FormEvent } from '../../models/forms.types.ts';
+import { getIsoDateTimeLocal } from '../../lib/utils';
+import { IFormEvent } from '../../models/forms.types';
+import { createTrigger, CreateTriggerDto } from '../../services/triggers';
+import Loader from '../Loader';
 
-interface TriggerFormProps {
+interface ITriggerFormProps {
   onSubmit: () => void;
 }
 
-export default function TriggerForm({ onSubmit }: TriggerFormProps) {
-  const { user } = useAuth();
-  const { triggerEnumList, triggerList, setTriggerList, setFormErrorMessage, profileSettingsData } =
+export default function TriggerForm({ onSubmit }: ITriggerFormProps) {
+  const { profileSettingsData, apiSession } = useAuth();
+  const { triggerEnumList, setTriggerList, setFormErrorMessage, setTriggerEnumList } =
     useProfileDataContext();
 
-  const userId: string = user?.id || '1';
   const [typeValue, setTypeValue] = useState<string>('');
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [noteValue, setNoteValue] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isValidTrigger = (trigger: Trigger) => {
-    if (!trigger?.type) {
-      return false;
-    }
-
-    if (!trigger?.datetimeAt) {
-      return false;
-    }
-
+  const isValidTrigger = (type: string, datetime: Date) => {
+    if (!type) return false;
+    if (!datetime) return false;
     return true;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    const maxId = Math.max(...triggerList.map(({ id }) => id));
-    const trigger: Trigger = {
-      id: maxId + 1,
-      userId,
-      type: typeValue,
-      note: noteValue,
-      createdAt: new Date(),
-      datetimeAt: datetimeAtValue,
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    if (isValidTrigger(trigger)) {
-      setTriggerList([...triggerList, trigger]);
-    } else {
-      console.error('Invalid trigger form');
-      setFormErrorMessage({ showModal: true, message: 'Invalid trigger form' });
+    if (!isValidTrigger(typeValue, datetimeAtValue)) {
+      setFormErrorMessage({ showModal: true, message: 'Please select a type and date' });
+      return;
     }
 
-    e.preventDefault();
-    onSubmit();
+    if (!apiSession?.accessToken) {
+      setFormErrorMessage({ showModal: true, message: 'Authentication session missing' });
+      return;
+    }
+
+    if (!apiSession?.userId) {
+      setFormErrorMessage({ showModal: true, message: 'User ID missing' });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const dto: CreateTriggerDto = {
+        type: typeValue,
+        note: noteValue,
+        userId: apiSession.userId,
+        datetimeAt: datetimeAtValue.toISOString(),
+      };
+
+      const newTrigger = await createTrigger(dto, apiSession.accessToken);
+
+      // Update local list
+      setTriggerList(prev => [...prev, newTrigger]);
+
+      // If it's a new type not in the enum list, add it (though usually management handles this, nice to have sync)
+      if (!triggerEnumList.includes(newTrigger.type)) {
+        setTriggerEnumList(prev => [...prev, newTrigger.type]);
+      }
+
+      onSubmit();
+    } catch (error) {
+      console.error('Failed to create trigger:', error);
+      setFormErrorMessage({
+        showModal: true,
+        message: error instanceof Error ? error.message : 'Failed to create trigger',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSelectChange = (event: FormEvent) => {
+  const handleSelectChange = (event: IFormEvent) => {
     setTypeValue(event.target.value.toString());
   };
 
-  const handleTextareaChange = (event: FormEvent) => {
+  const handleTextareaChange = (event: IFormEvent) => {
     setNoteValue(event.target.value.toString());
   };
 
-  const handleDateChange = (event: FormEvent) => {
+  const handleDateChange = (event: IFormEvent) => {
     setDatetimeAtValue(new Date(event.target.value));
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {isSubmitting && (
+        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+          <Loader />
+        </div>
+      )}
       <div>
         <label
           htmlFor="trigger"
@@ -128,9 +156,10 @@ export default function TriggerForm({ onSubmit }: TriggerFormProps) {
       <div className="flex justify-end gap-3">
         <button
           type="submit"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          disabled={isSubmitting}
+          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
         >
-          Save
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>

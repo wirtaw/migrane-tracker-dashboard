@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { Variable } from 'lucide-react';
+import { useState } from 'react';
+import { Variable, Activity } from 'lucide-react';
 import AddButton from './AddButton';
 import Modal from './Modal';
 import SymptomForm from './forms/SymptomForm';
 import MedicationForm from './forms/MedicationForm';
 import IncidentForm from './forms/IncidentForm';
-import WeightForm from './forms/WeightForm';
-import HeightForm from './forms/HeightForm';
-import BloodPressureForm from './forms/BloodPressureForm';
+import HealthLogsForm from './forms/HealthLogsForm';
 import TriggerForm from './forms/TriggerForm';
 import { useProfileDataContext } from '../context/ProfileDataContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function TrackingButtons() {
-  const { profileSettingsData, formErrorMessage, setFormErrorMessage } = useProfileDataContext();
+  const { profileSettingsData } = useAuth();
+  const { formErrorMessage, setFormErrorMessage } = useProfileDataContext();
   const [activeModal, setActiveModal] = useState<
-    'symptom' | 'medication' | 'trigger' | 'incident' | 'weight' | 'height' | 'bloodPressure' | null
+    'symptom' | 'medication' | 'trigger' | 'incident' | 'healthLogs' | null
   >(null);
 
   return (
@@ -27,42 +27,31 @@ export default function TrackingButtons() {
         <div className="flex flex-col gap-3">
           <AddButton
             id="addSymptom"
-            label="Record Symptom"
+            label="Quick record Symptom"
             onClick={() => setActiveModal('symptom')}
           />
           <AddButton
             id="addMedication"
-            label="Record Medication"
+            label="Quick record Medication"
             onClick={() => setActiveModal('medication')}
           />
           <AddButton
             id="addTrigger"
-            label="Record Trigger"
+            label="Quick record Trigger"
             onClick={() => setActiveModal('trigger')}
           />
           <AddButton
             id="recordIcident"
-            label="Record Incident"
+            label="Quick record Incident"
             onClick={() => setActiveModal('incident')}
           />
           {profileSettingsData?.personalHealthData && (
-            <>
-              <AddButton
-                id="addSymptom"
-                label="Record Weight"
-                onClick={() => setActiveModal('weight')}
-              />
-              <AddButton
-                id="recordBloodPressure"
-                label="Record Blood pressure"
-                onClick={() => setActiveModal('bloodPressure')}
-              />
-              <AddButton
-                id="recordHeight"
-                label="Record Height"
-                onClick={() => setActiveModal('height')}
-              />
-            </>
+            <AddButton
+              id="recordHealthLogs"
+              label="Log Health Data"
+              onClick={() => setActiveModal('healthLogs')}
+              icon={<Activity className="w-4 h-4 mr-2" />}
+            />
           )}
         </div>
       </div>
@@ -100,27 +89,11 @@ export default function TrackingButtons() {
       </Modal>
 
       <Modal
-        isOpen={activeModal === 'weight'}
+        isOpen={activeModal === 'healthLogs'}
         onClose={() => setActiveModal(null)}
-        title="Manage Weight"
+        title="Track Health Metrics"
       >
-        <WeightForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
-
-      <Modal
-        isOpen={activeModal === 'height'}
-        onClose={() => setActiveModal(null)}
-        title="Manage Height"
-      >
-        <HeightForm onSubmit={() => setActiveModal(null)} />
-      </Modal>
-
-      <Modal
-        isOpen={activeModal === 'bloodPressure'}
-        onClose={() => setActiveModal(null)}
-        title="Manage Blood Pressure"
-      >
-        <BloodPressureForm onSubmit={() => setActiveModal(null)} />
+        <HealthLogsForm onSubmit={() => setActiveModal(null)} />
       </Modal>
 
       <Modal

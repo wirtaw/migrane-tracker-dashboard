@@ -1,13 +1,32 @@
-import React from 'react';
-import { Zap, Waves, Activity, Clock, AlertTriangle } from 'lucide-react';
-import { useGeoMagneticWeather } from '../hooks/useGeoMagneticWeather.ts';
+import { Zap, Waves, Activity, Clock, AlertTriangle, AlertCircle, RefreshCcw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { env } from '../config/env';
+import Loader from '../components/Loader';
+import { useAuth } from '../context/AuthContext';
+import SolarFluxIndicator from '../components/indicators/SolarFluxIndicator';
+import KIndexIndicator from '../components/indicators/KIndexIndicator';
+import AIndexIndicator from '../components/indicators/AIndexIndicator';
 
-interface GeomagneticData {
+export interface NextWeather {
+  kpIndex: {
+    observed: string;
+    expected: string;
+    rationale: string;
+  };
+  solarRadiation: {
+    rationale: string;
+  };
+  radioBlackout: {
+    rationale: string;
+  };
+}
+
+export interface IGeomagneticData {
   solarFlux: number;
   kIndex: number;
   aIndex: number;
   pastWeather: { level: string };
-  nextWeather: { level: string };
+  nextWeather: NextWeather;
 }
 
 function SpaceWeatherIndicator({ level }: { level: string }) {
@@ -42,121 +61,182 @@ function SpaceWeatherIndicator({ level }: { level: string }) {
   );
 }
 
-function IndexBar({ value, max, colorClass }: { value: number; max: number; colorClass: string }) {
-  const percentage = (value / max) * 100;
-
-  return (
-    <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-      <div
-        className={`h-full ${colorClass} transition-all duration-300`}
-        style={{ width: `${percentage}%` }}
-      />
-    </div>
-  );
+interface IGeoMagneticWidgetProps {
+  data?: IGeomagneticData; // Assuming IGeophysicalWeatherData is IGeomagneticData
 }
 
-export default function GeoMagneticWidget() {
-  const { geophysicalweather, loading, error } = useGeoMagneticWeather();
+export default function GeoMagneticWidget({ data }: IGeoMagneticWidgetProps) {
+  const { geomagneticState, fetchGeomagnetic } = useAuth();
 
-  const geomagneticData: GeomagneticData = {
-    solarFlux: 125,
-    kIndex: 3,
-    aIndex: 15,
+  // Use passed data if available, otherwise fallback to context
+  const isLoading = data ? false : geomagneticState.loading;
+
+  const geomagneticData = {
+    solarFlux: undefined,
+    kIndex: undefined,
+    aIndex: undefined,
     pastWeather: {
-      level: 'minor',
+      level: undefined,
     },
     nextWeather: {
-      level: 'moderate',
+      kpIndex: { observed: '', expected: '', rationale: '' },
+      solarRadiation: { rationale: '' },
+      radioBlackout: { rationale: '' },
     },
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-        <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return <Loader />;
   }
 
-  const currentGeomagneticData = error
-    ? geomagneticData
-    : { ...geomagneticData, ...geophysicalweather };
+  const currentGeomagneticData = data
+    ? data
+    : geomagneticState.error || !geomagneticState.data
+      ? geomagneticData
+      : { ...geomagneticData, ...geomagneticState.data };
+
+  // ... rest of the render logic remains similar, but using currentGeomagneticData
+  // Need to handle the Reload button - if data is passed, reload might not be relevant or should call a different function
+  // For now, I'll hide the reload button if data is passed via props (historical view)
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
-      <div className="flex items-center gap-2 mb-6">
-        <Zap className="w-5 h-5 text-amber-500" />
-        <h2 className="text-lg font-semibold dark:text-white">Geomagnetic Activity</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Zap className="w-5 h-5 text-amber-500" />
+          <h2 className="text-lg font-semibold dark:text-white">Geomagnetic Activity</h2>
+        </div>
+        {!data && geomagneticState.error && (
+          <div className="flex items-center gap-1 text-amber-500 text-sm">
+            <AlertCircle className="w-4 h-4" />
+            <span>Using default data</span>
+          </div>
+        )}
+        {!data && (
+          <div className="flex items-center gap-1 text-amber-500 text-sm hover:text-blue-900 dark:hover:text-white">
+            <p>
+              Reload <RefreshCcw className="w-3 h-3 hover" onClick={() => fetchGeomagnetic()} />
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="grid gap-6">
-        {/* Solar Flux */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Waves className="w-4 h-4 text-yellow-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Solar Flux (sfu)</span>
-            </div>
-            <span className="text-sm font-medium dark:text-gray-300">
-              {currentGeomagneticData.solarFlux}
-            </span>
-          </div>
-          <IndexBar value={currentGeomagneticData.solarFlux} max={200} colorClass="bg-yellow-400" />
-        </div>
+      {currentGeomagneticData?.solarFlux !== undefined &&
+        currentGeomagneticData?.kIndex !== undefined &&
+        currentGeomagneticData?.aIndex !== undefined && (
+          <>
+            <div className="grid gap-6">
+              {/* Solar Flux */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Waves className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Solar Flux (sfu)
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium dark:text-gray-300">
+                    {currentGeomagneticData.solarFlux}/150
+                  </span>
+                </div>
+                <SolarFluxIndicator
+                  solarFlux={currentGeomagneticData.solarFlux}
+                  showDetails={false}
+                />
+              </div>
 
-        {/* K-Index */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-purple-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">K-Index</span>
-            </div>
-            <span className="text-sm font-medium dark:text-gray-300">
-              {currentGeomagneticData.kIndex}/9
-            </span>
-          </div>
-          <IndexBar value={currentGeomagneticData.kIndex} max={9} colorClass="bg-purple-500" />
-        </div>
+              {/* K-Index */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">K-Index</span>
+                  </div>
+                  <span className="text-sm font-medium dark:text-gray-300">
+                    {currentGeomagneticData.kIndex}/10
+                  </span>
+                </div>
+                <KIndexIndicator kIndex={currentGeomagneticData.kIndex} showDetails={false} />
+              </div>
 
-        {/* A-Index */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-blue-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">A-Index</span>
-            </div>
-            <span className="text-sm font-medium dark:text-gray-300">
-              {currentGeomagneticData.aIndex}/100
-            </span>
-          </div>
-          <IndexBar value={currentGeomagneticData.aIndex} max={100} colorClass="bg-blue-500" />
-        </div>
+              {/* A-Index */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">A-Index</span>
+                  </div>
+                  <span className="text-sm font-medium dark:text-gray-300">
+                    {currentGeomagneticData.aIndex}/50
+                  </span>
+                </div>
+                <AIndexIndicator aIndex={currentGeomagneticData.aIndex} showDetails={false} />
+              </div>
 
-        {/* Space Weather Status */}
-        <div className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Current Activity</span>
-            </div>
-            <SpaceWeatherIndicator level={currentGeomagneticData.pastWeather.level} />
-          </div>
+              {/* Space Weather Status */}
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Current Activity
+                    </span>
+                  </div>
+                  <SpaceWeatherIndicator level={currentGeomagneticData.pastWeather.level} />
+                </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-orange-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">Forecast</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-orange-500" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Forecast</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Forecast Details */}
+                    {Object.entries(currentGeomagneticData.nextWeather).map(([key, value]) => {
+                      if (typeof value === 'object' && value !== null && 'rationale' in value) {
+                        const typedValue = value as { rationale: string };
+                        return (
+                          <div key={key} className="text-sm text-gray-700 dark:text-gray-300">
+                            <span className="font-semibold capitalize">
+                              {key.replace(/([A-Z])/g, ' $1').trim()}:{' '}
+                            </span>
+                            {typedValue.rationale}
+                          </div>
+                        );
+                      }
+                      return null;
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
-            <SpaceWeatherIndicator level={currentGeomagneticData.nextWeather.level} />
-          </div>
-        </div>
-      </div>
+
+            <div className="flex justify-between pt-6">
+              <div className="text-sm text-gray-600 dark:text-gray-400">Source: </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <a
+                  href={env.NOAA_GOV_CURRENT_RESOURCE_URL}
+                  target="_blank"
+                  className="text-blue-600 visited:text-purple-600 underline "
+                >
+                  {env.NOAA_GOV_CURRENT_RESOURCE_TITLE}
+                </a>
+              </div>
+            </div>
+            <div className="flex justify-between pt-6">
+              <div className="text-sm text-gray-600 dark:text-gray-400">Details: </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <Link
+                  to="/indicator-details"
+                  className="ml-1 text-blue-500 hover:underline text-xs"
+                >
+                  Details
+                </Link>
+              </div>
+            </div>
+          </>
+        )}
     </div>
   );
 }

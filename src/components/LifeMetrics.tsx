@@ -1,13 +1,24 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 
-interface LifeMetricsProps {
+interface ILifeMetricsProps {
   birthDate: Date;
 }
 
-export default function LifeMetrics({ birthDate }: LifeMetricsProps) {
-  if (!birthDate) {
-    return '';
+export default function LifeMetrics({ birthDate }: ILifeMetricsProps) {
+  if (!birthDate || typeof birthDate !== 'object' || birthDate.toString() === 'Invalid Date') {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-lg font-semibold dark:text-white">Life Metrics</h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="font-semibold dark:text-white"> No provided birthdate </div>
+        </div>
+      </div>
+    );
   }
 
   const calculateMetrics = () => {

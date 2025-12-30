@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -16,6 +15,12 @@ import DataManagement from './pages/DataManagement';
 import Settings from './pages/Settings';
 import ReportPage from './pages/ReportPage';
 import DescriptionFeaturesPricing from './pages/DescriptionFeaturesPricing';
+import { ProfileDataProvider } from './context/ProfileDataContext';
+import CreateIncident from './pages/CreateIncident';
+import DateInfo from './pages/DateInfo';
+import MigraineManagementSuite from './pages/MigraineManagementSuite';
+import IndicatorDetailsPage from './pages/IndicatorDetailsPage';
+import HistoricalWeather from './pages/HistoricalWeather';
 
 export function App() {
   return (
@@ -28,7 +33,9 @@ export function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <Layout />
+                <ProfileDataProvider>
+                  <Layout />
+                </ProfileDataProvider>
               </ProtectedRoute>
             }
           >
@@ -42,6 +49,11 @@ export function App() {
             <Route path="data-management" element={<DataManagement />} />
             <Route path="settings" element={<Settings />} />
             <Route path="report-page" element={<ReportPage />} />
+            <Route path="create-incident" element={<CreateIncident />} />
+            <Route path="date-info" element={<DateInfo />} />
+            <Route path="migraine-management-suite" element={<MigraineManagementSuite />} />
+            <Route path="indicator-details" element={<IndicatorDetailsPage />} />
+            <Route path="historical-weather" element={<HistoricalWeather />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

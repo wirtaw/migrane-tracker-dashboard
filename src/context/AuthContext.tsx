@@ -1,38 +1,191 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase.ts';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import { env } from '../config/env';
-
-interface AuthContextType {
-  user: User | null;
+import {
+  IProfileSettingsData,
+  ILocationData,
+  IForecastHistoricalParams,
+  ISolarHistoricalParams,
+  IApiSession,
+} from '../models/profileData.types';
+import {
+  IWeatherData,
+  IGeophysicalWeatherData,
+  fetchOpenMeteoWeatherData,
+  fetchGeophysicalWeatherData,
+  fetchOpenMeteoWeatherDataHistorical,
+  fetchGeophysicalWeatherDataHistorical,
+  IRadiationTodayData,
+  fetchRadiationWeatherData,
+} from '../services/weather';
+import { syncUserWithBackend, fetchUserProfile } from '../services/migraineApi';
+interface IWeatherState {
+  data: IWeatherData | undefined;
   loading: boolean;
-  signInWithGithub: () => Promise<void>;
-  signInWithEmail: () => Promise<void>;
-  signOut: () => Promise<void>;
+  error: string;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface IGeomagneticState {
+  data: IGeophysicalWeatherData | undefined;
+  loading: boolean;
+  error: string;
+}
 
-const userExists = async (supabase: SupabaseClient, userId: string) => {
-  if (!supabase) {
-    throw new Error('Problem to connect supbase');
+interface ISolarRadiationState {
+  data: IRadiationTodayData[] | undefined;
+  loading: boolean;
+  error: string;
+}
+
+interface IAuthContextType {
+  user: User | null;
+  session: Session | null;
+  apiSession: IApiSession | null;
+  loading: boolean;
+  signInWithGithub: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  signOut: () => Promise<void>;
+  profileSettingsData: IProfileSettingsData;
+  setProfileSettingsData: React.Dispatch<React.SetStateAction<IProfileSettingsData>>;
+  profileLoading: boolean;
+  weatherState: IWeatherState;
+  geomagneticState: IGeomagneticState;
+  solarRadiationState: ISolarRadiationState;
+  fetchForecast: (params: IProfileSettingsData) => Promise<void>;
+  fetchGeomagnetic: () => Promise<void>;
+  locationDataList: ILocationData[];
+  setLocationDataList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
+  fetchForecastHistorical: (params: IForecastHistoricalParams) => Promise<IWeatherData | undefined>;
+  fetchGeomagneticHistorical: (
+    params: ISolarHistoricalParams
+  ) => Promise<IGeophysicalWeatherData | undefined>;
+  fetchSolarRadiation: (params: IProfileSettingsData) => Promise<void>;
+}
+
+const AuthContext = createContext<IAuthContextType | undefined>(undefined);
+
+const fetchForecastData = async (latitude: string, longitude: string, token?: string) => {
+  try {
+    const response: IWeatherData = await fetchOpenMeteoWeatherData(
+      {
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+      },
+      token
+    );
+    return response;
+  } catch (error) {
+    console.error('Error fetching forecast data:', error);
+    return;
   }
+};
 
-  const { data: users, error } = await supabase
-    .from('migrane_tracker-users')
-    .select('user_id,email,username')
-    .eq('user_id', userId);
-
-  if (error) {
-    throw error;
+const fetchGeomagneticData = async (token?: string) => {
+  try {
+    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherData(token);
+    return response;
+  } catch (error) {
+    console.error('Error fetching geomagnetic data:', error);
+    return;
   }
+};
 
-  return users;
+const fetchForecastDataHistorical = async (
+  latitude: number,
+  longitude: number,
+  dateTime: Date,
+  token?: string
+) => {
+  try {
+    const response: IWeatherData | undefined = await fetchOpenMeteoWeatherDataHistorical(
+      {
+        latitude,
+        longitude,
+        dateTime,
+      },
+      token
+    );
+    return response;
+  } catch (error) {
+    console.error('Error fetching forecast data:', error);
+    return;
+  }
+};
+
+const fetchGeomagneticDataHistorical = async (dateTime: Date, token: string) => {
+  try {
+    const response: IGeophysicalWeatherData = await fetchGeophysicalWeatherDataHistorical(
+      dateTime,
+      token
+    );
+    return response;
+  } catch (error) {
+    console.error('Error fetching geomagnetic data:', error);
+    return;
+  }
+};
+
+const fetchSolarRadiationData = async (latitude: number, longitude: number, token?: string) => {
+  try {
+    const response: IRadiationTodayData[] = await fetchRadiationWeatherData(
+      {
+        latitude,
+        longitude,
+      },
+      token
+    );
+    return response;
+  } catch (error) {
+    console.error('Error fetching solar radiation data:', error);
+    return;
+  }
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [apiSession, setApiSession] = useState<IApiSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileSettingsData, setProfileSettingsData] = useState<IProfileSettingsData>({
+    birthDate: '',
+    latitude: '',
+    longitude: '',
+    emailNotifications: false,
+    dailySummary: false,
+    personalHealthData: true,
+    userId: '',
+    profileFilled: false,
+    securitySetup: false,
+
+    fetchDataErrors: {
+      forecast: '',
+      magneticWeather: '',
+    },
+    fetchMagneticWeather: false,
+    fetchWeather: false,
+  });
+
+  const [weatherState, setWeatherState] = useState<IWeatherState>({
+    data: undefined,
+    loading: false,
+    error: '',
+  });
+
+  const [geomagneticState, setGeomagneticState] = useState<IGeomagneticState>({
+    data: undefined,
+    loading: false,
+    error: '',
+  });
+
+  const [solarRadiationState, setSolarRadiationState] = useState<ISolarRadiationState>({
+    data: undefined,
+    loading: false,
+    error: '',
+  });
+
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [locationDataList, setLocationDataList] = useState<ILocationData[]>([]);
 
   useEffect(() => {
     if (!supabase) {
@@ -41,6 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -50,6 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      setSession(session);
       setLoading(false);
 
       if (!supabase) {
@@ -59,28 +214,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (_event === 'INITIAL_SESSION') {
         // handle initial session
       } else if (_event === 'SIGNED_IN') {
-        const users = await userExists(supabase, session?.user.id);
+        setProfileLoading(true);
+        if (session?.access_token) {
+          try {
+            const authResponse = await syncUserWithBackend(session.access_token);
+            const userProfile = await fetchUserProfile(authResponse.token);
+            const apiSession = {
+              accessToken: authResponse.token,
+              refreshToken: session.refresh_token,
+              expiresAt: session.expires_at || 600,
+              userId: session.user.id,
+            };
+            setApiSession(apiSession);
 
-        if (!users?.length) {
-          const { error: error2 } = await supabase
-            .from('migrane_tracker-users')
-            .insert([
-              {
-                user_id: session?.user.id,
-                email: session?.user?.email,
-              },
-            ])
-            .select();
+            setProfileSettingsData({
+              ...profileSettingsData,
+              birthDate: userProfile.birthDate || '',
+              latitude: userProfile.latitude || '',
+              longitude: userProfile.longitude || '',
+              profileFilled:
+                !!userProfile.birthDate && !!userProfile.latitude && !!userProfile.longitude,
+            });
 
-          if (error2) {
-            throw error2;
+            const { latitude, longitude } = userProfile;
+
+            if (latitude && longitude && latitude !== '0' && longitude !== '0') {
+              const forecast = await fetchForecastData(latitude, longitude, apiSession.accessToken);
+
+              if (forecast) {
+                setWeatherState(prev => ({ ...prev, data: forecast }));
+              }
+
+              const geomagnetic = await fetchGeomagneticData(apiSession.accessToken);
+
+              if (geomagnetic) {
+                setGeomagneticState(prev => ({ ...prev, data: geomagnetic }));
+              }
+
+              const solar = await fetchSolarRadiationData(
+                parseFloat(latitude),
+                parseFloat(longitude),
+                apiSession.accessToken
+              );
+              if (solar) {
+                setSolarRadiationState(prev => ({ ...prev, data: solar }));
+              }
+            }
+
+            setProfileLoading(false);
+          } catch (err) {
+            console.error('Failed to sync with backend or fetch profile', err);
+            setProfileLoading(false);
           }
-
-          //console.dir(inserted);
         }
         // handle sign in event
       } else if (_event === 'SIGNED_OUT') {
         // handle sign out event
+        setSession(null);
         window.location.href = '/';
       } else if (_event === 'PASSWORD_RECOVERY') {
         // handle password recovery event
@@ -92,7 +282,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [profileSettingsData, setProfileSettingsData]);
 
   const signInWithGithub = async () => {
     if (!supabase) {
@@ -102,12 +292,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: env.REDIRECT_URL,
+        redirectTo: env.REDIRECT_URL || window.location.origin + '/index',
       },
     });
   };
 
-  const signInWithEmail = async () => {
+  /*const signInWithEmail = async () => {
     if (!supabase) {
       throw new Error('Problem to connect supbase');
     }
@@ -117,21 +307,162 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         captchaToken: 'test',
       },
     });
-  };
+  };*/
 
-  const signOut = async () => {
+  const signInWithGoogle = async () => {
     if (!supabase) {
       throw new Error('Problem to connect supbase');
     }
 
-    const response = await supabase.auth.signOut();
-    if (response?.error) {
-      throw new Error('Problem to connect supbase');
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+    });
+  };
+
+  const signOut = async () => {
+    if (!supabase) {
+      console.error('Supabase client not initialized.');
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error signing out:', error);
+        return;
+      }
+
+      setSession(null);
+    } catch (error) {
+      console.error('An unexpected error occurred during sign out:', error);
+    }
+  };
+
+  const fetchForecast = async (profileSettingsData: IProfileSettingsData) => {
+    try {
+      if (profileSettingsData.latitude && profileSettingsData.longitude) {
+        setWeatherState(prev => ({ ...prev, loading: true, error: '' }));
+        const forecast = await fetchForecastData(
+          profileSettingsData.latitude,
+          profileSettingsData.longitude,
+          apiSession?.accessToken
+        );
+        setWeatherState(prev => ({
+          ...prev,
+          data: forecast,
+          loading: false,
+        }));
+      }
+    } catch (err) {
+      const errMessage: string = `Failed to fetch weather data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+      setWeatherState(prev => ({ ...prev, error: errMessage, loading: false }));
+    }
+  };
+
+  const fetchGeomagnetic = async () => {
+    try {
+      setGeomagneticState(prev => ({ ...prev, loading: true, error: '' }));
+      const geomagnetic = await fetchGeomagneticData(apiSession?.accessToken);
+      setGeomagneticState(prev => ({
+        ...prev,
+        data: geomagnetic,
+        loading: false,
+      }));
+    } catch (err) {
+      const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+      setGeomagneticState(prev => ({ ...prev, error: errMessage, loading: false }));
+    }
+  };
+
+  const fetchForecastHistorical = async (forecastHistoricalParams: IForecastHistoricalParams) => {
+    try {
+      if (forecastHistoricalParams.latitude && forecastHistoricalParams.longitude) {
+        const forecast = await fetchForecastDataHistorical(
+          forecastHistoricalParams.latitude,
+          forecastHistoricalParams.longitude,
+          forecastHistoricalParams.dateTime,
+          apiSession?.accessToken
+        );
+        return forecast;
+      }
+    } catch (err) {
+      const errMessage: string = `Failed to fetch weather data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+    }
+  };
+
+  const fetchGeomagneticHistorical = async (solarHistoricalParams: ISolarHistoricalParams) => {
+    try {
+      if (!apiSession?.accessToken) {
+        return;
+      }
+      const geomagnetic = await fetchGeomagneticDataHistorical(
+        solarHistoricalParams.dateTime,
+        apiSession.accessToken
+      );
+
+      return geomagnetic;
+    } catch (err) {
+      const errMessage: string = `Failed to fetch geomagnetic activity data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+      setGeomagneticState(prev => ({ ...prev, error: errMessage }));
+    }
+  };
+
+  const fetchSolarRadiation = async (profileSettingsData: IProfileSettingsData) => {
+    try {
+      if (profileSettingsData.latitude && profileSettingsData.longitude) {
+        setSolarRadiationState(prev => ({ ...prev, loading: true, error: '' }));
+        const solar = await fetchSolarRadiationData(
+          parseFloat(profileSettingsData.latitude),
+          parseFloat(profileSettingsData.longitude),
+          apiSession?.accessToken
+        );
+
+        if (solar) {
+          setSolarRadiationState(prev => ({
+            ...prev,
+            data: solar,
+            loading: false,
+          }));
+        } else {
+          setSolarRadiationState(prev => ({ ...prev, loading: false }));
+        }
+      }
+    } catch (err) {
+      const errMessage: string = `Failed to fetch solar radiation data. ${JSON.stringify(err)}`;
+      console.error(new Error(errMessage));
+      setSolarRadiationState(prev => ({ ...prev, error: errMessage, loading: false }));
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGithub, signInWithEmail, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        apiSession,
+        loading,
+        signInWithGithub,
+        signInWithGoogle,
+        signOut,
+        profileSettingsData,
+        setProfileSettingsData,
+        profileLoading,
+        weatherState,
+        geomagneticState,
+        solarRadiationState,
+        fetchForecast,
+        fetchGeomagnetic,
+        locationDataList,
+        setLocationDataList,
+        fetchForecastHistorical,
+        fetchGeomagneticHistorical,
+        fetchSolarRadiation,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

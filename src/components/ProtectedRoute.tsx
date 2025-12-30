@@ -1,26 +1,35 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ProfileDataProvider } from '../context/ProfileDataContext';
+import Loader from '../components/Loader';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const {
+    user,
+    loading: authLoading,
+    profileLoading,
+    profileSettingsData,
+    setProfileSettingsData,
+  } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  useEffect(() => {
+    if (!authLoading && user && !profileLoading) {
+      if (!profileSettingsData.profileFilled) {
+        navigate('/profile');
+      }
+    }
+  }, [authLoading, user, profileLoading, profileSettingsData, setProfileSettingsData, navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+  if (authLoading || profileLoading) {
+    return <Loader />;
   }
 
   if (!user) {
-    return <Navigate to="/index" replace />;
+    sessionStorage.setItem('redirectAfterLogin', location.pathname);
+    return <Navigate to="/" replace />;
   }
 
-  return <ProfileDataProvider>{children}</ProfileDataProvider>;
+  return <>{children}</>;
 }

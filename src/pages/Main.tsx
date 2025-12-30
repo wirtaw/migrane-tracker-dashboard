@@ -1,8 +1,19 @@
-import React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, Calendar, LineChart, FileText, FolderKanban, Settings } from 'lucide-react';
+import {
+  Activity,
+  Calendar,
+  LineChart,
+  FileText,
+  FolderKanban,
+  Settings,
+  ArchiveRestore,
+  CloudSun,
+} from 'lucide-react';
+import { DateTime } from 'luxon';
 
 export default function Main() {
+  const [selectedDate] = useState<DateTime>(DateTime.now());
   return (
     <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
       <div className="text-center mb-12">
@@ -29,6 +40,10 @@ export default function Main() {
             icon: <Calendar className="w-8 h-8 text-pink-500" />,
             title: 'Daily Monitoring',
             description: 'Keep a detailed diary of your episodes',
+            link: {
+              title: 'View',
+              path: `/date-info?date=${selectedDate.toISO()}`,
+            },
           },
           {
             icon: <LineChart className="w-8 h-8 text-blue-500" />,
@@ -69,6 +84,24 @@ export default function Main() {
             link: {
               title: 'Manage Settings',
               path: '/settings',
+            },
+          },
+          {
+            icon: <ArchiveRestore className="w-8 h-8 text-red-800" />,
+            title: 'Migraine Management Suite',
+            description: 'Recommendation for Lifestyle Changes to Prevent Migraine Attacks',
+            link: {
+              title: 'Suite Page',
+              path: '/migraine-management-suite',
+            },
+          },
+          {
+            icon: <CloudSun className="w-8 h-8 text-amber-500" />,
+            title: 'Historical Weather',
+            description: 'Lookup past weather and geomagnetic data',
+            link: {
+              title: 'Lookup Weather',
+              path: '/historical-weather',
             },
           },
         ].map((feature, index) => (

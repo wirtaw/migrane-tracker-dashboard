@@ -1,12 +1,12 @@
 import React from 'react';
 import { Activity, TrendingDown, TrendingUp, Minus } from 'lucide-react';
 
-interface BiorhythmProps {
+interface IBiorhythmProps {
   birthDate: Date;
   targetDate?: Date;
 }
 
-interface BiorhythmValue {
+interface IBiorhythmValue {
   current: number;
   next: number;
   cycle: number;
@@ -41,15 +41,26 @@ const getDeltaText = (current: number, next: number): string => {
   return `${diff > 0 ? '+' : ''}${diff.toFixed(0)}%`;
 };
 
-export default function BiorhythmChart({ birthDate, targetDate = new Date() }: BiorhythmProps) {
-  if (!birthDate) {
-    return '';
+export default function BiorhythmChart({ birthDate, targetDate = new Date() }: IBiorhythmProps) {
+  if (!birthDate || typeof birthDate !== 'object' || birthDate.toString() === 'Invalid Date') {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+        <div className="flex items-center gap-2 mb-6">
+          <Activity className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-lg font-semibold dark:text-white">Biorhythm Analysis</h2>
+        </div>
+
+        <div className="space-y-6">
+          <div className="font-semibold dark:text-white"> No provided birthdate </div>
+        </div>
+      </div>
+    );
   }
 
   const tomorrow = new Date(targetDate);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  const biorhythms: BiorhythmValue[] = [
+  const biorhythms: IBiorhythmValue[] = [
     {
       name: 'Physical',
       cycle: 23,

@@ -1,0 +1,79 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Disc2 } from 'lucide-react';
+
+import { useProfileDataContext } from '../context/ProfileDataContext';
+
+interface IIndexedRecommendations {
+  id: number;
+  item: string;
+}
+
+const shuffle = (array: IIndexedRecommendations[]) => {
+  const indexes = array.map(({ id }) => +id).sort(() => Math.random() - 0.5);
+
+  return indexes.map(i => array[i - 1]);
+};
+
+export default function MigrainePreventionTip() {
+  const tablePhrase = '(see table on the reverse side)';
+  const { recommendationList } = useProfileDataContext();
+
+  const [recommendation, setRecommendation] = useState<string>('');
+
+  useEffect(() => {
+    const indexedRecommendations: IIndexedRecommendations[] = recommendationList.map(
+      (item, index) => ({
+        id: index,
+        item,
+      })
+    );
+
+    const randomRecommendationList: IIndexedRecommendations[] = shuffle(indexedRecommendations);
+
+    if (
+      randomRecommendationList &&
+      Array.isArray(randomRecommendationList) &&
+      randomRecommendationList[0]
+    ) {
+      setRecommendation(randomRecommendationList[0].item.replace(tablePhrase, ''));
+    } else {
+      setRecommendation(recommendationList[0].replace(tablePhrase, ''));
+    }
+  }, [recommendationList]);
+
+  return (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
+      <div className="flex items-center gap-2 mb-6">
+        <Disc2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <h2 className="text-lg font-semibold dark:text-white"></h2>
+      </div>
+
+      <div className="space-y-6 text-gray-900 dark:text-white">
+        {recommendation}
+        {recommendation.includes(tablePhrase) && (
+          <Link
+            to={`/migraine-management-suite#diet`}
+            className="text-blue-800 dark:text-blue-400 hover:text-blue-700 hover:text-underline"
+          >
+            See "Diet with Reduced Tyramine Content for Migraine Patients"
+          </Link>
+        )}
+      </div>
+
+      <div className="flex justify-between pt-6">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Full list recommendation page:{' '}
+        </div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          <Link
+            to={`/migraine-management-suite`}
+            className="text-blue-800 dark:text-blue-400 hover:text-blue-700 hover:text-underline"
+          >
+            Full information
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

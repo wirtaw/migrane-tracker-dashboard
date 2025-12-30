@@ -1,16 +1,15 @@
-import { fetchWeatherApi } from 'openmeteo';
 import { env } from '../config/env';
 
-interface OpenMeteoParams {
-  latitude: number;
-  longitude: number;
-  current: Array<string>;
-  daily: Array<string>;
-  timezone: string;
-  wind_speed_unit: string;
-}
-
-interface WeatherResponse {
+export interface IWeatherData {
+  temperature?: number;
+  humidity?: number;
+  pressure?: number;
+  feels_like?: number;
+  wind_speed_10m?: number;
+  clouds?: number;
+  uvi?: number;
+  description: string;
+  icon: string; // Mapped from OpenMeteo weather code
   alerts: Array<{
     description: string;
     start: number;
@@ -18,130 +17,92 @@ interface WeatherResponse {
     event: string;
     sender_name: string;
   }>;
-  current: {
-    temp: number;
-    humidity: number;
-    pressure: number;
-    feels_like: number;
-    clouds: number;
-    uvi: number;
-    weather: Array<{
-      main: string;
-      description: string;
-      icon: string;
-    }>;
+}
+
+export interface NextWeather {
+  kpIndex: {
+    observed: string;
+    expected: string;
+    rationale: string;
+  };
+  solarRadiation: {
+    rationale: string;
+  };
+  radioBlackout: {
+    rationale: string;
   };
 }
 
-export interface WeatherData {
-  temperature: number;
-  humidity: number;
-  pressure: number;
-  feels_like: number;
-  clouds: number;
-  uvi: number;
-  description: string;
-  icon: string;
-  alerts: Array<{
-    description: string;
-    start: number;
-    end: number;
-    event: string;
-    sender_name: string;
-  }>;
-}
-
-export interface GeophysicalWeatherData {
+export interface IGeophysicalWeatherData {
   solarFlux: number;
   aIndex: number;
   kIndex: number;
   pastWeather: { level: string };
-  nextWeather: { level: string };
+  nextWeather: NextWeather;
 }
 
-const OPEN_WEATHER_BASE_URL: string = env.OPEN_WEATHER_BASE_URL;
-const NOAA_GOV_CURRENT_BASE_URL: string = env.NOAA_GOV_CURRENT_BASE_URL;
-const OPEN_METEO_BASE_URL: string = env.OPEN_METEO_BASE_URL;
-
-function parseGeophysicalAlert(text: string): GeophysicalWeatherData {
-  const result: GeophysicalWeatherData = {
-    solarFlux: 0,
-    aIndex: 0,
-    kIndex: -1,
-    pastWeather: { level: '' },
-    nextWeather: { level: '' },
-  };
-
-  if (!text) {
-    return result;
-  }
-
-  const lines = text.split('\n');
-
-  if (!lines.length) {
-    return result;
-  }
-
-  // Extract solar flux and A-index
-  const solarFluxLine: string | undefined = lines.find(line => line.includes('Solar flux'));
-  const solarFluxMatch = solarFluxLine
-    ? solarFluxLine.match(/Solar flux (\d+) and estimated planetary A-index (\d+)/)
-    : null;
-  if (solarFluxMatch) {
-    result.solarFlux = parseInt(solarFluxMatch[1], 10);
-    result.aIndex = parseInt(solarFluxMatch[2], 10);
-  }
-
-  // Extract K-index
-  const kIndexLine: string | undefined = lines.find(line => line.includes('K-index'));
-  const kIndexMatch = kIndexLine
-    ? kIndexLine.match(/K-index at \d+ UTC on \d+ \w+ was (\d+\.\d+)/)
-    : null;
-  if (kIndexMatch) {
-    result.kIndex = parseFloat(kIndexMatch[1]);
-  }
-
-  // Extract space weather summaries
-  const pastSpaceWeatherLine: string | undefined = lines.find(line =>
-    line.startsWith('Space weather for the past 24 hours')
-  );
-  result.pastWeather.level = pastSpaceWeatherLine
-    ? pastSpaceWeatherLine.split(' has been ')[1].trim().replace('.', '')
-    : '';
-
-  const nextSpaceWeatherLine: string | undefined = lines.find(line =>
-    line.startsWith('Space weather for the next 24 hours')
-  );
-  result.nextWeather.level = nextSpaceWeatherLine
-    ? nextSpaceWeatherLine.split(' is predicted to be ')[1].trim().replace('.', '')
-    : '';
-
-  return result;
+interface ICoordinates {
+  latitude: number;
+  longitude: number;
 }
 
-export async function fetchWeatherData(): Promise<WeatherData> {
+interface ICoordinatesWithDate {
+  latitude: number;
+  longitude: number;
+  dateTime: Date;
+}
+
+export interface IRadiationTodayData {
+  date: string;
+  UVIndex: number;
+  ozone: number;
+  kpIndex?: number;
+  aRunning?: number;
+  Kp1?: number;
+  Kp2?: number;
+  Kp3?: number;
+  Kp4?: number;
+  Kp5?: number;
+  Kp6?: number;
+  Kp7?: number;
+  Kp8?: number;
+  ap1?: number;
+  ap2?: number;
+  ap3?: number;
+  ap4?: number;
+  ap5?: number;
+  ap6?: number;
+  ap7?: number;
+  ap8?: number;
+  solarFlux?: number;
+  sunsPotNumber?: number;
+}
+
+export async function fetchOpenMeteoWeatherData(
+  { latitude, longitude }: ICoordinates,
+  token?: string
+): Promise<IWeatherData> {
   try {
+    if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+      throw new Error('Weather data fetch failed: Missing configuration or token');
+    }
+
     const response = await fetch(
-      `${OPEN_WEATHER_BASE_URL}/onecall?lat=${env.LATITUDE}&lon=${env.LONGITUDE}&units=${env.WEATHER_UNITS}&exclude=hourly,daily&appid=${env.OPEN_WEATHER_API_KEY}`
+      `${env.MIGRAINE_BACKEND_API_URL}/api/v1/weather?latitude=${latitude}&longitude=${longitude}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
     );
 
     if (!response.ok) {
       throw new Error('Weather data fetch failed');
     }
 
-    const data: WeatherResponse = await response.json();
-
-    const weather: WeatherData = {
-      temperature: Math.round(data.current.temp),
-      humidity: data.current.humidity,
-      pressure: data.current.pressure,
-      feels_like: Math.round(data.current.feels_like),
-      clouds: data.current.clouds,
-      uvi: data.current.uvi,
-      description: data.current.weather[0].description,
-      icon: data.current.weather[0].icon,
-      alerts: data.alerts,
-    };
+    const weather: IWeatherData = await response.json();
 
     return weather;
   } catch (error) {
@@ -150,79 +111,142 @@ export async function fetchWeatherData(): Promise<WeatherData> {
   }
 }
 
-const range = (start: number, stop: number, step: number) =>
-  Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);
-
-export async function fetchOpenMeteoWeatherData(): Promise<WeatherData> {
-  try {
-    const params: OpenMeteoParams = {
-      latitude: env.LATITUDE,
-      longitude: env.LONGITUDE,
-      current: [
-        'temperature_2m',
-        'relative_humidity_2m',
-        'apparent_temperature',
-        'precipitation',
-        'rain',
-        'showers',
-        'weather_code',
-        'cloud_cover',
-        'surface_pressure',
-        'wind_speed_10m',
-        'wind_direction_10m',
-        'wind_gusts_10m',
-      ],
-      daily: ['uv_index_max', 'precipitation_sum', 'rain_sum'],
-      wind_speed_unit: 'ms',
-      timezone: 'Europe/Vilnius',
+export async function fetchGeophysicalWeatherData(
+  token?: string
+): Promise<IGeophysicalWeatherData> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    return {
+      solarFlux: 0,
+      aIndex: 0,
+      kIndex: 0,
+      pastWeather: { level: '' },
+      nextWeather: {
+        kpIndex: { observed: '', expected: '', rationale: '' },
+        solarRadiation: { rationale: '' },
+        radioBlackout: { rationale: '' },
+      },
     };
-    const responses = await fetchWeatherApi(OPEN_METEO_BASE_URL, params);
+  }
 
-    if (!responses) {
-      throw new Error('Weather data fetch failed');
+  const dateStr = getDateRange(new Date());
+
+  const responseGeoActivity = await fetch(
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/solar/geophysical/historical?date=${dateStr}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     }
-
-    const [response] = responses;
-
-    const current = response.current()!;
-    const daily = response.daily()!;
-    const utcOffsetSeconds = response.utcOffsetSeconds();
-
-    const time = range(Number(daily.time()), Number(daily.timeEnd()), daily.interval()).map(
-      t => new Date((t + utcOffsetSeconds) * 1000)
-    );
-
-    const uvIndexMax = daily.variables(0)!.valuesArray()!;
-
-    const weather: WeatherData = {
-      temperature: Math.round(current.variables(0)!.value()),
-      humidity: current.variables(1)!.value(),
-      pressure: Math.round(current.variables(8)!.value()),
-      feels_like: Math.round(current.variables(2)!.value()),
-      clouds: current.variables(7)!.value(),
-      uvi: Math.round(uvIndexMax.reduce((acc, prev) => acc + prev, 0) / time.length),
-      description: '',
-      icon: '',
-      alerts: [],
-    };
-
-    return weather;
-  } catch (error) {
-    console.error('Error fetching weather data:', error);
-    throw error;
-  }
-}
-
-export async function fetchGeophysicalWeatherData(): Promise<GeophysicalWeatherData> {
-  const responseGeoActivity = await fetch(NOAA_GOV_CURRENT_BASE_URL);
+  );
 
   if (!responseGeoActivity.ok) {
     throw new Error('Weather data fetch failed');
   }
 
-  const geoActivityData: string = await responseGeoActivity.text();
+  const geoActivityData: IGeophysicalWeatherData = await responseGeoActivity.json();
 
-  const geoActivityDataMapped: GeophysicalWeatherData = parseGeophysicalAlert(geoActivityData);
+  return geoActivityData;
+}
 
-  return geoActivityDataMapped;
+const getDateRange = (dateTime: Date) => {
+  const year = dateTime.getFullYear();
+  const month = dateTime.getMonth() + 1;
+  const date = dateTime.getDate();
+
+  return `${year}-${month < 9 ? `0${month}` : month}-${date < 9 ? `0${date}` : date}`;
+};
+
+export async function fetchOpenMeteoWeatherDataHistorical(
+  { latitude, longitude, dateTime }: ICoordinatesWithDate,
+  token?: string
+): Promise<IWeatherData | undefined> {
+  try {
+    if (typeof dateTime === 'undefined') {
+      return;
+    }
+
+    if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+      return;
+    }
+
+    const dateStr = getDateRange(dateTime);
+
+    const response = await fetch(
+      `${env.MIGRAINE_BACKEND_API_URL}/api/v1/weather/historical?latitude=${latitude}&longitude=${longitude}&date=${dateStr}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Weather data fetch failed');
+    }
+
+    const weather: IWeatherData = await response.json();
+
+    return weather;
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+    throw error;
+  }
+}
+
+export async function fetchGeophysicalWeatherDataHistorical(
+  dateTime: Date,
+  token: string
+): Promise<IGeophysicalWeatherData> {
+  const dateStr = getDateRange(dateTime);
+
+  const responseGeoActivity = await fetch(
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/solar/geophysical/historical?date=${dateStr}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!responseGeoActivity.ok) {
+    throw new Error('Geophysical weather data fetch failed');
+  }
+
+  const geoActivityData: IGeophysicalWeatherData = await responseGeoActivity.json();
+
+  return geoActivityData;
+}
+
+export async function fetchRadiationWeatherData(
+  { latitude, longitude }: ICoordinates,
+  token?: string
+): Promise<IRadiationTodayData[] | []> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    return [];
+  }
+
+  const responseRadiation = await fetch(
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/solar?latitude=${latitude}&longitude=${longitude}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!responseRadiation.ok) {
+    throw new Error('Radiation weather data fetch failed');
+  }
+
+  const responseRadiationData = await responseRadiation.json();
+
+  return responseRadiationData;
 }
