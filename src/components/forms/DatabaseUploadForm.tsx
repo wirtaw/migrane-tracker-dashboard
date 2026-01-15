@@ -18,6 +18,8 @@ interface IProgress {
   current: number;
   total: number;
   status: 'pending' | 'processing' | 'completed' | 'error';
+  failed: number;
+  errors: string[];
 }
 
 interface RawIncident {
@@ -82,27 +84,52 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
     return IncidentTypeEnum.OTHER;
   };
 
+  const sanitizeLocationData = (location: RawLocation): RawLocation => {
+    const sanitizeArray = <T,>(arr: T[] | undefined): T[] | undefined => {
+      if (!arr) return undefined;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+      return arr.map(({ _id, ...rest }: any) => rest);
+    };
+
+    return {
+      ...location,
+      forecast: sanitizeArray(location.forecast),
+      solar: sanitizeArray(location.solar),
+      solarRadiation: sanitizeArray(location.solarRadiation),
+    };
+  };
+
   const uploadConcurrent = async <T, R>(
     items: T[],
     uploadFn: (item: T) => Promise<R>,
     onItemSuccess: (result: R, originalItem: T) => void,
-    onProgressUpdate: (current: number) => void
+    onProgressUpdate: (current: number, failed: number, errors: string[]) => void
   ) => {
     let completedCount = 0;
-    await Promise.all(
-      items.map(async item => {
-        try {
-          const result = await uploadFn(item);
-          onItemSuccess(result, item);
-        } catch (err) {
-          console.error('Upload failed for item:', item, err);
-        } finally {
-          completedCount++;
-          onProgressUpdate(completedCount);
-          setOverallProgress(prev => ({ ...prev, current: prev.current + 1 }));
-        }
-      })
-    );
+    let failedCount = 0;
+    const errors: string[] = [];
+
+    const CHUNK_SIZE = 5; // Process 5 items at a time to avoid overwhelming the server
+    for (let i = 0; i < items.length; i += CHUNK_SIZE) {
+      const chunk = items.slice(i, i + CHUNK_SIZE);
+      await Promise.all(
+        chunk.map(async item => {
+          try {
+            const result = await uploadFn(item);
+            onItemSuccess(result, item);
+          } catch (err) {
+            failedCount++;
+            const msg = err instanceof Error ? err.message : String(err);
+            errors.push(`Failed item: ${JSON.stringify(item).slice(0, 50)}... Error: ${msg}`);
+            console.error('Upload failed for item:', item, err);
+          } finally {
+            completedCount++;
+            onProgressUpdate(completedCount, failedCount, errors);
+            setOverallProgress(prev => ({ ...prev, current: prev.current + 1 }));
+          }
+        })
+      );
+    }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,17 +168,52 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
         setOverallProgress({ current: 0, total: totalItems });
 
         const initialProgress: IProgress[] = [
-          { type: 'Incidents', current: 0, total: incidents.length, status: 'pending' },
-          { type: 'Triggers', current: 0, total: triggers.length, status: 'pending' },
-          { type: 'Medications', current: 0, total: medications.length, status: 'pending' },
-          { type: 'Symptoms', current: 0, total: symptoms.length, status: 'pending' },
-          { type: 'Locations', current: 0, total: locations.length, status: 'pending' },
+          {
+            type: 'Incidents',
+            current: 0,
+            total: incidents.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Triggers',
+            current: 0,
+            total: triggers.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Medications',
+            current: 0,
+            total: medications.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Symptoms',
+            current: 0,
+            total: symptoms.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Locations',
+            current: 0,
+            total: locations.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
         ];
         setProgress(initialProgress);
 
         const incidentIdMap: Record<string, string> = {};
 
-        // 1. Upload Incidents (Concurrent)
+        // 1. Upload Incidents (Sequential generally safer for ID mapping)
         if (incidents.length > 0) {
           setProgress(prev =>
             prev.map((p, idx) => (idx === 0 ? { ...p, status: 'processing' } : p))
@@ -175,8 +237,10 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
                 incidentIdMap[original.id.toString()] = created.id;
               }
             },
-            current =>
-              setProgress(prev => prev.map((p, idx) => (idx === 0 ? { ...p, current } : p)))
+            (current, failed, errors) =>
+              setProgress(prev =>
+                prev.map((p, idx) => (idx === 0 ? { ...p, current, failed, errors } : p))
+              )
           );
           setProgress(prev =>
             prev.map((p, idx) => (idx === 0 ? { ...p, status: 'completed' } : p))
@@ -204,8 +268,10 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
                       token
                     ),
                   () => {},
-                  current =>
-                    setProgress(prev => prev.map((p, idx) => (idx === 1 ? { ...p, current } : p)))
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 1 ? { ...p, current, failed, errors } : p))
+                    )
                 );
                 setProgress(prev =>
                   prev.map((p, idx) => (idx === 1 ? { ...p, status: 'completed' } : p))
@@ -233,8 +299,10 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
                       token
                     ),
                   () => {},
-                  current =>
-                    setProgress(prev => prev.map((p, idx) => (idx === 2 ? { ...p, current } : p)))
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 2 ? { ...p, current, failed, errors } : p))
+                    )
                 );
                 setProgress(prev =>
                   prev.map((p, idx) => (idx === 2 ? { ...p, status: 'completed' } : p))
@@ -262,8 +330,10 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
                       token
                     ),
                   () => {},
-                  current =>
-                    setProgress(prev => prev.map((p, idx) => (idx === 3 ? { ...p, current } : p)))
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 3 ? { ...p, current, failed, errors } : p))
+                    )
                 );
                 setProgress(prev =>
                   prev.map((p, idx) => (idx === 3 ? { ...p, status: 'completed' } : p))
@@ -279,29 +349,38 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
           );
           await uploadConcurrent(
             locations,
-            (item: RawLocation) =>
-              LocationsService.createLocation(token, {
+            (item: RawLocation) => {
+              const sanitizedItem = sanitizeLocationData(item);
+              return LocationsService.createLocation(token, {
                 userId: userId,
-                latitude: item.latitude,
-                longitude: item.longitude,
-                datetimeAt: item.datetimeAt,
-                incidentId: item.incidentId
-                  ? incidentIdMap[item.incidentId.toString()] || undefined
+                latitude: sanitizedItem.latitude,
+                longitude: sanitizedItem.longitude,
+                datetimeAt: sanitizedItem.datetimeAt,
+                incidentId: sanitizedItem.incidentId
+                  ? incidentIdMap[sanitizedItem.incidentId.toString()] || undefined
                   : undefined,
-                forecast: item.forecast,
-                solar: item.solar,
-                solarRadiation: item.solarRadiation,
-              }),
+                forecast: sanitizedItem.forecast,
+                solar: sanitizedItem.solar,
+                solarRadiation: sanitizedItem.solarRadiation,
+              });
+            },
             () => {},
-            current =>
-              setProgress(prev => prev.map((p, idx) => (idx === 4 ? { ...p, current } : p)))
+            (current, failed, errors) =>
+              setProgress(prev =>
+                prev.map((p, idx) => (idx === 4 ? { ...p, current, failed, errors } : p))
+              )
           );
           setProgress(prev =>
             prev.map((p, idx) => (idx === 4 ? { ...p, status: 'completed' } : p))
           );
         }
 
-        setSuccessMessage('Data successfully uploaded to database.');
+        const hasErrors = progress.some(p => p.failed > 0);
+        if (hasErrors) {
+          setSuccessMessage('Data upload completed with some errors. See details below.');
+        } else {
+          setSuccessMessage('Data successfully uploaded to database.');
+        }
       } catch (err) {
         setErrorMessage(
           'Error processing JSON file: ' + (err instanceof Error ? err.message : String(err))
@@ -394,7 +473,9 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
                       <div
                         className={`h-full transition-all duration-300 ${
                           p.status === 'completed'
-                            ? 'bg-green-500'
+                            ? p.failed > 0
+                              ? 'bg-yellow-500'
+                              : 'bg-green-500'
                             : p.status === 'error'
                               ? 'bg-red-500'
                               : 'bg-indigo-500'
@@ -402,10 +483,26 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
                         style={{ width: `${p.total > 0 ? (p.current / p.total) * 100 : 0}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-mono text-gray-500 min-w-[40px] text-right">
-                      {p.current}/{p.total}
+                    <span className="text-[10px] font-mono text-gray-500 min-w-[70px] text-right">
+                      {p.current}/{p.total} {p.failed > 0 && `(${p.failed} fail)`}
                     </span>
                   </div>
+
+                  {/* Individual Errors */}
+                  {p.errors.length > 0 && (
+                    <details className="mt-2 text-xs text-red-600 dark:text-red-400">
+                      <summary className="cursor-pointer hover:underline">
+                        View {p.errors.length} errors
+                      </summary>
+                      <ul className="mt-1 space-y-1 list-disc list-inside max-h-32 overflow-y-auto">
+                        {p.errors.map((err, i) => (
+                          <li key={i} className="truncate" title={err}>
+                            {err}
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
                 </div>
               ))}
             </div>

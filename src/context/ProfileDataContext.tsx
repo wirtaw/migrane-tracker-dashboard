@@ -323,6 +323,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useProfileDataContext = () => {
   const context = useContext(ProfileDataContext);
   if (context === undefined) {

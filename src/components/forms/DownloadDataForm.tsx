@@ -62,12 +62,25 @@ export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
       };
     }
 
+    const sanitizeArray = <T,>(arr: T[] | undefined): T[] | undefined => {
+      if (!arr) return undefined;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+      return arr.map(({ _id, ...rest }: any) => rest);
+    };
+
+    const sanitizedLocations = locationList.map(location => ({
+      ...location,
+      forecast: sanitizeArray(location.forecast),
+      solar: sanitizeArray(location.solar),
+      solarRadiation: sanitizeArray(location.solarRadiation),
+    }));
+
     return {
       incidents: incidentList || [],
       triggers: triggerList || [],
       medications: medicationList || [],
       symptoms: symptomList || [],
-      logsForecast: locationList || [],
+      logsForecast: sanitizedLocations || [],
       logHealth: {
         weight: weightList || [],
         height: heightList || [],

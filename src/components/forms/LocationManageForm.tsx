@@ -5,18 +5,28 @@ import { LocationsService } from '../../services/locations';
 import { CreateLocationDto, ISummaryResponse } from '../../models/locations.types';
 import Loader from '../Loader';
 
+import { IIncident } from '../../models/profileData.types';
+
 interface ILocationManageFormProps {
   onSubmit?: () => void;
+  incidents?: IIncident[];
+  initialIncidentId?: string;
 }
 
-export default function LocationManageForm({ onSubmit }: ILocationManageFormProps) {
+export default function LocationManageForm({
+  onSubmit,
+  incidents,
+  initialIncidentId,
+}: ILocationManageFormProps) {
   const { apiSession, profileSettingsData } = useAuth();
-  const { incidentList } = useProfileDataContext();
+  const { incidentList: contextIncidentList } = useProfileDataContext();
+
+  const incidentList = incidents || contextIncidentList;
 
   const [latitude, setLatitude] = useState<string>('');
   const [longitude, setLongitude] = useState<string>('');
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [selectedIncidentId, setSelectedIncidentId] = useState<string>('');
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string>(initialIncidentId || '');
 
   const [summary, setSummary] = useState<ISummaryResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);

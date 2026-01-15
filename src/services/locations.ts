@@ -32,6 +32,30 @@ export class LocationsService {
     return response.json();
   }
 
+  static async getLocationByIncidentId(
+    token: string,
+    incidentId: string
+  ): Promise<ILocationData | null> {
+    const response = await fetch(`${API_URL}/incident/${incidentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error(`Failed to fetch location by incident id: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      ...data,
+      datetimeAt: new Date(data.datetimeAt),
+    };
+  }
+
   static async createLocation(token: string, data: CreateLocationDto): Promise<void> {
     const response = await fetch(API_URL, {
       method: 'POST',
