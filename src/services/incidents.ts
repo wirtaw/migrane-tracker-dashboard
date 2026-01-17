@@ -1,6 +1,7 @@
 import { env } from '../config/env';
 import { IIncident } from '../models/profileData.types';
 import { IncidentTypeEnum } from '../enums/incident-type.enum';
+import { IncidentStats } from '../models/stats.types';
 
 // DTOs
 export interface CreateIncidentDto {
@@ -79,4 +80,16 @@ export async function deleteIncident(id: string, token: string): Promise<void> {
     headers: getHeaders(token),
   });
   if (!response.ok) throw new Error('Failed to delete incident');
+}
+
+export async function fetchIncidentStats(token: string): Promise<IncidentStats> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Fetch stats failed: Missing configuration or token');
+  }
+
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/incidents/stats`, {
+    headers: getHeaders(token),
+  });
+  if (!response.ok) throw new Error('Failed to fetch incident stats');
+  return response.json();
 }
