@@ -1,5 +1,6 @@
 import { env } from '../config/env';
 import { ITrigger } from '../models/profileData.types';
+import { handleResponseError } from './api-utils';
 
 export interface CreateTriggerDto {
   userId: string;
@@ -37,7 +38,7 @@ export async function fetchTriggers(token: string): Promise<ITrigger[]> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch triggers');
+    await handleResponseError(response, 'Failed to fetch triggers');
   }
 
   const data = await response.json();
@@ -61,7 +62,7 @@ export async function createTrigger(dto: CreateTriggerDto, token: string): Promi
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create trigger');
+    await handleResponseError(response, 'Failed to create trigger');
   }
 
   const data = await response.json();
@@ -88,7 +89,7 @@ export async function updateTrigger(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to update trigger');
+    await handleResponseError(response, 'Failed to update trigger');
   }
 
   const data = await response.json();
@@ -108,6 +109,6 @@ export async function deleteTrigger(id: string, token: string): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to delete trigger');
+    await handleResponseError(response, 'Failed to delete trigger');
   }
 }

@@ -1,5 +1,6 @@
 import { env } from '../config/env';
 import { IWeight, IHeight, IBloodPressure, ISleep } from '../models/profileData.types';
+import { handleResponseError } from './api-utils';
 
 // DTOs
 export interface CreateWeightDto {
@@ -57,7 +58,7 @@ export async function fetchHeights(token: string): Promise<IHeight[]> {
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/heights`, {
     headers: getHeaders(token),
   });
-  if (!response.ok) throw new Error('Failed to fetch heights');
+  if (!response.ok) await handleResponseError(response, 'Failed to fetch heights');
   const data = await response.json();
   return data.map((item: unknown) => parseDates<IHeight>(item));
 }
@@ -68,7 +69,7 @@ export async function createHeight(dto: CreateHeightDto, token: string): Promise
     headers: getHeaders(token),
     body: JSON.stringify(dto),
   });
-  if (!response.ok) throw new Error('Failed to create height');
+  if (!response.ok) await handleResponseError(response, 'Failed to create height');
   const data = await response.json();
   return parseDates<IHeight>(data);
 }
@@ -78,7 +79,7 @@ export async function deleteHeight(id: string, token: string): Promise<void> {
     method: 'DELETE',
     headers: getHeaders(token),
   });
-  if (!response.ok) throw new Error('Failed to delete height');
+  if (!response.ok) await handleResponseError(response, 'Failed to delete height');
 }
 
 // Weight
@@ -86,7 +87,7 @@ export async function fetchWeights(token: string): Promise<IWeight[]> {
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/weights`, {
     headers: getHeaders(token),
   });
-  if (!response.ok) throw new Error('Failed to fetch weights');
+  if (!response.ok) await handleResponseError(response, 'Failed to fetch weights');
   const data = await response.json();
   return data.map((item: unknown) => parseDates<IWeight>(item));
 }
@@ -97,7 +98,7 @@ export async function createWeight(dto: CreateWeightDto, token: string): Promise
     headers: getHeaders(token),
     body: JSON.stringify(dto),
   });
-  if (!response.ok) throw new Error('Failed to create weight');
+  if (!response.ok) await handleResponseError(response, 'Failed to create weight');
   const data = await response.json();
   return parseDates<IWeight>(data);
 }
@@ -107,7 +108,7 @@ export async function deleteWeight(id: string, token: string): Promise<void> {
     method: 'DELETE',
     headers: getHeaders(token),
   });
-  if (!response.ok) throw new Error('Failed to delete weight');
+  if (!response.ok) await handleResponseError(response, 'Failed to delete weight');
 }
 
 // Blood Pressure
@@ -118,7 +119,7 @@ export async function fetchBloodPressures(token: string): Promise<IBloodPressure
       headers: getHeaders(token),
     }
   );
-  if (!response.ok) throw new Error('Failed to fetch blood pressures');
+  if (!response.ok) await handleResponseError(response, 'Failed to fetch blood pressures');
   const data = await response.json();
   return data.map((item: unknown) => parseDates<IBloodPressure>(item));
 }
@@ -135,7 +136,7 @@ export async function createBloodPressure(
       body: JSON.stringify(dto),
     }
   );
-  if (!response.ok) throw new Error('Failed to create blood pressure');
+  if (!response.ok) await handleResponseError(response, 'Failed to create blood pressure');
   const data = await response.json();
   return parseDates<IBloodPressure>(data);
 }
@@ -148,7 +149,7 @@ export async function deleteBloodPressure(id: string, token: string): Promise<vo
       headers: getHeaders(token),
     }
   );
-  if (!response.ok) throw new Error('Failed to delete blood pressure');
+  if (!response.ok) await handleResponseError(response, 'Failed to delete blood pressure');
 }
 
 // Sleep
@@ -156,7 +157,7 @@ export async function fetchSleeps(token: string): Promise<ISleep[]> {
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/sleeps`, {
     headers: getHeaders(token),
   });
-  if (!response.ok) throw new Error('Failed to fetch sleeps');
+  if (!response.ok) await handleResponseError(response, 'Failed to fetch sleeps');
   const data = await response.json();
   return data.map((item: unknown) => parseDates<ISleep>(item));
 }
@@ -167,7 +168,7 @@ export async function createSleep(dto: CreateSleepDto, token: string): Promise<I
     headers: getHeaders(token),
     body: JSON.stringify(dto),
   });
-  if (!response.ok) throw new Error('Failed to create sleep');
+  if (!response.ok) await handleResponseError(response, 'Failed to create sleep');
   const data = await response.json();
   return parseDates<ISleep>(data);
 }
@@ -177,5 +178,5 @@ export async function deleteSleep(id: string, token: string): Promise<void> {
     method: 'DELETE',
     headers: getHeaders(token),
   });
-  if (!response.ok) throw new Error('Failed to delete sleep');
+  if (!response.ok) await handleResponseError(response, 'Failed to delete sleep');
 }

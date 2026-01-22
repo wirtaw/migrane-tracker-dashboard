@@ -1,5 +1,6 @@
 import { env } from '../config/env';
 import { ISymptom } from '../models/profileData.types';
+import { handleResponseError } from './api-utils';
 
 export interface CreateSymptomDto {
   userId: string;
@@ -38,7 +39,7 @@ export async function fetchSymptoms(token: string): Promise<ISymptom[]> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch symptoms');
+    await handleResponseError(response, 'Failed to fetch symptoms');
   }
 
   const data = await response.json();
@@ -60,7 +61,7 @@ export async function createSymptom(dto: CreateSymptomDto, token: string): Promi
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create symptom');
+    await handleResponseError(response, 'Failed to create symptom');
   }
 
   const data = await response.json();
@@ -86,7 +87,7 @@ export async function updateSymptom(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to update symptom');
+    await handleResponseError(response, 'Failed to update symptom');
   }
 
   const data = await response.json();
@@ -106,6 +107,6 @@ export async function deleteSymptom(id: string, token: string): Promise<void> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to delete symptom');
+    await handleResponseError(response, 'Failed to delete symptom');
   }
 }

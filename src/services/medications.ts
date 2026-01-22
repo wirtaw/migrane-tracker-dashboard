@@ -1,5 +1,6 @@
 import { env } from '../config/env';
 import { IMedication } from '../models/profileData.types';
+import { handleResponseError } from './api-utils';
 
 export interface CreateMedicationDto {
   userId: string;
@@ -40,7 +41,7 @@ export async function fetchMedications(token: string): Promise<IMedication[]> {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch medications: ${response.status} ${response.statusText}`);
+    await handleResponseError(response, 'Failed to fetch medications');
   }
 
   const data = await response.json();
@@ -65,7 +66,7 @@ export async function createMedication(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create medication');
+    await handleResponseError(response, 'Failed to create medication');
   }
 
   const data = await response.json();
@@ -91,7 +92,7 @@ export async function updateMedication(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to update medication');
+    await handleResponseError(response, 'Failed to update medication');
   }
 
   const data = await response.json();
@@ -111,6 +112,6 @@ export async function deleteMedication(id: string, token: string): Promise<void>
   });
 
   if (!response.ok) {
-    throw new Error('Failed to delete medication');
+    await handleResponseError(response, 'Failed to delete medication');
   }
 }

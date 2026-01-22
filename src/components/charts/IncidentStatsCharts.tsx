@@ -14,15 +14,7 @@ import {
 } from 'chart.js';
 import { IncidentStats } from '../../models/stats.types';
 
-ChartJS.register(
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title
-);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 interface IncidentStatsChartsProps {
   stats: IncidentStats;
@@ -50,9 +42,8 @@ export const IncidentStatsCharts: React.FC<IncidentStatsChartsProps> = ({ stats 
     ],
   };
 
-  const sortedTriggers = Object.entries(stats.byTrigger)
-    .sort(([, a], [, b]) => b - a);
-  
+  const sortedTriggers = Object.entries(stats.byTrigger).sort(([, a], [, b]) => b - a);
+
   const triggerLabels = sortedTriggers.map(([label]) => label);
   const triggerData = sortedTriggers.map(([, value]) => value);
 
@@ -91,11 +82,15 @@ export const IncidentStatsCharts: React.FC<IncidentStatsChartsProps> = ({ stats 
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Duration</h3>
-          <p className="text-2xl font-bold dark:text-white">{stats.byTime.totalDurationHours.toFixed(1)}h</p>
+          <p className="text-2xl font-bold dark:text-white">
+            {stats.byTime.totalDurationHours.toFixed(1)}h
+          </p>
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
           <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Duration</h3>
-          <p className="text-2xl font-bold dark:text-white">{stats.byTime.averageDurationHours.toFixed(1)}h</p>
+          <p className="text-2xl font-bold dark:text-white">
+            {stats.byTime.averageDurationHours.toFixed(1)}h
+          </p>
         </div>
       </div>
 
@@ -107,13 +102,13 @@ export const IncidentStatsCharts: React.FC<IncidentStatsChartsProps> = ({ stats 
             startDate={startDate}
             endDate={endDate}
             values={heatmapValues}
-            classForValue={(value) => {
+            classForValue={value => {
               if (!value || value.count === 0) {
                 return 'color-empty';
               }
               return `color-scale-${Math.min(value.count, 4)}`;
             }}
-            titleForValue={(value) => {
+            titleForValue={value => {
               if (!value) return 'No incidents';
               return `${value.date}: ${value.count} incidents`;
             }}

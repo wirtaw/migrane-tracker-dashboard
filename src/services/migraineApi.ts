@@ -1,4 +1,5 @@
 import { env } from '../config/env';
+import { handleResponseError } from './api-utils';
 
 export enum Role {
   USER = 'user',
@@ -53,7 +54,7 @@ export const syncUserWithBackend = async (token: string): Promise<AuthResponse> 
     });
 
     if (!response.ok) {
-      throw new Error(`Backend sync failed: ${response.statusText}`);
+      await handleResponseError(response, 'Backend sync failed');
     }
 
     return await response.json();
@@ -74,7 +75,7 @@ export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch user profile: ${response.statusText}`);
+      await handleResponseError(response, 'Failed to fetch user profile');
     }
 
     return await response.json();
@@ -99,7 +100,7 @@ export const updateProfile = async (
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to update user profile: ${response.statusText}`);
+      await handleResponseError(response, 'Failed to update user profile');
     }
 
     return await response.json();
