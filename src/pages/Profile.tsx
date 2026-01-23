@@ -5,7 +5,10 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
 import { IUserUpdateDAO } from '../models/user.types';
-import { updateProfile } from '../services/migraineApi';
+import { IUserStatistics } from '../models/user-stats.types';
+import { updateProfile, fetchUserStatistics } from '../services/migraineApi';
+import { formatBytes } from '../lib/utils';
+import { Database, Cloud, Sun, Clock } from 'lucide-react';
 
 interface ILocation {
   latitude: number | null;
@@ -26,6 +29,7 @@ export default function Profile() {
     longitude: null,
     error: '',
   });
+  const [statistics, setStatistics] = useState<IUserStatistics | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -34,6 +38,20 @@ export default function Profile() {
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
+
+  React.useEffect(() => {
+    const loadStatistics = async () => {
+      if (apiSession?.accessToken) {
+        try {
+          const stats = await fetchUserStatistics(apiSession.accessToken);
+          setStatistics(stats);
+        } catch (error) {
+          console.error('Failed to fetch statistics:', error);
+        }
+      }
+    };
+    loadStatistics();
+  }, [apiSession]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -284,6 +302,68 @@ export default function Profile() {
                     />
                     <span className="text-gray-700 dark:text-gray-300">Dark mode</span>
                   </label>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-indigo-500" />
+                  <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    Statistics
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg flex items-center gap-4">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Database Usage</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {statistics ? formatBytes(statistics.dbUsageBytes) : 'Loading...'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg flex items-center gap-4">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <Cloud className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Weather API Requests
+                      </p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {statistics?.weatherApiRequests ?? 'Loading...'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg flex items-center gap-4">
+                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                      <Sun className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Solar API Requests</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {statistics?.solarApiRequests ?? 'Loading...'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg flex items-center gap-4">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Last Updated</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {statistics
+                          ? new Date(statistics.lastUpdated).toLocaleString()
+                          : 'Loading...'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

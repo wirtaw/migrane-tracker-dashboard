@@ -1,4 +1,5 @@
 import { env } from '../config/env';
+import { IUserStatistics } from '../models/user-stats.types';
 import { handleResponseError } from './api-utils';
 
 export enum Role {
@@ -106,6 +107,27 @@ export const updateProfile = async (
     return await response.json();
   } catch (error) {
     console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
+
+export const fetchUserStatistics = async (token: string): Promise<IUserStatistics> => {
+  try {
+    const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/users/me/statistics`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      await handleResponseError(response, 'Failed to fetch user statistics');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user statistics:', error);
     throw error;
   }
 };
