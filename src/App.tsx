@@ -21,6 +21,11 @@ import DateInfo from './pages/DateInfo';
 import MigraineManagementSuite from './pages/MigraineManagementSuite';
 import IndicatorDetailsPage from './pages/IndicatorDetailsPage';
 import HistoricalWeather from './pages/HistoricalWeather';
+import EditIncident from './pages/EditIncident';
+import EditMedication from './pages/EditMedication';
+import EditSymptom from './pages/EditSymptom';
+import EditTrigger from './pages/EditTrigger';
+import EditHealthLog from './pages/EditHealthLog';
 
 export function App() {
   return (
@@ -50,6 +55,11 @@ export function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="report-page" element={<ReportPage />} />
             <Route path="create-incident" element={<CreateIncident />} />
+            <Route path="edit-incident/:id" element={<EditIncident />} />
+            <Route path="edit-medication/:id" element={<EditMedication />} />
+            <Route path="edit-symptom/:id" element={<EditSymptom />} />
+            <Route path="edit-trigger/:id" element={<EditTrigger />} />
+            <Route path="edit-health-log/:type/:id" element={<EditHealthLog />} />
             <Route path="date-info" element={<DateInfo />} />
             <Route path="migraine-management-suite" element={<MigraineManagementSuite />} />
             <Route path="indicator-details" element={<IndicatorDetailsPage />} />

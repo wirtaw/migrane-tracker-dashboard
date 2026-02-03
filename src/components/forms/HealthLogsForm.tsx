@@ -12,6 +12,12 @@ import {
   CreateHeightDto,
   CreateWeightDto,
   CreateBloodPressureDto,
+  updateHeight,
+  updateWeight,
+  updateBloodPressure,
+  UpdateHeightDto,
+  UpdateWeightDto,
+  UpdateBloodPressureDto,
 } from '../../services/health-logs';
 import { IHeight, IWeight, IBloodPressure } from '../../models/profileData.types';
 import { Trash2 } from 'lucide-react';
@@ -19,9 +25,14 @@ import { Trash2 } from 'lucide-react';
 interface IHealthLogsFormProps {
   onSubmit: () => void;
   initialType?: 'height' | 'weight' | 'bloodPressure';
+  initialData?: IHeight | IWeight | IBloodPressure;
 }
 
-export default function HealthLogsForm({ onSubmit, initialType = 'weight' }: IHealthLogsFormProps) {
+export default function HealthLogsForm({
+  onSubmit,
+  initialType = 'weight',
+  initialData,
+}: IHealthLogsFormProps) {
   const { apiSession } = useAuth();
   const {
     heightList,
@@ -34,14 +45,24 @@ export default function HealthLogsForm({ onSubmit, initialType = 'weight' }: IHe
   } = useProfileDataContext();
 
   const [activeTab, setActiveTab] = useState<'height' | 'weight' | 'bloodPressure'>(initialType);
-  const [datetime, setDatetime] = useState<Date>(new Date());
-  const [notes, setNotes] = useState('');
+  const [datetime, setDatetime] = useState<Date>(
+    initialData?.datetimeAt ? new Date(initialData.datetimeAt) : new Date()
+  );
+  const [notes, setNotes] = useState(initialData?.notes || '');
 
   // Values
-  const [heightValue, setHeightValue] = useState<string>('');
-  const [weightValue, setWeightValue] = useState<string>('');
-  const [systolicValue, setSystolicValue] = useState<string>('');
-  const [diastolicValue, setDiastolicValue] = useState<string>('');
+  const [heightValue, setHeightValue] = useState<string>(
+    initialData && 'height' in initialData ? String(initialData.height) : ''
+  );
+  const [weightValue, setWeightValue] = useState<string>(
+    initialData && 'weight' in initialData ? String(initialData.weight) : ''
+  );
+  const [systolicValue, setSystolicValue] = useState<string>(
+    initialData && 'systolic' in initialData ? String(initialData.systolic) : ''
+  );
+  const [diastolicValue, setDiastolicValue] = useState<string>(
+    initialData && 'diastolic' in initialData ? String(initialData.diastolic) : ''
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,50 +75,87 @@ export default function HealthLogsForm({ onSubmit, initialType = 'weight' }: IHe
     const promises: Promise<unknown>[] = [];
 
     try {
-      // Weight
-      if (weightValue) {
-        const dto: CreateWeightDto = {
-          userId: apiSession.userId,
-          weight: parseFloat(weightValue),
-          notes,
-          datetimeAt: datetime.toISOString(),
-        };
-        const promise = createWeight(dto, apiSession.accessToken).then(data => {
-          setWeightList(prev => [...prev, data]);
-          return 'weight';
-        });
-        promises.push(promise);
-      }
+      if (initialData) {
+        // Edit Mode
+        if (activeTab === 'weight' && weightValue) {
+          const dto: UpdateWeightDto = {
+            weight: parseFloat(weightValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const p = updateWeight(initialData.id, dto, apiSession.accessToken).then(data => {
+            setWeightList(prev => prev.map(item => (item.id === data.id ? data : item)));
+          });
+          promises.push(p);
+        } else if (activeTab === 'height' && heightValue) {
+          const dto: UpdateHeightDto = {
+            height: parseFloat(heightValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const p = updateHeight(initialData.id, dto, apiSession.accessToken).then(data => {
+            setHeightList(prev => prev.map(item => (item.id === data.id ? data : item)));
+          });
+          promises.push(p);
+        } else if (activeTab === 'bloodPressure' && systolicValue && diastolicValue) {
+          const dto: UpdateBloodPressureDto = {
+            systolic: parseFloat(systolicValue),
+            diastolic: parseFloat(diastolicValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const p = updateBloodPressure(initialData.id, dto, apiSession.accessToken).then(data => {
+            setBloodPressureList(prev => prev.map(item => (item.id === data.id ? data : item)));
+          });
+          promises.push(p);
+        }
+      } else {
+        // Create Mode
+        // Weight
+        if (weightValue) {
+          const dto: CreateWeightDto = {
+            userId: apiSession.userId,
+            weight: parseFloat(weightValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const promise = createWeight(dto, apiSession.accessToken).then(data => {
+            setWeightList(prev => [...prev, data]);
+            return 'weight';
+          });
+          promises.push(promise);
+        }
 
-      // Height
-      if (heightValue) {
-        const dto: CreateHeightDto = {
-          userId: apiSession.userId,
-          height: parseFloat(heightValue),
-          notes,
-          datetimeAt: datetime.toISOString(),
-        };
-        const promise = createHeight(dto, apiSession.accessToken).then(data => {
-          setHeightList(prev => [...prev, data]);
-          return 'height';
-        });
-        promises.push(promise);
-      }
+        // Height
+        if (heightValue) {
+          const dto: CreateHeightDto = {
+            userId: apiSession.userId,
+            height: parseFloat(heightValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const promise = createHeight(dto, apiSession.accessToken).then(data => {
+            setHeightList(prev => [...prev, data]);
+            return 'height';
+          });
+          promises.push(promise);
+        }
 
-      // Blood Pressure
-      if (systolicValue && diastolicValue) {
-        const dto: CreateBloodPressureDto = {
-          userId: apiSession.userId,
-          systolic: parseFloat(systolicValue),
-          diastolic: parseFloat(diastolicValue),
-          notes,
-          datetimeAt: datetime.toISOString(),
-        };
-        const promise = createBloodPressure(dto, apiSession.accessToken).then(data => {
-          setBloodPressureList(prev => [...prev, data]);
-          return 'bloodPressure';
-        });
-        promises.push(promise);
+        // Blood Pressure
+        if (systolicValue && diastolicValue) {
+          const dto: CreateBloodPressureDto = {
+            userId: apiSession.userId,
+            systolic: parseFloat(systolicValue),
+            diastolic: parseFloat(diastolicValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const promise = createBloodPressure(dto, apiSession.accessToken).then(data => {
+            setBloodPressureList(prev => [...prev, data]);
+            return 'bloodPressure';
+          });
+          promises.push(promise);
+        }
       }
 
       if (promises.length === 0) {

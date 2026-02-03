@@ -82,6 +82,21 @@ export async function deleteHeight(id: string, token: string): Promise<void> {
   if (!response.ok) await handleResponseError(response, 'Failed to delete height');
 }
 
+export async function updateHeight(
+  id: string,
+  dto: UpdateHeightDto,
+  token: string
+): Promise<IHeight> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/height/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(token),
+    body: JSON.stringify(dto),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to update height');
+  const data = await response.json();
+  return parseDates<IHeight>(data);
+}
+
 // Weight
 export async function fetchWeights(token: string): Promise<IWeight[]> {
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/weights`, {
@@ -109,6 +124,21 @@ export async function deleteWeight(id: string, token: string): Promise<void> {
     headers: getHeaders(token),
   });
   if (!response.ok) await handleResponseError(response, 'Failed to delete weight');
+}
+
+export async function updateWeight(
+  id: string,
+  dto: UpdateWeightDto,
+  token: string
+): Promise<IWeight> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/weight/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(token),
+    body: JSON.stringify(dto),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to update weight');
+  const data = await response.json();
+  return parseDates<IWeight>(data);
 }
 
 // Blood Pressure
@@ -152,6 +182,24 @@ export async function deleteBloodPressure(id: string, token: string): Promise<vo
   if (!response.ok) await handleResponseError(response, 'Failed to delete blood pressure');
 }
 
+export async function updateBloodPressure(
+  id: string,
+  dto: UpdateBloodPressureDto,
+  token: string
+): Promise<IBloodPressure> {
+  const response = await fetch(
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/blood-pressure/${id}`,
+    {
+      method: 'PATCH',
+      headers: getHeaders(token),
+      body: JSON.stringify(dto),
+    }
+  );
+  if (!response.ok) await handleResponseError(response, 'Failed to update blood pressure');
+  const data = await response.json();
+  return parseDates<IBloodPressure>(data);
+}
+
 // Sleep
 export async function fetchSleeps(token: string): Promise<ISleep[]> {
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/sleeps`, {
@@ -179,4 +227,15 @@ export async function deleteSleep(id: string, token: string): Promise<void> {
     headers: getHeaders(token),
   });
   if (!response.ok) await handleResponseError(response, 'Failed to delete sleep');
+}
+
+export async function updateSleep(id: string, dto: UpdateSleepDto, token: string): Promise<ISleep> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/sleep/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(token),
+    body: JSON.stringify(dto),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to update sleep');
+  const data = await response.json();
+  return parseDates<ISleep>(data);
 }

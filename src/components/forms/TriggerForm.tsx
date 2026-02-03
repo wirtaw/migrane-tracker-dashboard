@@ -3,21 +3,30 @@ import { useProfileDataContext } from '../../context/ProfileDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { getIsoDateTimeLocal } from '../../lib/utils';
 import { IFormEvent } from '../../models/forms.types';
-import { createTrigger, CreateTriggerDto } from '../../services/triggers';
+import {
+  createTrigger,
+  updateTrigger,
+  CreateTriggerDto,
+  UpdateTriggerDto,
+} from '../../services/triggers';
+import { ITrigger } from '../../models/profileData.types';
 import Loader from '../Loader';
 
 interface ITriggerFormProps {
   onSubmit: () => void;
+  initialData?: ITrigger;
 }
 
-export default function TriggerForm({ onSubmit }: ITriggerFormProps) {
+export default function TriggerForm({ onSubmit, initialData }: ITriggerFormProps) {
   const { profileSettingsData, apiSession } = useAuth();
   const { triggerEnumList, setTriggerList, setFormErrorMessage, setTriggerEnumList } =
     useProfileDataContext();
 
-  const [typeValue, setTypeValue] = useState<string>('');
-  const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
-  const [noteValue, setNoteValue] = useState<string>('');
+  const [typeValue, setTypeValue] = useState<string>(initialData?.type || '');
+  const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(
+    initialData?.datetimeAt ? new Date(initialData.datetimeAt) : new Date()
+  );
+  const [noteValue, setNoteValue] = useState<string>(initialData?.note || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isValidTrigger = (type: string, datetime: Date) => {
@@ -47,21 +56,32 @@ export default function TriggerForm({ onSubmit }: ITriggerFormProps) {
     setIsSubmitting(true);
 
     try {
-      const dto: CreateTriggerDto = {
-        type: typeValue,
-        note: noteValue,
-        userId: apiSession.userId,
-        datetimeAt: datetimeAtValue.toISOString(),
-      };
+      if (initialData) {
+        const dto: UpdateTriggerDto = {
+          type: typeValue,
+          note: noteValue,
+          datetimeAt: datetimeAtValue.toISOString(),
+        };
 
-      const newTrigger = await createTrigger(dto, apiSession.accessToken);
+        const updated = await updateTrigger(initialData.id, dto, apiSession.accessToken);
+        setTriggerList(prev => prev.map(t => (t.id === updated.id ? updated : t)));
+      } else {
+        const dto: CreateTriggerDto = {
+          type: typeValue,
+          note: noteValue,
+          userId: apiSession.userId,
+          datetimeAt: datetimeAtValue.toISOString(),
+        };
 
-      // Update local list
-      setTriggerList(prev => [...prev, newTrigger]);
+        const newTrigger = await createTrigger(dto, apiSession.accessToken);
 
-      // If it's a new type not in the enum list, add it (though usually management handles this, nice to have sync)
-      if (!triggerEnumList.includes(newTrigger.type)) {
-        setTriggerEnumList(prev => [...prev, newTrigger.type]);
+        // Update local list
+        setTriggerList(prev => [...prev, newTrigger]);
+
+        // If it's a new type not in the enum list, add it
+        if (!triggerEnumList.includes(newTrigger.type)) {
+          setTriggerEnumList(prev => [...prev, newTrigger.type]);
+        }
       }
 
       onSubmit();

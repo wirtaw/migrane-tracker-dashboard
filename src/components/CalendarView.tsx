@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import Modal from './../components/Modal';
 import { useProfileDataContext } from '../context/ProfileDataContext';
@@ -8,11 +8,12 @@ import { deleteTrigger } from '../services/triggers';
 import { deleteSymptom } from '../services/symptoms';
 import { deleteMedication } from '../services/medications';
 import { deleteIncident } from '../services/incidents';
+import { deleteWeight, deleteHeight, deleteBloodPressure } from '../services/health-logs';
 import { useAuth } from '../context/AuthContext';
 
 interface ICalendarItem {
   id: number | string;
-  type: 'Incident' | 'Medication' | 'Trigger' | 'Symptom';
+  type: 'Incident' | 'Medication' | 'Trigger' | 'Symptom' | 'Weight' | 'Height' | 'Blood Pressure';
   name: string;
   userId: string;
 }
@@ -41,8 +42,15 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
     setSymptomList,
     setMedicationList,
     setIncidentList,
+    weightList,
+    heightList,
+    bloodPressureList,
+    setWeightList,
+    setHeightList,
+    setBloodPressureList,
   } = useProfileDataContext();
   const { apiSession } = useAuth();
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [modalContent, setModalContent] = useState<IModalContent | null>(null);
 
@@ -59,12 +67,29 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
     const symptomItems: ICalendarItem[] = symptomList
       .filter(item => getIsoDate(item.datetimeAt) === date)
       .map(({ id, type, userId }) => ({ id, type: 'Symptom', name: type, userId }));
+    const weightItems: ICalendarItem[] = weightList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ id, weight, userId }) => ({ id, type: 'Weight', name: `${weight} kg`, userId }));
+    const heightItems: ICalendarItem[] = heightList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ id, height, userId }) => ({ id, type: 'Height', name: `${height} cm`, userId }));
+    const bpItems: ICalendarItem[] = bloodPressureList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ id, systolic, diastolic, userId }) => ({
+        id,
+        type: 'Blood Pressure',
+        name: `${systolic}/${diastolic} mmHg`,
+        userId,
+      }));
 
     const items: ICalendarItem[] | [] = [
       ...incidentItems,
       ...medicationItems,
       ...triggerItems,
       ...symptomItems,
+      ...weightItems,
+      ...heightItems,
+      ...bpItems,
     ];
 
     if (items.length > 0) {
@@ -87,17 +112,18 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
     setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)));
   };
 
-  const handleDeleteTrigger = async (id: number) => {
+  const handleDeleteTrigger = async (id: string | number) => {
     if (!apiSession?.accessToken) return;
+    const triggerId = String(id);
 
     if (window.confirm('Are you sure you want to delete this trigger?')) {
       try {
-        await deleteTrigger(id, apiSession.accessToken);
-        setTriggerList(prev => prev.filter(t => t.id !== id));
+        await deleteTrigger(triggerId, apiSession.accessToken);
+        setTriggerList(prev => prev.filter(t => t.id.toString() !== triggerId));
         // Update modal content
         if (modalContent) {
           const updatedItems = modalContent.items.filter(
-            item => !(item.type === 'Trigger' && item.id === id)
+            item => !(item.type === 'Trigger' && item.id.toString() === triggerId)
           );
           if (updatedItems.length === 0) {
             closeModal();
@@ -190,6 +216,76 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
     }
   };
 
+  const handleDeleteWeight = async (id: string | number) => {
+    if (!apiSession?.accessToken) return;
+    const lid = String(id);
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      try {
+        await deleteWeight(lid, apiSession.accessToken);
+        setWeightList(prev => prev.filter(m => m.id !== lid));
+        if (modalContent) {
+          const updatedItems = modalContent.items.filter(item => item.id !== lid);
+          if (updatedItems.length === 0) closeModal();
+          else setModalContent({ ...modalContent, items: updatedItems });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const handleDeleteHeight = async (id: string | number) => {
+    if (!apiSession?.accessToken) return;
+    const lid = String(id);
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      try {
+        await deleteHeight(lid, apiSession.accessToken);
+        setHeightList(prev => prev.filter(m => m.id !== lid));
+        if (modalContent) {
+          const updatedItems = modalContent.items.filter(item => item.id !== lid);
+          if (updatedItems.length === 0) closeModal();
+          else setModalContent({ ...modalContent, items: updatedItems });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const handleDeleteBloodPressure = async (id: string | number) => {
+    if (!apiSession?.accessToken) return;
+    const lid = String(id);
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      try {
+        await deleteBloodPressure(lid, apiSession.accessToken);
+        setBloodPressureList(prev => prev.filter(m => m.id !== lid));
+        if (modalContent) {
+          const updatedItems = modalContent.items.filter(item => item.id !== lid);
+          if (updatedItems.length === 0) closeModal();
+          else setModalContent({ ...modalContent, items: updatedItems });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const handleEditClick = (type: string, id: string | number) => {
+    const routeMap: Record<string, string> = {
+      Incident: 'edit-incident',
+      Medication: 'edit-medication',
+      Symptom: 'edit-symptom',
+      Trigger: 'edit-trigger',
+      Weight: 'edit-health-log/weight',
+      Height: 'edit-health-log/height',
+      'Blood Pressure': 'edit-health-log/bloodPressure',
+    };
+    const route = routeMap[type];
+    if (route) {
+      navigate(`/${route}/${id}`);
+    }
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm">
       <div className="flex items-center justify-between mb-4">
@@ -246,6 +342,12 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
                 {hasMedication && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
                 {hasTrigger && <span className="w-2 h-2 bg-yellow-500 rounded-full" />}
                 {hasSymptom && <span className="w-2 h-2 bg-green-500 rounded-full" />}
+                {(incidentList.some(item => getIsoDate(item.datetimeAt) === date) ||
+                  weightList.some(item => getIsoDate(item.datetimeAt) === date) ||
+                  heightList.some(item => getIsoDate(item.datetimeAt) === date) ||
+                  bloodPressureList.some(item => getIsoDate(item.datetimeAt) === date)) && (
+                  <span className="w-2 h-2 bg-purple-500 rounded-full" />
+                )}
               </div>
             </div>
           );
@@ -271,38 +373,28 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
                 <div>
                   <span className="font-medium">{item.type}:</span> {item.name}
                 </div>
-                {item.type === 'Incident' && (
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleDeleteIncident(item.id)}
+                    onClick={() => {
+                      if (item.type === 'Incident') handleDeleteIncident(item.id);
+                      if (item.type === 'Trigger') handleDeleteTrigger(item.id as string);
+                      if (item.type === 'Symptom') handleDeleteSymptom(item.id);
+                      if (item.type === 'Medication') handleDeleteMedication(item.id);
+                      if (item.type === 'Weight') handleDeleteWeight(item.id);
+                      if (item.type === 'Height') handleDeleteHeight(item.id);
+                      if (item.type === 'Blood Pressure') handleDeleteBloodPressure(item.id);
+                    }}
                     className="p-1 text-gray-500 hover:text-red-600 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                )}
-                {item.type === 'Trigger' && (
                   <button
-                    onClick={() => handleDeleteTrigger(item.id as number)}
-                    className="p-1 text-gray-500 hover:text-red-600 transition-colors"
+                    onClick={() => handleEditClick(item.type, item.id)}
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-xs"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    Edit {item.type}
                   </button>
-                )}
-                {item.type === 'Symptom' && (
-                  <button
-                    onClick={() => handleDeleteSymptom(item.id)}
-                    className="p-1 text-gray-500 hover:text-red-600 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-                {item.type === 'Medication' && (
-                  <button
-                    onClick={() => handleDeleteMedication(item.id)}
-                    className="p-1 text-gray-500 hover:text-red-600 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
+                </div>
               </li>
             ))}
           </ul>

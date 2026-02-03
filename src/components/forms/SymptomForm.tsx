@@ -4,22 +4,31 @@ import { useAuth } from '../../context/AuthContext';
 
 import { getIsoDateTimeLocal } from '../../lib/utils';
 import { IFormEvent } from '../../models/forms.types';
-import { createSymptom, CreateSymptomDto } from '../../services/symptoms';
+import {
+  createSymptom,
+  updateSymptom,
+  CreateSymptomDto,
+  UpdateSymptomDto,
+} from '../../services/symptoms';
+import { ISymptom } from '../../models/profileData.types';
 import Loader from '../Loader';
 
 interface ISymptomFormProps {
   onSubmit: () => void;
+  initialData?: ISymptom;
 }
 
-export default function SymptomForm({ onSubmit }: ISymptomFormProps) {
+export default function SymptomForm({ onSubmit, initialData }: ISymptomFormProps) {
   const { profileSettingsData, apiSession } = useAuth();
   const { symptomEnumList, setSymptomList, setFormErrorMessage, setSymptomEnumList } =
     useProfileDataContext();
 
-  const [typeValue, setTypeValue] = useState<string>('');
-  const [severityValue, setSeverityValue] = useState<number>(1);
-  const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
-  const [notesValue, setNotesValue] = useState<string>('');
+  const [typeValue, setTypeValue] = useState<string>(initialData?.type || '');
+  const [severityValue, setSeverityValue] = useState<number>(initialData?.severity || 1);
+  const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(
+    initialData?.datetimeAt ? new Date(initialData.datetimeAt) : new Date()
+  );
+  const [notesValue, setNotesValue] = useState<string>(initialData?.note || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isValidSymptom = (type: string, severity: number) => {
@@ -49,20 +58,32 @@ export default function SymptomForm({ onSubmit }: ISymptomFormProps) {
     setIsSubmitting(true);
 
     try {
-      const dto: CreateSymptomDto = {
-        userId: apiSession.userId,
-        type: typeValue,
-        severity: severityValue,
-        note: notesValue,
-        datetimeAt: datetimeAtValue.toISOString(),
-      };
+      if (initialData) {
+        const dto: UpdateSymptomDto = {
+          type: typeValue,
+          severity: severityValue,
+          note: notesValue,
+          datetimeAt: datetimeAtValue.toISOString(),
+        };
 
-      const newSymptom = await createSymptom(dto, apiSession.accessToken);
+        const updated = await updateSymptom(initialData.id, dto, apiSession.accessToken);
+        setSymptomList(prev => prev.map(s => (s.id === updated.id ? updated : s)));
+      } else {
+        const dto: CreateSymptomDto = {
+          userId: apiSession.userId,
+          type: typeValue,
+          severity: severityValue,
+          note: notesValue,
+          datetimeAt: datetimeAtValue.toISOString(),
+        };
 
-      setSymptomList(prev => [...prev, newSymptom]);
+        const newSymptom = await createSymptom(dto, apiSession.accessToken);
 
-      if (!symptomEnumList.includes(newSymptom.type)) {
-        setSymptomEnumList(prev => [...prev, newSymptom.type]);
+        setSymptomList(prev => [...prev, newSymptom]);
+
+        if (!symptomEnumList.includes(newSymptom.type)) {
+          setSymptomEnumList(prev => [...prev, newSymptom.type]);
+        }
       }
 
       onSubmit();

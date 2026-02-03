@@ -94,3 +94,22 @@ export async function fetchIncidentStats(token: string): Promise<IncidentStats> 
   if (!response.ok) await handleResponseError(response, 'Failed to fetch incident stats');
   return response.json();
 }
+
+export async function updateIncident(
+  id: string,
+  dto: UpdateIncidentDto,
+  token: string
+): Promise<IIncident> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Update incident failed: Missing configuration or token');
+  }
+
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/incidents/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(token),
+    body: JSON.stringify(dto),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to update incident');
+  const data = await response.json();
+  return parseDates(data);
+}

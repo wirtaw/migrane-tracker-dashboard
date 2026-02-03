@@ -4,21 +4,43 @@ import { useAuth } from '../../context/AuthContext';
 
 import { getIsoDateTimeLocal } from '../../lib/utils.ts';
 import { IFormEvent } from '../../models/forms.types.ts';
-import { createMedication, CreateMedicationDto } from '../../services/medications';
+import {
+  createMedication,
+  updateMedication,
+  CreateMedicationDto,
+  UpdateMedicationDto,
+} from '../../services/medications';
+import { IMedication } from '../../models/profileData.types';
+
 interface IMedicationFormProps {
   onSubmit: () => void;
+  initialData?: IMedication;
 }
 
-export default function MedicationForm({ onSubmit }: IMedicationFormProps) {
+export default function MedicationForm({ onSubmit, initialData }: IMedicationFormProps) {
   const { profileSettingsData, apiSession } = useAuth();
   const { medicationEnumList, setMedicationList, setFormErrorMessage, setMedicationEnumList } =
     useProfileDataContext();
 
-  const [titleValue, setTitleValue] = useState<string>('');
-  const [dosageValue, setDosageValue] = useState<number>(0);
-  const [dosageMetricValue, setDosageMetricValue] = useState<string>('mg');
-  const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
-  const [notesValue, setNotesValue] = useState<string>('');
+  const [titleValue, setTitleValue] = useState<string>(initialData?.title || '');
+  const [dosageValue, setDosageValue] = useState<number>(() => {
+    if (initialData?.dosage) {
+      const val = parseFloat(initialData.dosage);
+      return isNaN(val) ? 0 : val;
+    }
+    return 0;
+  });
+  const [dosageMetricValue, setDosageMetricValue] = useState<string>(() => {
+    if (initialData?.dosage) {
+      return initialData.dosage.replace(/[0-9.]/g, '') || 'mg';
+    }
+    return 'mg';
+  });
+  const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(
+    initialData?.datetimeAt ? new Date(initialData.datetimeAt) : new Date()
+  );
+  const [notesValue, setNotesValue] = useState<string>(initialData?.notes || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,30 +60,44 @@ export default function MedicationForm({ onSubmit }: IMedicationFormProps) {
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      const dto: CreateMedicationDto = {
-        userId: apiSession.userId,
-        title: titleValue,
-        dosage: `${dosageValue}${dosageMetricValue}`,
-        notes: notesValue || undefined,
-        datetimeAt: datetimeAtValue.toISOString(),
-      };
+      if (initialData) {
+        const dto: UpdateMedicationDto = {
+          title: titleValue,
+          dosage: `${dosageValue}${dosageMetricValue}`,
+          notes: notesValue || undefined,
+          datetimeAt: datetimeAtValue.toISOString(),
+        };
+        const updated = await updateMedication(initialData.id, dto, apiSession.accessToken);
+        setMedicationList(prev => prev.map(m => (m.id === updated.id ? updated : m)));
+      } else {
+        const dto: CreateMedicationDto = {
+          userId: apiSession.userId,
+          title: titleValue,
+          dosage: `${dosageValue}${dosageMetricValue}`,
+          notes: notesValue || undefined,
+          datetimeAt: datetimeAtValue.toISOString(),
+        };
 
-      const newMedication = await createMedication(dto, apiSession.accessToken);
+        const newMedication = await createMedication(dto, apiSession.accessToken);
 
-      setMedicationList(prev => [...prev, newMedication]);
+        setMedicationList(prev => [...prev, newMedication]);
 
-      if (!medicationEnumList.includes(newMedication.title)) {
-        setMedicationEnumList(prev => [...prev, newMedication.title]);
+        if (!medicationEnumList.includes(newMedication.title)) {
+          setMedicationEnumList(prev => [...prev, newMedication.title]);
+        }
       }
 
       onSubmit();
     } catch (error) {
-      console.error('Failed to create medication:', error);
+      console.error('Failed to save medication:', error);
       setFormErrorMessage({
         showModal: true,
-        message: error instanceof Error ? error.message : 'Failed to create medication',
+        message: error instanceof Error ? error.message : 'Failed to save medication',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -175,9 +211,10 @@ export default function MedicationForm({ onSubmit }: IMedicationFormProps) {
       <div className="flex justify-end gap-3">
         <button
           type="submit"
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          disabled={isSubmitting}
         >
-          Save
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>

@@ -18,7 +18,7 @@ export default function MedicationCard({ medication, className }: IMedicationCar
         </h3>
         <p className="leading-8 text-gray-500 font-normal text-gray-800 dark:text-gray-200">
           Time - {getIsoDate(medication.datetimeAt)} {getIsoTime(medication.datetimeAt)} <br />
-          Dosage - {medication.dosage} mg <br />
+          Dosage - {medication.dosage} <br />
         </p>
       </div>
     </div>
