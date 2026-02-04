@@ -170,6 +170,7 @@ export default function MedicationForm({ onSubmit, initialData }: IMedicationFor
             <option value="mg">mg</option>
             <option value="ml">ml</option>
             <option value="g">g</option>
+            <option value="µg">µg</option>
           </select>
         </div>
       </div>
