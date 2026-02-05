@@ -7,6 +7,7 @@ import GeoMagneticWidget from '../components/GeoMagneticWidget';
 import TrackingButtons from '../components/TrackingButtons';
 import MostRecentData from '../components/MostRecentData';
 import MigrainePreventionTip from '../components/MigrainePreventionTip';
+import EveryDayMedicationWidget from '../components/widgets/EveryDayMedicationWidget';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -40,6 +41,8 @@ export default function Dashboard() {
         {/* Sidebar Column */}
         <div className="space-y-6">
           <WeatherWidget />
+
+          <EveryDayMedicationWidget />
 
           <MigrainePreventionTip />
 

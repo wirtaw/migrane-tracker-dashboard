@@ -6,10 +6,13 @@ import Modal from './../components/Modal';
 import AddButton from './../components/AddButton';
 import TriggerTypeManageForm from '../components/forms/TriggerTypeManageForm';
 import LocationManageForm from '../components/forms/LocationManageForm';
+import ManageDailyMedicationsForm from '../components/forms/ManageDailyMedicationsForm';
+import { useWeatherSettings } from '../hooks/useWeatherSettings';
 
 export default function Settings() {
+  const { settings, toggleSetting } = useWeatherSettings();
   const [activeModal, setActiveModal] = useState<
-    'symptom' | 'medication' | 'incident' | 'trigger' | 'location' | null
+    'symptom' | 'medication' | 'incident' | 'trigger' | 'location' | 'dailyMedication' | null
   >(null);
 
   return (
@@ -37,11 +40,19 @@ export default function Settings() {
               <h2 className="mt-4 mb-5 text-lg font-semibold text-gray-900 dark:text-white">
                 Medications
               </h2>
-              <AddButton
-                id="manageMedication"
-                label="Manage Medications"
-                onClick={() => setActiveModal('medication')}
-              />
+              <div className="flex flex-col gap-3 w-full">
+                <AddButton
+                  id="manageMedication"
+                  label="Manage Medications"
+                  onClick={() => setActiveModal('medication')}
+                />
+                <button
+                  onClick={() => setActiveModal('dailyMedication')}
+                  className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full"
+                >
+                  Daily Presets
+                </button>
+              </div>
             </div>
           </div>
 
@@ -97,6 +108,49 @@ export default function Settings() {
             </div>
           </div>
         </div>
+
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow mb-12">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Weather Display Preferences
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            Customize which weather data points appear on your dashboard.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <label className="flex items-center space-x-3 cursor-pointer p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <input
+                type="checkbox"
+                checked={settings.showTemperature}
+                onChange={() => toggleSetting('showTemperature')}
+                className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+              />
+              <span className="text-gray-700 dark:text-gray-200 font-medium">Temperature</span>
+            </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <input
+                type="checkbox"
+                checked={settings.showHumidity}
+                onChange={() => toggleSetting('showHumidity')}
+                className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+              />
+              <span className="text-gray-700 dark:text-gray-200 font-medium">Humidity</span>
+            </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <input
+                type="checkbox"
+                checked={settings.showPressure}
+                onChange={() => toggleSetting('showPressure')}
+                className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+              />
+              <span className="text-gray-700 dark:text-gray-200 font-medium">
+                Pressure <span className="text-xs text-gray-500 ml-1">(Migraine Trigger)</span>
+              </span>
+            </label>
+          </div>
+        </div>
       </main>
       <Modal
         isOpen={activeModal === 'medication'}
@@ -104,6 +158,14 @@ export default function Settings() {
         title="Manage Medication"
       >
         <MedicationManageForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+
+      <Modal
+        isOpen={activeModal === 'dailyMedication'}
+        onClose={() => setActiveModal(null)}
+        title="Manage Daily Medications"
+      >
+        <ManageDailyMedicationsForm />
       </Modal>
       <Modal
         isOpen={activeModal === 'symptom'}

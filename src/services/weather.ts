@@ -250,3 +250,74 @@ export async function fetchRadiationWeatherData(
 
   return responseRadiationData;
 }
+
+export interface IHourlyForecast {
+  time: Date;
+  temperature: number;
+  humidity: number;
+  weatherCode: number;
+}
+
+export interface IDailyForecast {
+  date: Date;
+  temperatureMax: number;
+  temperatureMin: number;
+  weatherCode: number;
+  precipitationSum: number;
+}
+
+export interface IForecastResponse {
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  hourly: IHourlyForecast[];
+  daily: IDailyForecast[];
+}
+
+export const getForecast = async (
+  { latitude, longitude }: ICoordinates,
+  token?: string
+): Promise<IForecastResponse> => {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    return {
+      latitude: 0,
+      longitude: 0,
+      timezone: '',
+      hourly: [],
+      daily: [],
+    };
+  }
+
+  const response = await fetch(
+    `${env.MIGRAINE_BACKEND_API_URL}/api/v1/weather/forecast?latitude=${latitude}&longitude=${longitude}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch forecast');
+  }
+
+  const data = await response.json();
+
+  if (!data || !data.hourly || !data.daily) {
+    console.error('Failed to fetch forecast: Invalid data');
+    return {
+      latitude: 0,
+      longitude: 0,
+      timezone: '',
+      hourly: [],
+      daily: [],
+    };
+  }
+
+  return {
+    ...data,
+    hourly: data.hourly.map((h: { time: string }) => ({ ...h, time: new Date(h.time) })),
+    daily: data.daily.map((d: { date: string }) => ({ ...d, date: new Date(d.date) })),
+  };
+};
