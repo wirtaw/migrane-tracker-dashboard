@@ -33,7 +33,11 @@ export default function Dashboard() {
         <div className="lg:col-span-2 space-y-6">
           <CalendarView weekDays={weekDays} firstDayOfMonth={firstDayOfMonth} days={days} />
 
+          <TrackingButtons />
+
           <GeoMagneticWidget />
+
+          <MostRecentData />
 
           <BiorhythmChart birthDate={birthDate} />
         </div>
@@ -45,10 +49,6 @@ export default function Dashboard() {
           <EveryDayMedicationWidget />
 
           <MigrainePreventionTip />
-
-          <MostRecentData />
-
-          <TrackingButtons />
 
           <LifeMetrics birthDate={birthDate} />
         </div>

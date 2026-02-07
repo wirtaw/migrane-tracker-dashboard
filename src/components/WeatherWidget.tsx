@@ -29,6 +29,9 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
   const [forecast, setForecast] = useState<IForecastResponse | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loadingForecast, setLoadingForecast] = useState(true);
+  const [activeChart, setActiveChart] = useState<
+    'temperature' | 'humidity' | 'pressure' | 'cloudCover'
+  >('temperature');
   const { apiSession } = useAuth();
 
   const isLoading = data ? false : weatherState.loading;
@@ -219,10 +222,66 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
 
           <div className="mb-6">
             <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wider">
-              24-Hour Trend
+              {settings.forecastDuration}-Hour Trend
             </h4>
+
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              {settings.showTemperature && (
+                <button
+                  onClick={() => setActiveChart('temperature')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    activeChart === 'temperature'
+                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Temperature
+                </button>
+              )}
+              {settings.showHumidity && (
+                <button
+                  onClick={() => setActiveChart('humidity')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    activeChart === 'humidity'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Humidity
+                </button>
+              )}
+              {settings.showPressure && (
+                <button
+                  onClick={() => setActiveChart('pressure')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    activeChart === 'pressure'
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Pressure
+                </button>
+              )}
+              {settings.showCloudCover && (
+                <button
+                  onClick={() => setActiveChart('cloudCover')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    activeChart === 'cloudCover'
+                      ? 'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-300'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Cloud Cover
+                </button>
+              )}
+            </div>
+
             <div className="h-64 w-full">
-              <WeatherForecastChart data={forecast.hourly} settings={settings} />
+              <WeatherForecastChart
+                data={forecast.hourly}
+                type={activeChart}
+                duration={settings.forecastDuration}
+              />
             </div>
           </div>
 
@@ -230,7 +289,7 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
             <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wider">
               Daily Outlook
             </h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {forecast.daily.map((day, i) => (
                 <WeatherForecastCard key={i} data={day} />
               ))}

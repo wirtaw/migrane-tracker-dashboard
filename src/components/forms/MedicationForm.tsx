@@ -23,12 +23,12 @@ export default function MedicationForm({ onSubmit, initialData }: IMedicationFor
     useProfileDataContext();
 
   const [titleValue, setTitleValue] = useState<string>(initialData?.title || '');
-  const [dosageValue, setDosageValue] = useState<number>(() => {
+  const [dosageValue, setDosageValue] = useState<string>(() => {
     if (initialData?.dosage) {
       const val = parseFloat(initialData.dosage);
-      return isNaN(val) ? 0 : val;
+      return isNaN(val) ? '' : String(val);
     }
-    return 0;
+    return '';
   });
   const [dosageMetricValue, setDosageMetricValue] = useState<string>(() => {
     if (initialData?.dosage) {
@@ -106,7 +106,7 @@ export default function MedicationForm({ onSubmit, initialData }: IMedicationFor
   };
 
   const handleNumberChange = (event: IFormEvent) => {
-    setDosageValue(Number(event.target.value));
+    setDosageValue(String(event.target.value));
   };
 
   const handleSelectMetricChange = (event: IFormEvent) => {
@@ -160,6 +160,7 @@ export default function MedicationForm({ onSubmit, initialData }: IMedicationFor
             id="dosageValue"
             value={dosageValue}
             onChange={handleNumberChange}
+            onFocus={e => e.target.select()}
             className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
           />
           <select

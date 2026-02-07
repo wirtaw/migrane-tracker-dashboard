@@ -24,14 +24,16 @@ export default function SymptomForm({ onSubmit, initialData }: ISymptomFormProps
     useProfileDataContext();
 
   const [typeValue, setTypeValue] = useState<string>(initialData?.type || '');
-  const [severityValue, setSeverityValue] = useState<number>(initialData?.severity || 1);
+  const [severityValue, setSeverityValue] = useState<string>(
+    initialData?.severity ? String(initialData.severity) : '1'
+  );
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(
     initialData?.datetimeAt ? new Date(initialData.datetimeAt) : new Date()
   );
   const [notesValue, setNotesValue] = useState<string>(initialData?.note || '');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isValidSymptom = (type: string, severity: number) => {
+  const isValidSymptom = (type: string, severity: string) => {
     if (!type) return false;
     if (!severity) return false;
     return true;
@@ -61,7 +63,7 @@ export default function SymptomForm({ onSubmit, initialData }: ISymptomFormProps
       if (initialData) {
         const dto: UpdateSymptomDto = {
           type: typeValue,
-          severity: severityValue,
+          severity: parseInt(severityValue),
           note: notesValue,
           datetimeAt: datetimeAtValue.toISOString(),
         };
@@ -72,7 +74,7 @@ export default function SymptomForm({ onSubmit, initialData }: ISymptomFormProps
         const dto: CreateSymptomDto = {
           userId: apiSession.userId,
           type: typeValue,
-          severity: severityValue,
+          severity: parseInt(severityValue),
           note: notesValue,
           datetimeAt: datetimeAtValue.toISOString(),
         };
@@ -103,7 +105,7 @@ export default function SymptomForm({ onSubmit, initialData }: ISymptomFormProps
   };
 
   const handleNumberChange = (event: IFormEvent) => {
-    setSeverityValue(Number(event.target.value));
+    setSeverityValue(String(event.target.value));
   };
 
   const handleTextareaChange = (event: IFormEvent) => {
@@ -159,6 +161,7 @@ export default function SymptomForm({ onSubmit, initialData }: ISymptomFormProps
           max="10"
           value={severityValue}
           onChange={handleNumberChange}
+          onFocus={e => e.target.select()}
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
       </div>

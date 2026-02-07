@@ -13,7 +13,6 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { IHourlyForecast } from '../../services/weather';
-import { WeatherSettings } from '../../hooks/useWeatherSettings';
 import { DateTime } from 'luxon';
 
 ChartJS.register(
@@ -29,16 +28,17 @@ ChartJS.register(
 
 interface Props {
   data: IHourlyForecast[];
-  settings: WeatherSettings;
+  type: 'temperature' | 'humidity' | 'pressure' | 'cloudCover';
+  duration: 24 | 48 | 72;
 }
 
-export default function WeatherForecastChart({ data, settings }: Props) {
-  const chartData = data.slice(0, 24);
+export default function WeatherForecastChart({ data, type, duration }: Props) {
+  const chartData = data.slice(0, duration);
   const labels = chartData.map(item => DateTime.fromMillis(item.time.getTime()).toFormat('HH:mm'));
 
   const datasets = [];
 
-  if (settings.showTemperature) {
+  if (type === 'temperature') {
     datasets.push({
       label: 'Temp (°C)',
       data: chartData.map(item => item.temperature),
@@ -48,9 +48,7 @@ export default function WeatherForecastChart({ data, settings }: Props) {
       tension: 0.4,
       yAxisID: 'y',
     });
-  }
-
-  if (settings.showHumidity) {
+  } else if (type === 'humidity') {
     datasets.push({
       label: 'Humidity (%)',
       data: chartData.map(item => item.humidity),
@@ -58,7 +56,27 @@ export default function WeatherForecastChart({ data, settings }: Props) {
       backgroundColor: 'rgba(130, 202, 157, 0.5)',
       fill: true,
       tension: 0.4,
-      yAxisID: 'y', // Using same axis for simplicity, or could be 'y1' if scales differ significantly
+      yAxisID: 'y',
+    });
+  } else if (type === 'pressure') {
+    datasets.push({
+      label: 'Pressure (hPa)',
+      data: chartData.map(item => item.surfacePressure), // Using surfacePressure for 'pressure' chart as per plan
+      borderColor: '#ffc658',
+      backgroundColor: 'rgba(255, 198, 88, 0.5)',
+      fill: true,
+      tension: 0.4,
+      yAxisID: 'y',
+    });
+  } else if (type === 'cloudCover') {
+    datasets.push({
+      label: 'Cloud Cover (%)',
+      data: chartData.map(item => item.cloudCover),
+      borderColor: '#8884d8', // Reuse color or pick a new one, gray seems appropriate for clouds
+      backgroundColor: 'rgba(128, 128, 128, 0.5)',
+      fill: true,
+      tension: 0.4,
+      yAxisID: 'y',
     });
   }
 

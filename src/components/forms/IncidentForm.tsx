@@ -19,7 +19,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
 
   const [typeValue, setTypeValue] = useState<IncomingType | ''>('');
   type IncomingType = IncidentTypeEnum;
-  const [durationHoursValue, setDurationHoursValue] = useState<number>(0.5);
+  const [durationHoursValue, setDurationHoursValue] = useState<string>('0.5');
   const [startTimeValue, setStartTimeValue] = useState<Date>(new Date());
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
   const [notesValue, setNotesValue] = useState<string>('');
@@ -61,7 +61,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
         userId: apiSession.userId,
         type: typeValue as IncidentTypeEnum,
         startTime: startTimeValue.toISOString(),
-        durationHours: durationHoursValue,
+        durationHours: parseFloat(durationHoursValue),
         notes: notesValue,
         triggers,
         datetimeAt: datetimeAtValue.toISOString(),
@@ -80,7 +80,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
   };
 
   const handleNumberChange = (event: IFormEvent) => {
-    setDurationHoursValue(Number(event.target.value));
+    setDurationHoursValue(String(event.target.value));
   };
 
   const handleDateChange = (event: IFormEvent) => {
@@ -166,6 +166,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
           value={durationHoursValue}
           onChange={handleNumberChange}
+          onFocus={e => e.target.select()}
         />
       </div>
 

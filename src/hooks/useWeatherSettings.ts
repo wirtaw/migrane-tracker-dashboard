@@ -5,6 +5,8 @@ export interface WeatherSettings {
   showHumidity: boolean;
   showPressure: boolean; // Useful for migraine tracking
   showPrecipitation: boolean;
+  showCloudCover: boolean;
+  forecastDuration: 24 | 48 | 72;
 }
 
 const DEFAULT_SETTINGS: WeatherSettings = {
@@ -12,6 +14,8 @@ const DEFAULT_SETTINGS: WeatherSettings = {
   showHumidity: true,
   showPressure: true,
   showPrecipitation: true,
+  showCloudCover: true,
+  forecastDuration: 48,
 };
 
 export const useWeatherSettings = () => {
@@ -28,5 +32,9 @@ export const useWeatherSettings = () => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  return { settings, toggleSetting };
+  const updateSetting = <K extends keyof WeatherSettings>(key: K, value: WeatherSettings[K]) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  return { settings, toggleSetting, updateSetting };
 };

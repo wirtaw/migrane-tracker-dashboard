@@ -35,8 +35,12 @@ weather).
 
 1. [DONE] **Auth Foundation**: Supabase integration and RBAC guards.
 2. [DONE] **External Data Clients**: NOAA, GFZ, and Weather integration.
-3. [DONE] **Core Domains**: Incidents, Symptoms, Triggers, and Medications.
-4. [IN PROGRESS] **Visualization**: Implementing Biorhythm and Solar Radiation
+3. [DONE] **Core Domains**: Incidents, Symptoms, Triggers, and Medications (CRUD
+   & Edit included).
+4. [DONE] **User Statistics**: Tracking API usage and Database metrics.
+5. [DONE] **Weather Widget**: Real-time forecast and historical weather data
+   visualization.
+6. [IN PROGRESS] **Visualization**: Implementing Biorhythm and Solar Radiation
    charts in the Dashboard.
-5. [TODO] **Correlation Engine**: Logic to automatically find links between
+7. [TODO] **Correlation Engine**: Logic to automatically find links between
    weather and incident frequency.

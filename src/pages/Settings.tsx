@@ -10,7 +10,7 @@ import ManageDailyMedicationsForm from '../components/forms/ManageDailyMedicatio
 import { useWeatherSettings } from '../hooks/useWeatherSettings';
 
 export default function Settings() {
-  const { settings, toggleSetting } = useWeatherSettings();
+  const { settings, toggleSetting, updateSetting } = useWeatherSettings();
   const [activeModal, setActiveModal] = useState<
     'symptom' | 'medication' | 'incident' | 'trigger' | 'location' | 'dailyMedication' | null
   >(null);
@@ -149,6 +149,37 @@ export default function Settings() {
                 Pressure <span className="text-xs text-gray-500 ml-1">(Migraine Trigger)</span>
               </span>
             </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <input
+                type="checkbox"
+                checked={settings.showCloudCover}
+                onChange={() => toggleSetting('showCloudCover')}
+                className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+              />
+              <span className="text-gray-700 dark:text-gray-200 font-medium">Cloud Cover</span>
+            </label>
+          </div>
+
+          <div className="mt-8">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+              Forecast Duration
+            </h3>
+            <div className="grid grid-cols-3 gap-4">
+              {[24, 48, 72].map(duration => (
+                <button
+                  key={duration}
+                  onClick={() => updateSetting('forecastDuration', duration as 24 | 48 | 72)}
+                  className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
+                    settings.forecastDuration === duration
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-400'
+                      : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {duration} Hours
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </main>

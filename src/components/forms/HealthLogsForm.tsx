@@ -258,6 +258,7 @@ export default function HealthLogsForm({
               step="0.1"
               value={weightValue}
               onChange={e => setWeightValue(e.target.value)}
+              onFocus={e => e.target.select()}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
             />
           </div>
@@ -273,6 +274,7 @@ export default function HealthLogsForm({
               step="0.1"
               value={heightValue}
               onChange={e => setHeightValue(e.target.value)}
+              onFocus={e => e.target.select()}
               className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
             />
           </div>
@@ -288,6 +290,7 @@ export default function HealthLogsForm({
                 type="number"
                 value={systolicValue}
                 onChange={e => setSystolicValue(e.target.value)}
+                onFocus={e => e.target.select()}
                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
               />
             </div>
@@ -299,6 +302,7 @@ export default function HealthLogsForm({
                 type="number"
                 value={diastolicValue}
                 onChange={e => setDiastolicValue(e.target.value)}
+                onFocus={e => e.target.select()}
                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
               />
             </div>

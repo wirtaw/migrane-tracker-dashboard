@@ -256,6 +256,8 @@ export interface IHourlyForecast {
   temperature: number;
   humidity: number;
   weatherCode: number;
+  cloudCover: number;
+  surfacePressure: number;
 }
 
 export interface IDailyForecast {
