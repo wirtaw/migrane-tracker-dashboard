@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 export interface WeatherSettings {
   showTemperature: boolean;
   showHumidity: boolean;
-  showPressure: boolean; // Useful for migraine tracking
+  showPressure: boolean;
   showPrecipitation: boolean;
   showCloudCover: boolean;
+  showUVIndex?: boolean;
   forecastDuration: 24 | 48 | 72;
 }
 
@@ -15,6 +16,7 @@ const DEFAULT_SETTINGS: WeatherSettings = {
   showPressure: true,
   showPrecipitation: true,
   showCloudCover: true,
+  showUVIndex: true,
   forecastDuration: 48,
 };
 

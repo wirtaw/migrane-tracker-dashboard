@@ -30,7 +30,7 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loadingForecast, setLoadingForecast] = useState(true);
   const [activeChart, setActiveChart] = useState<
-    'temperature' | 'humidity' | 'pressure' | 'cloudCover'
+    'temperature' | 'humidity' | 'pressure' | 'cloudCover' | 'uvIndex'
   >('temperature');
   const { apiSession } = useAuth();
 
@@ -272,6 +272,18 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
                   }`}
                 >
                   Cloud Cover
+                </button>
+              )}
+              {settings.showUVIndex && (
+                <button
+                  onClick={() => setActiveChart('uvIndex')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    activeChart === 'uvIndex'
+                      ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  UV Index
                 </button>
               )}
             </div>

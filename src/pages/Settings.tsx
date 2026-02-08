@@ -159,6 +159,18 @@ export default function Settings() {
               />
               <span className="text-gray-700 dark:text-gray-200 font-medium">Cloud Cover</span>
             </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <input
+                type="checkbox"
+                checked={settings.showUVIndex}
+                onChange={() => toggleSetting('showUVIndex')}
+                className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+              />
+              <span className="text-gray-700 dark:text-gray-200 font-medium">
+                UV Index <span className="text-xs text-gray-500 ml-1">(Migraine Trigger)</span>
+              </span>
+            </label>
           </div>
 
           <div className="mt-8">

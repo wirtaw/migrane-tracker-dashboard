@@ -28,7 +28,7 @@ ChartJS.register(
 
 interface Props {
   data: IHourlyForecast[];
-  type: 'temperature' | 'humidity' | 'pressure' | 'cloudCover';
+  type: 'temperature' | 'humidity' | 'pressure' | 'cloudCover' | 'uvIndex';
   duration: 24 | 48 | 72;
 }
 
@@ -74,6 +74,16 @@ export default function WeatherForecastChart({ data, type, duration }: Props) {
       data: chartData.map(item => item.cloudCover),
       borderColor: '#8884d8', // Reuse color or pick a new one, gray seems appropriate for clouds
       backgroundColor: 'rgba(128, 128, 128, 0.5)',
+      fill: true,
+      tension: 0.4,
+      yAxisID: 'y',
+    });
+  } else if (type === 'uvIndex') {
+    datasets.push({
+      label: 'UV Index',
+      data: chartData.map(item => item.uvIndex ?? 0), // Use 0 if uvIndex is null
+      borderColor: '#ff7300',
+      backgroundColor: 'rgba(255, 115, 0, 0.5)',
       fill: true,
       tension: 0.4,
       yAxisID: 'y',
