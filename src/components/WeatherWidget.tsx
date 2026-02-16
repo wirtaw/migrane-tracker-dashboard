@@ -55,7 +55,7 @@ export default function WeatherWidget({ data }: IWeatherWidgetProps) {
     };
 
     fetchWeatherForecast();
-  }, [profileSettingsData]);
+  }, [profileSettingsData, apiSession?.accessToken]);
 
   if (isLoading) {
     return <Loader />;

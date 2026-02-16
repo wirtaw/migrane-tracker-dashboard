@@ -90,6 +90,34 @@ export class LocationsService {
     })) as ILocationData[];
   }
 
+  static async getLocationsByRange(
+    token: string,
+    startDate: string,
+    endDate: string
+  ): Promise<ILocationData[]> {
+    const params = new URLSearchParams({
+      startDate,
+      endDate,
+    });
+
+    const response = await fetch(`${API_URL}/date-range?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch locations by range: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.map((item: { datetimeAt: string }) => ({
+      ...item,
+      datetimeAt: new Date(item.datetimeAt),
+    })) as ILocationData[];
+  }
+
   static async updateLocation(token: string, id: string, data: UpdateLocationDto): Promise<void> {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PATCH',

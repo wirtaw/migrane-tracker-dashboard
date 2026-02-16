@@ -12,11 +12,17 @@ import {
   IBrokenData,
   ILocationData,
   ITyramineContentItem,
+  ISleep,
 } from '../models/profileData.types';
 import { fetchTriggers } from '../services/triggers';
 import { fetchSymptoms } from '../services/symptoms';
 import { fetchMedications } from '../services/medications';
-import { fetchHeights, fetchWeights, fetchBloodPressures } from '../services/health-logs';
+import {
+  fetchHeights,
+  fetchWeights,
+  fetchBloodPressures,
+  fetchSleeps,
+} from '../services/health-logs';
 import { fetchIncidents } from '../services/incidents';
 import { LocationsService } from '../services/locations';
 import { useAuth } from './AuthContext';
@@ -54,6 +60,8 @@ interface IProfileDataContextProps {
   setBrokenImportData: React.Dispatch<React.SetStateAction<IBrokenData>>;
   locationList: ILocationData[];
   setLocationList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
+  sleepList: ISleep[];
+  setSleepList: React.Dispatch<React.SetStateAction<ISleep[]>>;
   recommendationList: string[];
   reducedTyramineMenuList: ITyramineContentItem[];
 }
@@ -68,6 +76,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const [medicationList, setMedicationList] = useState<IMedication[]>([]);
   const [symptomList, setSymptomList] = useState<ISymptom[]>([]);
   const [locationList, setLocationList] = useState<ILocationData[]>([]);
+  const [sleepList, setSleepList] = useState<ISleep[]>([]);
 
   const [medicationEnumList, setMedicationEnumList] = useState<string[]>([
     'Aspirin',
@@ -269,6 +278,10 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         .then(setBloodPressureList)
         .catch(err => console.error('Failed to fetch blood pressures', err));
 
+      fetchSleeps(apiSession.accessToken)
+        .then(setSleepList)
+        .catch(err => console.error('Failed to fetch sleeps', err));
+
       fetchIncidents(apiSession.accessToken)
         .then(setIncidentList)
         .catch(err => console.error('Failed to fetch incidents', err));
@@ -314,6 +327,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setBrokenImportData,
         locationList,
         setLocationList,
+        sleepList,
+        setSleepList,
         recommendationList,
         reducedTyramineMenuList,
       }}
