@@ -2,25 +2,32 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import HealthLogsForm from '../components/forms/HealthLogsForm';
-import { IHeight, IWeight, IBloodPressure } from '../models/profileData.types';
+import { IHeight, IWeight, IBloodPressure, ISleep, IWater } from '../models/profileData.types';
 
 export default function EditHealthLog() {
   const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
-  const { weightList, heightList, bloodPressureList } = useProfileDataContext();
+  const { weightList, heightList, bloodPressureList, sleepList, waterList } =
+    useProfileDataContext();
 
-  const [logData, setLogData] = useState<IHeight | IWeight | IBloodPressure | null>(null);
+  const [logData, setLogData] = useState<
+    IHeight | IWeight | IBloodPressure | ISleep | IWater | null
+  >(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (type && id) {
-      let found: IHeight | IWeight | IBloodPressure | undefined = undefined;
+      let found: IHeight | IWeight | IBloodPressure | ISleep | IWater | undefined = undefined;
       if (type === 'weight') {
         found = weightList.find(w => w.id === id);
       } else if (type === 'height') {
         found = heightList.find(h => h.id === id);
       } else if (type === 'bloodPressure') {
         found = bloodPressureList.find(bp => bp.id === id);
+      } else if (type === 'sleep') {
+        found = sleepList.find(s => s.id === id);
+      } else if (type === 'water') {
+        found = waterList.find(w => w.id === id);
       }
 
       if (found) {
@@ -28,7 +35,7 @@ export default function EditHealthLog() {
       }
       setLoading(false);
     }
-  }, [type, id, weightList, heightList, bloodPressureList]);
+  }, [type, id, weightList, heightList, bloodPressureList, sleepList, waterList]);
 
   if (loading) {
     return (
@@ -64,7 +71,7 @@ export default function EditHealthLog() {
 
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
         <HealthLogsForm
-          initialType={type as 'height' | 'weight' | 'bloodPressure'}
+          initialType={type as 'height' | 'weight' | 'bloodPressure' | 'sleep' | 'water'}
           initialData={logData}
           onSubmit={() => navigate(-1)}
         />

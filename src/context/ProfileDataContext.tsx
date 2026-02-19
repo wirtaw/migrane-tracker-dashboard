@@ -13,6 +13,7 @@ import {
   ILocationData,
   ITyramineContentItem,
   ISleep,
+  IWater,
 } from '../models/profileData.types';
 import { fetchTriggers } from '../services/triggers';
 import { fetchSymptoms } from '../services/symptoms';
@@ -22,6 +23,7 @@ import {
   fetchWeights,
   fetchBloodPressures,
   fetchSleeps,
+  fetchWaters,
 } from '../services/health-logs';
 import { fetchIncidents } from '../services/incidents';
 import { LocationsService } from '../services/locations';
@@ -62,6 +64,8 @@ interface IProfileDataContextProps {
   setLocationList: React.Dispatch<React.SetStateAction<ILocationData[]>>;
   sleepList: ISleep[];
   setSleepList: React.Dispatch<React.SetStateAction<ISleep[]>>;
+  waterList: IWater[];
+  setWaterList: React.Dispatch<React.SetStateAction<IWater[]>>;
   recommendationList: string[];
   reducedTyramineMenuList: ITyramineContentItem[];
 }
@@ -77,6 +81,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const [symptomList, setSymptomList] = useState<ISymptom[]>([]);
   const [locationList, setLocationList] = useState<ILocationData[]>([]);
   const [sleepList, setSleepList] = useState<ISleep[]>([]);
+  const [waterList, setWaterList] = useState<IWater[]>([]);
 
   const [medicationEnumList, setMedicationEnumList] = useState<string[]>([
     'Aspirin',
@@ -282,6 +287,10 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         .then(setSleepList)
         .catch(err => console.error('Failed to fetch sleeps', err));
 
+      fetchWaters(apiSession.accessToken)
+        .then(setWaterList)
+        .catch(err => console.error('Failed to fetch waters', err));
+
       fetchIncidents(apiSession.accessToken)
         .then(setIncidentList)
         .catch(err => console.error('Failed to fetch incidents', err));
@@ -329,6 +338,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setLocationList,
         sleepList,
         setSleepList,
+        waterList,
+        setWaterList,
         recommendationList,
         reducedTyramineMenuList,
       }}

@@ -6,26 +6,36 @@ import {
   createHeight,
   createWeight,
   createBloodPressure,
+  createSleep,
+  createWater,
   deleteHeight,
   deleteWeight,
   deleteBloodPressure,
+  deleteSleep,
+  deleteWater,
   CreateHeightDto,
   CreateWeightDto,
   CreateBloodPressureDto,
+  CreateSleepDto,
+  CreateWaterDto,
   updateHeight,
   updateWeight,
   updateBloodPressure,
+  updateSleep,
+  updateWater,
   UpdateHeightDto,
   UpdateWeightDto,
   UpdateBloodPressureDto,
+  UpdateSleepDto,
+  UpdateWaterDto,
 } from '../../services/health-logs';
-import { IHeight, IWeight, IBloodPressure } from '../../models/profileData.types';
+import { IHeight, IWeight, IBloodPressure, ISleep, IWater } from '../../models/profileData.types';
 import { Trash2 } from 'lucide-react';
 
 interface IHealthLogsFormProps {
   onSubmit: () => void;
-  initialType?: 'height' | 'weight' | 'bloodPressure';
-  initialData?: IHeight | IWeight | IBloodPressure;
+  initialType?: 'height' | 'weight' | 'bloodPressure' | 'sleep' | 'water';
+  initialData?: IHeight | IWeight | IBloodPressure | ISleep | IWater;
 }
 
 export default function HealthLogsForm({
@@ -41,10 +51,16 @@ export default function HealthLogsForm({
     setWeightList,
     bloodPressureList,
     setBloodPressureList,
+    sleepList,
+    setSleepList,
+    waterList,
+    setWaterList,
     setFormErrorMessage,
   } = useProfileDataContext();
 
-  const [activeTab, setActiveTab] = useState<'height' | 'weight' | 'bloodPressure'>(initialType);
+  type TabType = 'height' | 'weight' | 'bloodPressure' | 'sleep' | 'water';
+
+  const [activeTab, setActiveTab] = useState<TabType>(initialType);
   const [datetime, setDatetime] = useState<Date>(
     initialData?.datetimeAt ? new Date(initialData.datetimeAt) : new Date()
   );
@@ -62,6 +78,33 @@ export default function HealthLogsForm({
   );
   const [diastolicValue, setDiastolicValue] = useState<string>(
     initialData && 'diastolic' in initialData ? String(initialData.diastolic) : ''
+  );
+
+  // Sleep Values
+  const [sleepRate, setSleepRate] = useState<string>(
+    initialData && 'rate' in initialData ? String(initialData.rate || '') : ''
+  );
+  const [minutesTotal, setMinutesTotal] = useState<string>(
+    initialData && 'minutesTotal' in initialData ? String(initialData.minutesTotal || '') : ''
+  );
+  const [minutesDeep, setMinutesDeep] = useState<string>(
+    initialData && 'minutesDeep' in initialData ? String(initialData.minutesDeep || '') : ''
+  );
+  const [minutesRem, setMinutesRem] = useState<string>(
+    initialData && 'minutesRem' in initialData ? String(initialData.minutesRem || '') : ''
+  );
+  const [timesWakeUp, setTimesWakeUp] = useState<string>(
+    initialData && 'timesWakeUp' in initialData ? String(initialData.timesWakeUp ?? '') : ''
+  );
+  const [startedAt, setStartedAt] = useState<string>(
+    initialData && 'startedAt' in initialData && initialData.startedAt
+      ? getIsoDateTimeLocal(new Date(initialData.startedAt))
+      : ''
+  );
+
+  // Water Values
+  const [waterMlValue, setWaterMlValue] = useState<string>(
+    initialData && 'ml' in initialData ? String(initialData.ml) : ''
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,11 +151,36 @@ export default function HealthLogsForm({
             setBloodPressureList(prev => prev.map(item => (item.id === data.id ? data : item)));
           });
           promises.push(p);
+        } else if (activeTab === 'sleep') {
+          const dto: UpdateSleepDto = {
+            rate: sleepRate ? parseInt(sleepRate) : undefined,
+            minutesTotal: minutesTotal ? parseInt(minutesTotal) : undefined,
+            minutesDeep: minutesDeep ? parseInt(minutesDeep) : undefined,
+            minutesRem: minutesRem ? parseInt(minutesRem) : undefined,
+            timesWakeUp: timesWakeUp ? parseInt(timesWakeUp) : undefined,
+            startedAt: startedAt ? new Date(startedAt).toISOString() : undefined,
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const p = updateSleep(initialData.id, dto, apiSession.accessToken).then(data => {
+            setSleepList(prev => prev.map(item => (item.id === data.id ? data : item)));
+          });
+          promises.push(p);
+        } else if (activeTab === 'water' && waterMlValue) {
+          const dto: UpdateWaterDto = {
+            ml: parseFloat(waterMlValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const p = updateWater(initialData.id, dto, apiSession.accessToken).then(data => {
+            setWaterList(prev => prev.map(item => (item.id === data.id ? data : item)));
+          });
+          promises.push(p);
         }
       } else {
         // Create Mode
         // Weight
-        if (weightValue) {
+        if (activeTab === 'weight' && weightValue) {
           const dto: CreateWeightDto = {
             userId: apiSession.userId,
             weight: parseFloat(weightValue),
@@ -127,7 +195,7 @@ export default function HealthLogsForm({
         }
 
         // Height
-        if (heightValue) {
+        if (activeTab === 'height' && heightValue) {
           const dto: CreateHeightDto = {
             userId: apiSession.userId,
             height: parseFloat(heightValue),
@@ -142,7 +210,7 @@ export default function HealthLogsForm({
         }
 
         // Blood Pressure
-        if (systolicValue && diastolicValue) {
+        if (activeTab === 'bloodPressure' && systolicValue && diastolicValue) {
           const dto: CreateBloodPressureDto = {
             userId: apiSession.userId,
             systolic: parseFloat(systolicValue),
@@ -153,6 +221,41 @@ export default function HealthLogsForm({
           const promise = createBloodPressure(dto, apiSession.accessToken).then(data => {
             setBloodPressureList(prev => [...prev, data]);
             return 'bloodPressure';
+          });
+          promises.push(promise);
+        }
+
+        // Sleep
+        if (activeTab === 'sleep') {
+          const dto: CreateSleepDto = {
+            userId: apiSession.userId,
+            rate: sleepRate ? parseInt(sleepRate) : undefined,
+            minutesTotal: minutesTotal ? parseInt(minutesTotal) : undefined,
+            minutesDeep: minutesDeep ? parseInt(minutesDeep) : undefined,
+            minutesRem: minutesRem ? parseInt(minutesRem) : undefined,
+            timesWakeUp: timesWakeUp ? parseInt(timesWakeUp) : undefined,
+            startedAt: startedAt ? new Date(startedAt).toISOString() : undefined,
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const promise = createSleep(dto, apiSession.accessToken).then(data => {
+            setSleepList(prev => [...prev, data]);
+            return 'sleep';
+          });
+          promises.push(promise);
+        }
+
+        // Water
+        if (activeTab === 'water' && waterMlValue) {
+          const dto: CreateWaterDto = {
+            userId: apiSession.userId,
+            ml: parseFloat(waterMlValue),
+            notes,
+            datetimeAt: datetime.toISOString(),
+          };
+          const promise = createWater(dto, apiSession.accessToken).then(data => {
+            setWaterList(prev => [...prev, data]);
+            return 'water';
           });
           promises.push(promise);
         }
@@ -188,6 +291,12 @@ export default function HealthLogsForm({
       } else if (activeTab === 'bloodPressure') {
         await deleteBloodPressure(id, apiSession.accessToken);
         setBloodPressureList(prev => prev.filter(item => item.id !== id));
+      } else if (activeTab === 'sleep') {
+        await deleteSleep(id, apiSession.accessToken);
+        setSleepList(prev => prev.filter(item => item.id !== id));
+      } else if (activeTab === 'water') {
+        await deleteWater(id, apiSession.accessToken);
+        setWaterList(prev => prev.filter(item => item.id !== id));
       }
     } catch (error) {
       console.error(`Failed to delete ${activeTab}:`, error);
@@ -195,49 +304,38 @@ export default function HealthLogsForm({
     }
   };
 
+  const tabs = [
+    { id: 'weight', label: 'Weight' },
+    { id: 'height', label: 'Height' },
+    { id: 'bloodPressure', label: 'Blood Pressure' },
+    { id: 'sleep', label: 'Sleep' },
+    { id: 'water', label: 'Water' },
+  ];
+
   return (
     <div className="space-y-4">
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700 pb-2">
-        <button
-          type="button"
-          onClick={() => setActiveTab('weight')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
-            activeTab === 'weight'
-              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-          }`}
-        >
-          Weight
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('height')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
-            activeTab === 'height'
-              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-          }`}
-        >
-          Height
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('bloodPressure')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
-            activeTab === 'bloodPressure'
-              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-          }`}
-        >
-          Blood Pressure
-        </button>
+      <div className="flex space-x-2 border-b border-gray-200 dark:border-gray-700 pb-2 overflow-x-auto">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id as TabType)}
+            className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap ${
+              activeTab === tab.id
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            DateTime
+            DateTime / Wake up time
           </label>
           <input
             type="datetime-local"
@@ -306,6 +404,103 @@ export default function HealthLogsForm({
                 className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
               />
             </div>
+          </div>
+        )}
+
+        {activeTab === 'sleep' && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Started Sleeping
+              </label>
+              <input
+                type="datetime-local"
+                value={startedAt}
+                onChange={e => setStartedAt(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Total Minutes
+                </label>
+                <input
+                  type="number"
+                  value={minutesTotal}
+                  onChange={e => setMinutesTotal(e.target.value)}
+                  onFocus={e => e.target.select()}
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Wake Ups
+                </label>
+                <input
+                  type="number"
+                  value={timesWakeUp}
+                  onChange={e => setTimesWakeUp(e.target.value)}
+                  onFocus={e => e.target.select()}
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Deep Sleep (min)
+                </label>
+                <input
+                  type="number"
+                  value={minutesDeep}
+                  onChange={e => setMinutesDeep(e.target.value)}
+                  onFocus={e => e.target.select()}
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  REM Sleep (min)
+                </label>
+                <input
+                  type="number"
+                  value={minutesRem}
+                  onChange={e => setMinutesRem(e.target.value)}
+                  onFocus={e => e.target.select()}
+                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Rate (1-10)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={sleepRate}
+                onChange={e => setSleepRate(e.target.value)}
+                onFocus={e => e.target.select()}
+                className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'water' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Water (ml)
+            </label>
+            <input
+              type="number"
+              value={waterMlValue}
+              onChange={e => setWaterMlValue(e.target.value)}
+              onFocus={e => e.target.select()}
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
+            />
           </div>
         )}
 
@@ -387,6 +582,52 @@ export default function HealthLogsForm({
                   <span className="font-medium">
                     {item.systolic}/{item.diastolic}
                   </span>
+                  <span className="text-gray-500 dark:text-gray-500 ml-2">
+                    {getIsoDate(item.datetimeAt)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+
+          {activeTab === 'sleep' &&
+            sleepList.map((item: ISleep) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-md"
+              >
+                <div className="text-sm dark:text-gray-300">
+                  <span className="font-medium">
+                    {item.minutesTotal
+                      ? Math.floor(item.minutesTotal / 60) + 'h ' + (item.minutesTotal % 60) + 'm'
+                      : 'Sleep log'}
+                  </span>
+                  <span className="text-gray-500 dark:text-gray-500 ml-2">
+                    {getIsoDate(item.datetimeAt)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+
+          {activeTab === 'water' &&
+            waterList.map((item: IWater) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-md"
+              >
+                <div className="text-sm dark:text-gray-300">
+                  <span className="font-medium">{item.ml} ml</span>
                   <span className="text-gray-500 dark:text-gray-500 ml-2">
                     {getIsoDate(item.datetimeAt)}
                   </span>

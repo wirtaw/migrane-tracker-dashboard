@@ -1,5 +1,5 @@
 import { env } from '../config/env';
-import { IWeight, IHeight, IBloodPressure, ISleep } from '../models/profileData.types';
+import { IWeight, IHeight, IBloodPressure, ISleep, IWater } from '../models/profileData.types';
 import { handleResponseError } from './api-utils';
 
 // DTOs
@@ -27,9 +27,20 @@ export interface CreateBloodPressureDto {
 
 export interface CreateSleepDto {
   userId: string;
-  rate: number;
+  rate?: number;
+  minutesTotal?: number;
+  minutesDeep?: number;
+  minutesRem?: number;
+  timesWakeUp?: number;
   notes?: string;
-  startedAt: string;
+  startedAt?: string;
+  datetimeAt: string;
+}
+
+export interface CreateWaterDto {
+  userId: string;
+  ml: number;
+  notes?: string;
   datetimeAt: string;
 }
 
@@ -37,6 +48,7 @@ export type UpdateWeightDto = Partial<CreateWeightDto>;
 export type UpdateHeightDto = Partial<CreateHeightDto>;
 export type UpdateBloodPressureDto = Partial<CreateBloodPressureDto>;
 export type UpdateSleepDto = Partial<CreateSleepDto>;
+export type UpdateWaterDto = Partial<CreateWaterDto>;
 
 // Helper to parse dates
 const parseDates = <T>(item: unknown): T => {
@@ -238,4 +250,44 @@ export async function updateSleep(id: string, dto: UpdateSleepDto, token: string
   if (!response.ok) await handleResponseError(response, 'Failed to update sleep');
   const data = await response.json();
   return parseDates<ISleep>(data);
+}
+
+// Water
+export async function fetchWaters(token: string): Promise<IWater[]> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/waters`, {
+    headers: getHeaders(token),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to fetch water logs');
+  const data = await response.json();
+  return data.map((item: unknown) => parseDates<IWater>(item));
+}
+
+export async function createWater(dto: CreateWaterDto, token: string): Promise<IWater> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/water`, {
+    method: 'POST',
+    headers: getHeaders(token),
+    body: JSON.stringify(dto),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to create water log');
+  const data = await response.json();
+  return parseDates<IWater>(data);
+}
+
+export async function deleteWater(id: string, token: string): Promise<void> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/water/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(token),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to delete water log');
+}
+
+export async function updateWater(id: string, dto: UpdateWaterDto, token: string): Promise<IWater> {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/water/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(token),
+    body: JSON.stringify(dto),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to update water log');
+  const data = await response.json();
+  return parseDates<IWater>(data);
 }

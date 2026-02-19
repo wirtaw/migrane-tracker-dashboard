@@ -70,9 +70,21 @@ export interface IBloodPressure {
 export interface ISleep {
   id: string;
   userId: string;
-  rate: number;
+  rate?: number;
+  minutesTotal?: number;
+  minutesDeep?: number;
+  minutesRem?: number;
+  timesWakeUp?: number;
   notes: string | undefined;
-  startedAt: Date;
+  startedAt?: Date;
+  datetimeAt: Date;
+}
+
+export interface IWater {
+  id: string;
+  userId: string;
+  ml: number;
+  notes?: string;
   datetimeAt: Date;
 }
 

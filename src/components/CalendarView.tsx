@@ -8,12 +8,27 @@ import { deleteTrigger } from '../services/triggers';
 import { deleteSymptom } from '../services/symptoms';
 import { deleteMedication } from '../services/medications';
 import { deleteIncident } from '../services/incidents';
-import { deleteWeight, deleteHeight, deleteBloodPressure } from '../services/health-logs';
+import {
+  deleteWeight,
+  deleteHeight,
+  deleteBloodPressure,
+  deleteSleep,
+  deleteWater,
+} from '../services/health-logs';
 import { useAuth } from '../context/AuthContext';
 
 interface ICalendarItem {
   id: number | string;
-  type: 'Incident' | 'Medication' | 'Trigger' | 'Symptom' | 'Weight' | 'Height' | 'Blood Pressure';
+  type:
+    | 'Incident'
+    | 'Medication'
+    | 'Trigger'
+    | 'Symptom'
+    | 'Weight'
+    | 'Height'
+    | 'Blood Pressure'
+    | 'Sleep'
+    | 'Water';
   name: string;
   userId: string;
 }
@@ -48,6 +63,10 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
     setWeightList,
     setHeightList,
     setBloodPressureList,
+    sleepList,
+    setSleepList,
+    waterList,
+    setWaterList,
   } = useProfileDataContext();
   const { apiSession } = useAuth();
   const navigate = useNavigate();
@@ -81,6 +100,19 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
         name: `${systolic}/${diastolic} mmHg`,
         userId,
       }));
+    const sleepItems: ICalendarItem[] = sleepList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ id, userId, minutesTotal }) => ({
+        id,
+        type: 'Sleep',
+        name: minutesTotal
+          ? `${Math.floor(minutesTotal / 60)}h ${minutesTotal % 60}m`
+          : 'Sleep Log',
+        userId,
+      }));
+    const waterItems: ICalendarItem[] = waterList
+      .filter(item => getIsoDate(item.datetimeAt) === date)
+      .map(({ id, ml, userId }) => ({ id, type: 'Water', name: `${ml} ml`, userId }));
 
     const items: ICalendarItem[] | [] = [
       ...incidentItems,
@@ -90,6 +122,8 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
       ...weightItems,
       ...heightItems,
       ...bpItems,
+      ...sleepItems,
+      ...waterItems,
     ];
 
     if (items.length > 0) {
@@ -270,6 +304,42 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
     }
   };
 
+  const handleDeleteSleep = async (id: string | number) => {
+    if (!apiSession?.accessToken) return;
+    const lid = String(id);
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      try {
+        await deleteSleep(lid, apiSession.accessToken);
+        setSleepList(prev => prev.filter(m => m.id !== lid));
+        if (modalContent) {
+          const updatedItems = modalContent.items.filter(item => item.id !== lid);
+          if (updatedItems.length === 0) closeModal();
+          else setModalContent({ ...modalContent, items: updatedItems });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  const handleDeleteWater = async (id: string | number) => {
+    if (!apiSession?.accessToken) return;
+    const lid = String(id);
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      try {
+        await deleteWater(lid, apiSession.accessToken);
+        setWaterList(prev => prev.filter(m => m.id !== lid));
+        if (modalContent) {
+          const updatedItems = modalContent.items.filter(item => item.id !== lid);
+          if (updatedItems.length === 0) closeModal();
+          else setModalContent({ ...modalContent, items: updatedItems });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   const handleEditClick = (type: string, id: string | number) => {
     const routeMap: Record<string, string> = {
       Incident: 'edit-incident',
@@ -279,6 +349,8 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
       Weight: 'edit-health-log/weight',
       Height: 'edit-health-log/height',
       'Blood Pressure': 'edit-health-log/bloodPressure',
+      Sleep: 'edit-health-log/sleep',
+      Water: 'edit-health-log/water',
     };
     const route = routeMap[type];
     if (route) {
@@ -329,6 +401,12 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
           const hasMedication = medicationList.some(item => getIsoDate(item.datetimeAt) === date);
           const hasTrigger = triggerList.some(item => getIsoDate(item.datetimeAt) === date);
           const hasSymptom = symptomList.some(item => getIsoDate(item.datetimeAt) === date);
+          const hasHealthEntry =
+            weightList.some(item => getIsoDate(item.datetimeAt) === date) ||
+            heightList.some(item => getIsoDate(item.datetimeAt) === date) ||
+            bloodPressureList.some(item => getIsoDate(item.datetimeAt) === date) ||
+            sleepList.some(item => getIsoDate(item.datetimeAt) === date) ||
+            waterList.some(item => getIsoDate(item.datetimeAt) === date);
 
           return (
             <div
@@ -342,12 +420,7 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
                 {hasMedication && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
                 {hasTrigger && <span className="w-2 h-2 bg-yellow-500 rounded-full" />}
                 {hasSymptom && <span className="w-2 h-2 bg-green-500 rounded-full" />}
-                {(incidentList.some(item => getIsoDate(item.datetimeAt) === date) ||
-                  weightList.some(item => getIsoDate(item.datetimeAt) === date) ||
-                  heightList.some(item => getIsoDate(item.datetimeAt) === date) ||
-                  bloodPressureList.some(item => getIsoDate(item.datetimeAt) === date)) && (
-                  <span className="w-2 h-2 bg-purple-500 rounded-full" />
-                )}
+                {hasHealthEntry && <span className="w-2 h-2 bg-purple-500 rounded-full" />}
               </div>
             </div>
           );
@@ -383,6 +456,8 @@ const CalendarView: React.FC<ICalendarViewProps> = ({ weekDays, firstDayOfMonth,
                       if (item.type === 'Weight') handleDeleteWeight(item.id);
                       if (item.type === 'Height') handleDeleteHeight(item.id);
                       if (item.type === 'Blood Pressure') handleDeleteBloodPressure(item.id);
+                      if (item.type === 'Sleep') handleDeleteSleep(item.id);
+                      if (item.type === 'Water') handleDeleteWater(item.id);
                     }}
                     className="p-1 text-gray-500 hover:text-red-600 transition-colors"
                   >

@@ -48,6 +48,7 @@ export default function DateInfo() {
     symptomList,
     locationList,
     sleepList,
+    waterList,
     bloodPressureList,
   } = useProfileDataContext();
   const { apiSession } = useAuth();
@@ -182,11 +183,19 @@ export default function DateInfo() {
   );
 
   const formatSleepDuration = (sleep: typeof selectedSleep) => {
-    if (!sleep || !sleep.startedAt) return 'No data';
-    const start = DateTime.fromJSDate(new Date(sleep.startedAt));
-    const end = DateTime.fromJSDate(new Date(sleep.datetimeAt));
-    const duration = end.diff(start, ['hours', 'minutes']);
-    return `${Math.floor(duration.hours)}h ${Math.floor(duration.minutes)}m`;
+    if (!sleep) return 'No data';
+    if (sleep.minutesTotal) {
+      const hours = Math.floor(sleep.minutesTotal / 60);
+      const minutes = sleep.minutesTotal % 60;
+      return `${hours}h ${minutes}m`;
+    }
+    if (sleep.startedAt) {
+      const start = DateTime.fromJSDate(new Date(sleep.startedAt));
+      const end = DateTime.fromJSDate(new Date(sleep.datetimeAt));
+      const duration = end.diff(start, ['hours', 'minutes']);
+      return `${Math.floor(duration.hours)}h ${Math.floor(duration.minutes)}m`;
+    }
+    return 'No data';
   };
 
   useEffect(() => {
@@ -548,21 +557,40 @@ export default function DateInfo() {
                     <p className="font-semibold text-gray-900 dark:text-white">
                       {formatSleepDuration(selectedSleep)}
                     </p>
-                    {selectedSleep && selectedSleep.rate < 3 && (
-                      <p className="text-xs text-yellow-600 dark:text-yellow-400">Below optimal</p>
+                    {selectedSleep && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        {selectedSleep.minutesDeep !== undefined && (
+                          <span>Deep: {selectedSleep.minutesDeep}m </span>
+                        )}
+                        {selectedSleep.minutesRem !== undefined && (
+                          <span>Rem: {selectedSleep.minutesRem}m</span>
+                        )}
+                      </div>
                     )}
+                    {selectedSleep &&
+                      selectedSleep.rate !== undefined &&
+                      selectedSleep.rate < 3 && (
+                        <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                          Below optimal
+                        </p>
+                      )}
                   </div>
                 </div>
               </div>
 
-              {/* Hydration Card (WIP) */}
+              {/* Hydration Card */}
               <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg">
                 <div className="flex items-center gap-3">
                   <Droplets className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   <div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Hydration</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                      Integration pending
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {waterList
+                        .filter(
+                          w => getIsoDate(new Date(w.datetimeAt)) === selectedDate.toISODate()
+                        )
+                        .reduce((acc, curr) => acc + curr.ml, 0)}{' '}
+                      ml
                     </p>
                   </div>
                 </div>
