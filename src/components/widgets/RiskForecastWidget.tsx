@@ -175,19 +175,19 @@ export default function RiskForecastWidget() {
             <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
               <li className="flex justify-between">
                 <span>Temp:</span>{' '}
-                <span className="font-medium">{data.factors.weather.temperature}°</span>
+                <span className="font-medium">{data.factors.weather.temperature.toFixed(2)}°</span>
               </li>
               <li className="flex justify-between">
                 <span>Humidity:</span>{' '}
-                <span className="font-medium">{data.factors.weather.humidity}%</span>
+                <span className="font-medium">{data.factors.weather.humidity.toFixed(2)}%</span>
               </li>
               <li className="flex justify-between">
                 <span>Pressure:</span>{' '}
-                <span className="font-medium">{data.factors.weather.pressure} hPa</span>
+                <span className="font-medium">{data.factors.weather.pressure.toFixed(1)} hPa</span>
               </li>
               <li className="flex justify-between">
                 <span>UV Index:</span>{' '}
-                <span className="font-medium">{data.factors.weather.uvIndex}</span>
+                <span className="font-medium">{data.factors.weather.uvIndex.toFixed(1)}</span>
               </li>
             </ul>
           </div>
