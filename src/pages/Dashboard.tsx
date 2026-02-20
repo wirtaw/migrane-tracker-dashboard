@@ -7,6 +7,7 @@ import GeoMagneticWidget from '../components/GeoMagneticWidget';
 import TrackingButtons from '../components/TrackingButtons';
 import MostRecentData from '../components/MostRecentData';
 import MigrainePreventionTip from '../components/MigrainePreventionTip';
+import RiskForecastWidget from '../components/widgets/RiskForecastWidget';
 import EveryDayMedicationWidget from '../components/widgets/EveryDayMedicationWidget';
 import { useProfileDataContext } from '../context/ProfileDataContext';
 import { useAuth } from '../context/AuthContext';
@@ -31,6 +32,8 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content Column */}
         <div className="lg:col-span-2 space-y-6">
+          <RiskForecastWidget />
+
           <CalendarView weekDays={weekDays} firstDayOfMonth={firstDayOfMonth} days={days} />
 
           <TrackingButtons />

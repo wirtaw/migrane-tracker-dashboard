@@ -9,6 +9,7 @@ import {
   Settings,
   ArchiveRestore,
   CloudSun,
+  BrainCircuit,
 } from 'lucide-react';
 import { DateTime } from 'luxon';
 
@@ -102,6 +103,15 @@ export default function Main() {
             link: {
               title: 'Lookup Weather',
               path: '/historical-weather',
+            },
+          },
+          {
+            icon: <BrainCircuit className="w-8 h-8 text-indigo-500" />,
+            title: 'Prediction Rules',
+            description: 'Manage your prediction and alert rules',
+            link: {
+              title: 'Manage Rules',
+              path: '/prediction-rules',
             },
           },
         ].map((feature, index) => (

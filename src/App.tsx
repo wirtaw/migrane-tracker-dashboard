@@ -16,6 +16,7 @@ import Settings from './pages/Settings';
 import ReportPage from './pages/ReportPage';
 import DescriptionFeaturesPricing from './pages/DescriptionFeaturesPricing';
 import { ProfileDataProvider } from './context/ProfileDataContext';
+import { NotificationProvider } from './context/NotificationContext';
 import CreateIncident from './pages/CreateIncident';
 import DateInfo from './pages/DateInfo';
 import MigraineManagementSuite from './pages/MigraineManagementSuite';
@@ -26,6 +27,7 @@ import EditMedication from './pages/EditMedication';
 import EditSymptom from './pages/EditSymptom';
 import EditTrigger from './pages/EditTrigger';
 import EditHealthLog from './pages/EditHealthLog';
+import PredictionRules from './pages/PredictionRules';
 
 export function App() {
   return (
@@ -39,7 +41,9 @@ export function App() {
             element={
               <ProtectedRoute>
                 <ProfileDataProvider>
-                  <Layout />
+                  <NotificationProvider>
+                    <Layout />
+                  </NotificationProvider>
                 </ProfileDataProvider>
               </ProtectedRoute>
             }
@@ -64,6 +68,7 @@ export function App() {
             <Route path="migraine-management-suite" element={<MigraineManagementSuite />} />
             <Route path="indicator-details" element={<IndicatorDetailsPage />} />
             <Route path="historical-weather" element={<HistoricalWeather />} />
+            <Route path="prediction-rules" element={<PredictionRules />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

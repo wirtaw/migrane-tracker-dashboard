@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Brain, PowerOff } from 'lucide-react';
+import { Brain, PowerOff, Bell } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
 import { System } from '../config/constants.ts';
 
 export function Header() {
@@ -13,6 +14,8 @@ export function Header() {
   const [isMobileNavActive, setIsMobileNavActive] = useState<boolean>(
     window.innerWidth < System.MobileWidth
   );
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead } = useNotifications();
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `py-2 rounded-lg transition-colors flex items-center ${
@@ -48,6 +51,20 @@ export function Header() {
 
     return () => window.removeEventListener('resize', handleResize);
   }, [isMobileNavActive, isInitiallyMobile, isMobileMenuOpen]);
+
+  // Close notifications dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.notifications-dropdown-container')) {
+        setIsNotificationsOpen(false);
+      }
+    };
+    if (isNotificationsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isNotificationsOpen]);
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm">
@@ -111,6 +128,75 @@ export function Header() {
             <NavLink to="/profile" className={navLinkClass}>
               Profile
             </NavLink>
+
+            <div className="relative notifications-dropdown-container">
+              <button
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="relative p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none"
+                aria-label="Notifications"
+              >
+                <Bell className="w-6 h-6" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {isNotificationsOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg rtl:left-0 rtl:right-auto z-50 border border-gray-100 dark:border-gray-700 max-h-96 overflow-y-auto">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 rounded-t-lg">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-400 px-2 py-1 rounded-full">
+                        {unreadCount} new
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-2 space-y-1">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+                        No notifications yet.
+                      </div>
+                    ) : (
+                      notifications.slice(0, 10).map(notification => (
+                        <div
+                          key={notification._id}
+                          onClick={() => {
+                            if (!notification.isRead) markAsRead(notification._id);
+                          }}
+                          className={`p-3 rounded-lg cursor-pointer transition-colors ${
+                            !notification.isRead
+                              ? 'bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                          }`}
+                        >
+                          <div className="flex gap-3">
+                            <div className="flex-1">
+                              <p
+                                className={`text-sm ${!notification.isRead ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-600 dark:text-gray-300'}`}
+                              >
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                {new Date(notification.createdAt).toLocaleString(undefined, {
+                                  dateStyle: 'short',
+                                  timeStyle: 'short',
+                                })}
+                              </p>
+                            </div>
+                            {!notification.isRead && (
+                              <div className="w-2 h-2 mt-1.5 bg-indigo-500 rounded-full flex-shrink-0" />
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <ThemeToggle
               className={`flex items-center ${isMobileMenuOpen && isMobileNavActive ? 'w-full py-6' : ''}`}
             />
