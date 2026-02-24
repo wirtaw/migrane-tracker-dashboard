@@ -6,8 +6,8 @@ import { createMedication } from '../../services/medications';
 import { createSymptom } from '../../services/symptoms';
 import { LocationsService } from '../../services/locations';
 import { IForecastDto, ISolarDto, ISolarRadiationDto } from '../../models/locations.types';
-import { IncidentTypeEnum } from '../../enums/incident-type.enum';
 import Loader from '../Loader';
+import { useProfileDataContext } from '../../context/ProfileDataContext';
 
 interface IDatabaseUploadFormProps {
   onSubmit: () => void;
@@ -73,15 +73,15 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
   });
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const { incidentTypeEnumList } = useProfileDataContext();
 
-  const mapToIncidentType = (type: string): IncidentTypeEnum => {
-    const values = Object.values(IncidentTypeEnum) as string[];
-    if (values.includes(type)) {
-      return type as IncidentTypeEnum;
+  const mapToIncidentType = (type: string): string => {
+    if (incidentTypeEnumList.includes(type)) {
+      return type as string;
     }
-    if (type.toLowerCase().includes('migraine')) return IncidentTypeEnum.MIGRAINE_ATTACK;
-    if (type.toLowerCase().includes('tension')) return IncidentTypeEnum.TENSION_HEADACHE;
-    return IncidentTypeEnum.OTHER;
+    if (type.toLowerCase().includes('migraine')) return 'Migraine Attack';
+    if (type.toLowerCase().includes('tension')) return 'Tension Headache';
+    return 'Other';
   };
 
   const sanitizeLocationData = (location: RawLocation): RawLocation => {

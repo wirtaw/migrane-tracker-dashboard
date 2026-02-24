@@ -1,13 +1,12 @@
 import { env } from '../config/env';
 import { IIncident } from '../models/profileData.types';
-import { IncidentTypeEnum } from '../enums/incident-type.enum';
 import { IncidentStats } from '../models/stats.types';
 import { handleResponseError } from './api-utils';
 
 // DTOs
 export interface CreateIncidentDto {
   userId: string;
-  type: IncidentTypeEnum;
+  type: string;
   startTime: string;
   durationHours: number;
   notes?: string;
@@ -20,7 +19,7 @@ export type UpdateIncidentDto = Partial<CreateIncidentDto>;
 const parseDates = (item: unknown): IIncident => {
   const data = item as {
     userId: string;
-    type: IncidentTypeEnum;
+    type: string;
     startTime: string;
     durationHours: number;
     notes?: string;
@@ -112,4 +111,16 @@ export async function updateIncident(
   if (!response.ok) await handleResponseError(response, 'Failed to update incident');
   const data = await response.json();
   return parseDates(data);
+}
+
+export async function fetchIncidentTypes(token: string): Promise<string[]> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Fetch incident types failed: Missing configuration or token');
+  }
+
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/incidents/types`, {
+    headers: getHeaders(token),
+  });
+  if (!response.ok) await handleResponseError(response, 'Failed to fetch incident types');
+  return response.json();
 }

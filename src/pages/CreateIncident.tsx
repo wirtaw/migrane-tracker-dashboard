@@ -9,7 +9,6 @@ import Modal from '../components/Modal';
 import Loader from '../components/Loader';
 import { createIncident, CreateIncidentDto } from '../services/incidents';
 import { ILocationData } from '../models/profileData.types';
-import { IncidentTypeEnum } from '../enums/incident-type.enum';
 
 export default function CreateIncident() {
   const {
@@ -22,8 +21,13 @@ export default function CreateIncident() {
     setLocationDataList,
   } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { triggerEnumList, setIncidentList, formErrorMessage, setFormErrorMessage } =
-    useProfileDataContext();
+  const {
+    triggerEnumList,
+    setIncidentList,
+    formErrorMessage,
+    setFormErrorMessage,
+    incidentTypeEnumList,
+  } = useProfileDataContext();
 
   const defaultWeather = {
     temperature: 0,
@@ -65,7 +69,7 @@ export default function CreateIncident() {
     ? deafaultGeomagneticData
     : { ...deafaultGeomagneticData, ...geomagneticState.data };
 
-  const [typeValue, setTypeValue] = useState<IncidentTypeEnum | ''>('');
+  const [typeValue, setTypeValue] = useState<string | ''>('');
   const [durationHoursValue, setDurationHoursValue] = useState<number>(0.5);
   const [startTimeValue, setStartTimeValue] = useState<Date>(new Date());
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
@@ -142,7 +146,7 @@ export default function CreateIncident() {
     try {
       const dto: CreateIncidentDto = {
         userId: apiSession.userId,
-        type: typeValue as IncidentTypeEnum,
+        type: typeValue as string,
         startTime: startTimeValue.toISOString(),
         durationHours: durationHoursValue,
         notes: notesValue,
@@ -241,7 +245,7 @@ export default function CreateIncident() {
   };
 
   const handleSelectChange = (event: IFormEvent) => {
-    setTypeValue(event.target.value as IncidentTypeEnum);
+    setTypeValue(event.target.value as string);
   };
 
   const handleTextareaChange = (event: IFormEvent) => {
@@ -372,7 +376,7 @@ export default function CreateIncident() {
                         <option value="" disabled>
                           Select a type
                         </option>
-                        {Object.values(IncidentTypeEnum).map((option, index) => (
+                        {incidentTypeEnumList.map((option, index) => (
                           <option key={index} value={option}>
                             {option}
                           </option>

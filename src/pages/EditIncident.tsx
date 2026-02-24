@@ -7,18 +7,23 @@ import { IFormEvent } from '../models/forms.types';
 import Modal from '../components/Modal';
 import Loader from '../components/Loader';
 import { updateIncident, UpdateIncidentDto } from '../services/incidents';
-import { IncidentTypeEnum } from '../enums/incident-type.enum';
 
 export default function EditIncident() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { apiSession } = useAuth();
 
-  const { triggerEnumList, setIncidentList, incidentList, formErrorMessage, setFormErrorMessage } =
-    useProfileDataContext();
+  const {
+    triggerEnumList,
+    setIncidentList,
+    incidentList,
+    formErrorMessage,
+    setFormErrorMessage,
+    incidentTypeEnumList,
+  } = useProfileDataContext();
 
   const [triggers, setTriggers] = useState<string[]>([]);
-  const [typeValue, setTypeValue] = useState<IncidentTypeEnum | ''>('');
+  const [typeValue, setTypeValue] = useState<string | ''>('');
   const [durationHoursValue, setDurationHoursValue] = useState<number>(0.5);
   const [startTimeValue, setStartTimeValue] = useState<Date>(new Date());
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
@@ -84,7 +89,7 @@ export default function EditIncident() {
 
     try {
       const dto: UpdateIncidentDto = {
-        type: typeValue as IncidentTypeEnum,
+        type: typeValue as string,
         startTime: startTimeValue.toISOString(),
         durationHours: durationHoursValue,
         notes: notesValue,
@@ -119,7 +124,7 @@ export default function EditIncident() {
   };
 
   const handleSelectChange = (event: IFormEvent) => {
-    setTypeValue(event.target.value as IncidentTypeEnum);
+    setTypeValue(event.target.value as string);
   };
 
   const handleTextareaChange = (event: IFormEvent) => {
@@ -178,7 +183,7 @@ export default function EditIncident() {
                       <option value="" disabled>
                         Select a type
                       </option>
-                      {Object.values(IncidentTypeEnum).map((option, index) => (
+                      {incidentTypeEnumList.map((option, index) => (
                         <option key={index} value={option}>
                           {option}
                         </option>

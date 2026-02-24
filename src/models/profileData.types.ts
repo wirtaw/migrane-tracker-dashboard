@@ -17,12 +17,10 @@ export interface ISymptom {
   datetimeAt: Date;
 }
 
-import { IncidentTypeEnum } from '../enums/incident-type.enum';
-
 export interface IIncident {
   id: string;
   userId: string;
-  type: IncidentTypeEnum;
+  type: string;
   startTime: Date;
   durationHours: number;
   notes?: string;

@@ -7,12 +7,13 @@ import AddButton from './../components/AddButton';
 import TriggerTypeManageForm from '../components/forms/TriggerTypeManageForm';
 import LocationManageForm from '../components/forms/LocationManageForm';
 import ManageDailyMedicationsForm from '../components/forms/ManageDailyMedicationsForm';
+import IncidentTypeManageForm from '../components/forms/IncidentTypeManageForm';
 import { useWeatherSettings } from '../hooks/useWeatherSettings';
 
 export default function Settings() {
   const { settings, toggleSetting, updateSetting } = useWeatherSettings();
   const [activeModal, setActiveModal] = useState<
-    'symptom' | 'medication' | 'incident' | 'trigger' | 'location' | 'dailyMedication' | null
+    'symptom' | 'medication' | 'incidentTypes' | 'trigger' | 'location' | 'dailyMedication' | null
   >(null);
 
   return (
@@ -72,12 +73,12 @@ export default function Settings() {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
             <div className="flex flex-col items-center text-center">
               <h2 className="mt-4 mb-5 text-lg font-semibold text-gray-900 dark:text-white">
-                Incidents
+                Incidents Types
               </h2>
               <AddButton
                 id="manageIncidentsTypes"
-                label="Manage Incidents"
-                onClick={() => setActiveModal('incident')}
+                label="Manage Types"
+                onClick={() => setActiveModal('incidentTypes')}
               />
             </div>
           </div>
@@ -231,6 +232,13 @@ export default function Settings() {
         title="Manage Locations"
       >
         <LocationManageForm onSubmit={() => setActiveModal(null)} />
+      </Modal>
+      <Modal
+        isOpen={activeModal === 'incidentTypes'}
+        onClose={() => setActiveModal(null)}
+        title="Manage Incident Types"
+      >
+        <IncidentTypeManageForm />
       </Modal>
     </>
   );

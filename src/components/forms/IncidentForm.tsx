@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import { getIsoDateTimeLocal } from '../../lib/utils';
 import { IFormEvent } from '../../models/forms.types';
 import { createIncident, CreateIncidentDto } from '../../services/incidents';
-import { IncidentTypeEnum } from '../../enums/incident-type.enum';
 
 interface IIncidentFormProps {
   onSubmit: () => void;
@@ -14,11 +13,11 @@ interface IIncidentFormProps {
 export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
   const { apiSession } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { triggerEnumList, setIncidentList, setFormErrorMessage } = useProfileDataContext();
+  const { triggerEnumList, setIncidentList, incidentTypeEnumList, setFormErrorMessage } =
+    useProfileDataContext();
   const navigate = useNavigate();
 
-  const [typeValue, setTypeValue] = useState<IncomingType | ''>('');
-  type IncomingType = IncidentTypeEnum;
+  const [typeValue, setTypeValue] = useState<string | ''>('');
   const [durationHoursValue, setDurationHoursValue] = useState<string>('0.5');
   const [startTimeValue, setStartTimeValue] = useState<Date>(new Date());
   const [datetimeAtValue, setDatetimeAtValue] = useState<Date>(new Date());
@@ -59,7 +58,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
     try {
       const dto: CreateIncidentDto = {
         userId: apiSession.userId,
-        type: typeValue as IncidentTypeEnum,
+        type: typeValue,
         startTime: startTimeValue.toISOString(),
         durationHours: parseFloat(durationHoursValue),
         notes: notesValue,
@@ -89,7 +88,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
   };
 
   const handleSelectChange = (event: IFormEvent) => {
-    setTypeValue(event.target.value as IncidentTypeEnum);
+    setTypeValue(event.target.value as string);
   };
 
   const handleTextareaChange = (event: IFormEvent) => {
@@ -127,7 +126,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
           <option value="" disabled>
             Select a type
           </option>
-          {Object.values(IncidentTypeEnum).map((option, index) => (
+          {incidentTypeEnumList.map((option, index) => (
             <option key={index} value={option}>
               {option}
             </option>
