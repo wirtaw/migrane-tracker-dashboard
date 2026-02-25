@@ -124,3 +124,23 @@ export async function fetchIncidentTypes(token: string): Promise<string[]> {
   if (!response.ok) await handleResponseError(response, 'Failed to fetch incident types');
   return response.json();
 }
+
+export async function fetchIncidentTriggers(token: string): Promise<string[]> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Fetch incident triggers failed: Missing configuration or token');
+  }
+
+  return fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/incidents/triggers`, {
+    headers: getHeaders(token),
+  })
+    .then(response => {
+      if (!response.ok) {
+        return handleResponseError(response, 'Failed to fetch incident triggers');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error fetching incident triggers:', error);
+      throw error;
+    });
+}

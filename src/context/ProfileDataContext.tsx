@@ -25,7 +25,7 @@ import {
   fetchSleeps,
   fetchWaters,
 } from '../services/health-logs';
-import { fetchIncidents, fetchIncidentTypes } from '../services/incidents';
+import { fetchIncidents, fetchIncidentTypes, fetchIncidentTriggers } from '../services/incidents';
 import { LocationsService } from '../services/locations';
 import { useAuth } from './AuthContext';
 
@@ -68,6 +68,8 @@ interface IProfileDataContextProps {
   setWaterList: React.Dispatch<React.SetStateAction<IWater[]>>;
   recommendationList: string[];
   reducedTyramineMenuList: ITyramineContentItem[];
+  incidentTriggerEnumList: string[];
+  setIncidentTriggerEnumList: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const ProfileDataContext = createContext<IProfileDataContextProps | undefined>(undefined);
@@ -104,14 +106,9 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
 
   const [incidentTypeEnumList, setIncidentTypeEnumList] = useState<string[]>([]);
 
-  const [triggerEnumList, setTriggerEnumList] = useState<string[]>([
-    'Stress',
-    'Lack of Sleep',
-    'Food',
-    'Weather',
-    'Exercise',
-    'Medication',
-  ]);
+  const [triggerEnumList, setTriggerEnumList] = useState<string[]>([]);
+
+  const [incidentTriggerEnumList, setIncidentTriggerEnumList] = useState<string[]>([]);
 
   const [weightList, setWeightList] = useState<IWeight[]>([]);
 
@@ -296,6 +293,15 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch(err => console.error('Failed to fetch incident types', err));
 
+      fetchIncidentTriggers(apiSession.accessToken)
+        .then((historyTypes: string[]) => {
+          setIncidentTriggerEnumList(prev => {
+            const uniqueTypes = new Set([...prev, ...historyTypes]);
+            return Array.from(uniqueTypes);
+          });
+        })
+        .catch(err => console.error('Failed to fetch incident triggers', err));
+
       LocationsService.getLocations(apiSession.accessToken)
         .then(setLocationList)
         .catch(err => console.error('Failed to fetch locations', err));
@@ -343,6 +349,8 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         setWaterList,
         recommendationList,
         reducedTyramineMenuList,
+        incidentTriggerEnumList,
+        setIncidentTriggerEnumList,
       }}
     >
       {children}

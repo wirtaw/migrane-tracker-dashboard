@@ -13,7 +13,7 @@ interface IIncidentFormProps {
 export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
   const { apiSession } = useAuth();
   const [triggers, setTriggers] = useState<string[]>([]);
-  const { triggerEnumList, setIncidentList, incidentTypeEnumList, setFormErrorMessage } =
+  const { incidentTriggerEnumList, setIncidentList, incidentTypeEnumList, setFormErrorMessage } =
     useProfileDataContext();
   const navigate = useNavigate();
 
@@ -184,7 +184,7 @@ export default function IncidentForm({ onSubmit }: IIncidentFormProps) {
           className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
         />
         <div className="mt-2 flex flex-wrap gap-2">
-          {triggerEnumList.map((trigger, index) => (
+          {incidentTriggerEnumList.map((trigger, index) => (
             <button
               key={index}
               type="button"
