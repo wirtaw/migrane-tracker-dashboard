@@ -110,3 +110,24 @@ export async function deleteSymptom(id: string, token: string): Promise<void> {
     await handleResponseError(response, 'Failed to delete symptom');
   }
 }
+
+export async function fetchSymptomTypes(token: string): Promise<string[]> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Symptom types fetch failed: Missing configuration or token');
+  }
+
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/symptoms/types`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response, 'Failed to fetch symptom types');
+  }
+
+  const data = await response.json();
+  return data;
+}

@@ -16,7 +16,7 @@ import {
   IWater,
 } from '../models/profileData.types';
 import { fetchTriggers } from '../services/triggers';
-import { fetchSymptoms } from '../services/symptoms';
+import { fetchSymptoms, fetchSymptomTypes } from '../services/symptoms';
 import { fetchMedications } from '../services/medications';
 import {
   fetchHeights,
@@ -93,16 +93,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
     'Metformin',
   ]);
 
-  const [symptomEnumList, setSymptomEnumList] = useState<string[]>([
-    'Confused Thinking',
-    'Constipation',
-    'Dizziness',
-    'Light Sensitivity',
-    'Nausea',
-    'Noise Sensitivity',
-    'Smelly',
-    'Weather (loud wind)',
-  ]);
+  const [symptomEnumList, setSymptomEnumList] = useState<string[]>([]);
 
   const [incidentTypeEnumList, setIncidentTypeEnumList] = useState<string[]>([]);
 
@@ -301,6 +292,15 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
           });
         })
         .catch(err => console.error('Failed to fetch incident triggers', err));
+
+      fetchSymptomTypes(apiSession.accessToken)
+        .then((historyTypes: string[]) => {
+          setSymptomEnumList(prev => {
+            const uniqueTypes = new Set([...prev, ...historyTypes]);
+            return Array.from(uniqueTypes);
+          });
+        })
+        .catch(err => console.error('Failed to fetch symptom types', err));
 
       LocationsService.getLocations(apiSession.accessToken)
         .then(setLocationList)
