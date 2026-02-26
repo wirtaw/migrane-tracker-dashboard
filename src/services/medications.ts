@@ -115,3 +115,23 @@ export async function deleteMedication(id: string, token: string): Promise<void>
     await handleResponseError(response, 'Failed to delete medication');
   }
 }
+
+export async function fetchMedicationTitles(token: string): Promise<string[]> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Fetch medication titles failed: Missing configuration or token');
+  }
+
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/medications/titles`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response, 'Failed to fetch medication titles');
+  }
+
+  return response.json();
+}

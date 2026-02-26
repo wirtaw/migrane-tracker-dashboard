@@ -17,7 +17,7 @@ import {
 } from '../models/profileData.types';
 import { fetchTriggers } from '../services/triggers';
 import { fetchSymptoms, fetchSymptomTypes } from '../services/symptoms';
-import { fetchMedications } from '../services/medications';
+import { fetchMedications, fetchMedicationTitles } from '../services/medications';
 import {
   fetchHeights,
   fetchWeights,
@@ -85,13 +85,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
   const [sleepList, setSleepList] = useState<ISleep[]>([]);
   const [waterList, setWaterList] = useState<IWater[]>([]);
 
-  const [medicationEnumList, setMedicationEnumList] = useState<string[]>([
-    'Aspirin',
-    'Ibuprofen',
-    'Paracetamol',
-    'Amoxicillin',
-    'Metformin',
-  ]);
+  const [medicationEnumList, setMedicationEnumList] = useState<string[]>([]);
 
   const [symptomEnumList, setSymptomEnumList] = useState<string[]>([]);
 
@@ -230,11 +224,6 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
       fetchSymptoms(apiSession.accessToken)
         .then(data => {
           setSymptomList(data);
-          const historyTypes = Array.from(new Set(data.map(s => s.type)));
-          setSymptomEnumList(prev => {
-            const uniqueTypes = new Set([...prev, ...historyTypes]);
-            return Array.from(uniqueTypes);
-          });
         })
         .catch(err => console.error('Failed to fetch symptoms', err));
 
@@ -242,11 +231,6 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
       fetchMedications(apiSession.accessToken)
         .then(data => {
           setMedicationList(data);
-          const historyTitles = Array.from(new Set(data.map(m => m.title)));
-          setMedicationEnumList(prev => {
-            const uniqueTitles = new Set([...prev, ...historyTitles]);
-            return Array.from(uniqueTitles);
-          });
         })
         .catch(err => console.error('Failed to fetch medications', err));
 
@@ -301,6 +285,15 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
           });
         })
         .catch(err => console.error('Failed to fetch symptom types', err));
+
+      fetchMedicationTitles(apiSession.accessToken)
+        .then((historyTitles: string[]) => {
+          setMedicationEnumList(prev => {
+            const uniqueTitles = new Set([...prev, ...historyTitles]);
+            return Array.from(uniqueTitles);
+          });
+        })
+        .catch(err => console.error('Failed to fetch medication titles', err));
 
       LocationsService.getLocations(apiSession.accessToken)
         .then(setLocationList)
