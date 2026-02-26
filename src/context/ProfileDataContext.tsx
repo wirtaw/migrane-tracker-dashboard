@@ -15,7 +15,7 @@ import {
   ISleep,
   IWater,
 } from '../models/profileData.types';
-import { fetchTriggers } from '../services/triggers';
+import { fetchTriggers, fetchTriggersTypes } from '../services/triggers';
 import { fetchSymptoms, fetchSymptomTypes } from '../services/symptoms';
 import { fetchMedications, fetchMedicationTitles } from '../services/medications';
 import {
@@ -212,13 +212,17 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
       fetchTriggers(apiSession.accessToken)
         .then(data => {
           setTriggerList(data);
-          const historyTypes = Array.from(new Set(data.map(t => t.type)));
+        })
+        .catch(err => console.error('Failed to fetch triggers', err));
+
+      fetchTriggersTypes(apiSession.accessToken)
+        .then((historyTypes: string[]) => {
           setTriggerEnumList(prev => {
             const uniqueTypes = new Set([...prev, ...historyTypes]);
             return Array.from(uniqueTypes);
           });
         })
-        .catch(err => console.error('Failed to fetch triggers', err));
+        .catch(err => console.error('Failed to fetch incident triggers', err));
 
       // Fetch Symptoms
       fetchSymptoms(apiSession.accessToken)
@@ -227,12 +231,30 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch(err => console.error('Failed to fetch symptoms', err));
 
+      fetchSymptomTypes(apiSession.accessToken)
+        .then((historyTypes: string[]) => {
+          setSymptomEnumList(prev => {
+            const uniqueTypes = new Set([...prev, ...historyTypes]);
+            return Array.from(uniqueTypes);
+          });
+        })
+        .catch(err => console.error('Failed to fetch symptom types', err));
+
       // Fetch Medications
       fetchMedications(apiSession.accessToken)
         .then(data => {
           setMedicationList(data);
         })
         .catch(err => console.error('Failed to fetch medications', err));
+
+      fetchMedicationTitles(apiSession.accessToken)
+        .then((historyTitles: string[]) => {
+          setMedicationEnumList(prev => {
+            const uniqueTitles = new Set([...prev, ...historyTitles]);
+            return Array.from(uniqueTitles);
+          });
+        })
+        .catch(err => console.error('Failed to fetch medication titles', err));
 
       // Fetch Health Logs
       fetchHeights(apiSession.accessToken)
@@ -255,6 +277,7 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
         .then(setWaterList)
         .catch(err => console.error('Failed to fetch waters', err));
 
+      // Fetch Incidents and related enums
       fetchIncidents(apiSession.accessToken)
         .then(setIncidentList)
         .catch(err => console.error('Failed to fetch incidents', err));
@@ -276,24 +299,6 @@ export const ProfileDataProvider = ({ children }: { children: ReactNode }) => {
           });
         })
         .catch(err => console.error('Failed to fetch incident triggers', err));
-
-      fetchSymptomTypes(apiSession.accessToken)
-        .then((historyTypes: string[]) => {
-          setSymptomEnumList(prev => {
-            const uniqueTypes = new Set([...prev, ...historyTypes]);
-            return Array.from(uniqueTypes);
-          });
-        })
-        .catch(err => console.error('Failed to fetch symptom types', err));
-
-      fetchMedicationTitles(apiSession.accessToken)
-        .then((historyTitles: string[]) => {
-          setMedicationEnumList(prev => {
-            const uniqueTitles = new Set([...prev, ...historyTitles]);
-            return Array.from(uniqueTitles);
-          });
-        })
-        .catch(err => console.error('Failed to fetch medication titles', err));
 
       LocationsService.getLocations(apiSession.accessToken)
         .then(setLocationList)

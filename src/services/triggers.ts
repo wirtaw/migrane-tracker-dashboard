@@ -112,3 +112,23 @@ export async function deleteTrigger(id: string, token: string): Promise<void> {
     await handleResponseError(response, 'Failed to delete trigger');
   }
 }
+
+export async function fetchTriggersTypes(token: string): Promise<string[]> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Fetch trigger types failed: Missing configuration or token');
+  }
+
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/triggers/types`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    await handleResponseError(response, 'Failed to fetch trigger types');
+  }
+
+  return response.json();
+}
