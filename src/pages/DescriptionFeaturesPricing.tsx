@@ -44,8 +44,8 @@ const Header = () => {
       isMobileMenuOpen || isMobileNavActive ? 'w-full' : 'px-4'
     } ${
       isActive
-        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-        : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+        ? 'bg-indigo-100 text-white dark:bg-indigo-900/50 dark:text-indigo-300'
+        : 'text-white hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
     }`;
 
   return (
@@ -121,7 +121,7 @@ const WelcomeSection = () => {
   const { theme } = useContext(ThemeContextMain);
   return (
     <section
-      className={`bg-${theme === 'light' ? 'blue-500 text-white' : 'gray-800 text-gray-300'} container mx-auto p-8`}
+      className={`bg-${theme === 'light' ? 'text-gray-800' : 'gray-800 text-gray-300'} container mx-auto p-8 m-5`}
     >
       <h2 className="text-4xl font-bold mb-4">Track Your Migraines, Take Control of Your Life</h2>
       <p className="text-lg mb-6">
@@ -151,11 +151,9 @@ const FeaturesSection = () => {
   const { theme } = useContext(ThemeContextMain);
   return (
     <section
-      className={`bg-${theme === 'light' ? 'blue-500 text-black-500' : 'gray-800 text-gray-300'} container mx-auto p-8`}
+      className={`bg-${theme === 'light' ? 'text-black-500' : 'gray-800 text-gray-300'} container mx-auto p-8`}
     >
-      <h2
-        className={`bg-${theme === 'light' ? 'blue-500 text-white' : 'gray-800'} text-4xl font-bold mb-4`}
-      >
+      <h2 className={`bg-${theme === 'light' ? 'text-white' : 'gray-800'} text-4xl font-bold mb-4`}>
         Key Features at a Glance:
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-3 dark:text-black">
@@ -197,7 +195,7 @@ const CallToActionSection = () => {
   const { theme } = useContext(ThemeContextMain);
   return (
     <section
-      className={`bg-${theme === 'light' ? 'blue-500 text-white' : 'gray-800 text-gray-300'} container mx-auto p-8 text-white text-center mt-5 mb-5`}
+      className={`bg-${theme === 'light' ? 'text-gray-800' : 'gray-800 text-white'} container mx-auto p-8  text-center mt-5 mb-5`}
     >
       <h2 className="text-3xl font-bold mb-4">
         Start your journey to migraine mastery today! Sign up for a free trial and experience the
@@ -205,7 +203,7 @@ const CallToActionSection = () => {
       </h2>
       <Link
         to="/signin"
-        className="bg-white text-blue-500 py-2 px-6 rounded-lg font-bold hover:bg-blue-100"
+        className="text-gray-800 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 inline-block px-6 py-3 rounded-md text-lg font-medium transition-colors border border-gray-300 dark:border-gray-600"
       >
         Sign In
       </Link>

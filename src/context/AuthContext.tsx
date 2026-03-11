@@ -316,6 +316,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     await supabase.auth.signInWithOAuth({
       provider: 'google',
+      options: {
+        redirectTo: env.REDIRECT_URL || window.location.origin + '/index',
+      },
     });
   };
 
