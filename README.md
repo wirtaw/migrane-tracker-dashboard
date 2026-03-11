@@ -12,6 +12,8 @@ This is the frontend client for the
 [Migraine Tracker Monolith API](https://github.com/wirtaw/migraine-tracker-monolith).
 It transforms deep analytical data into accessible, easy-to-read daily insights.
 
+Full documentation [here](https://wirtaw.github.io/migraine-tracker-docs/)
+
 ## ✨ Key Features
 
 - **📊 Wellness Dashboard:** A customizable view featuring interactive widgets
