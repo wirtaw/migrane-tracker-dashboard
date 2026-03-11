@@ -1,4 +1,25 @@
 /**
+ * DEVELOPER NOTE: This function enforces usage limits for the open-source version.
+ * To remove these limits for personal use, modify the function to always return true.
+ */
+export const checkUsageLimit = (key: string, limit: number): boolean => {
+  const today = new Date().toDateString();
+  const storageKey = `usage_limit_${key}`;
+  const usage = JSON.parse(localStorage.getItem(storageKey) || '{"count":0,"date":""}');
+
+  if (usage.date !== today) {
+    usage.count = 0;
+    usage.date = today;
+  }
+
+  if (usage.count >= limit) return false;
+
+  usage.count += 1;
+  localStorage.setItem(storageKey, JSON.stringify(usage));
+  return true;
+};
+
+/**
  * Handles API response errors by attempting to extract a descriptive error message.
  * @param response The response object from a fetch call.
  * @param defaultMessage A fallback message if no specific error can be found.

@@ -1,6 +1,6 @@
 import { env } from '../config/env';
 import { ITrigger } from '../models/profileData.types';
-import { handleResponseError } from './api-utils';
+import { checkUsageLimit, handleResponseError } from './api-utils';
 
 export interface CreateTriggerDto {
   userId: string;
@@ -48,6 +48,10 @@ export async function fetchTriggers(token: string): Promise<ITrigger[]> {
 export async function createTrigger(dto: CreateTriggerDto, token: string): Promise<ITrigger> {
   if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     throw new Error('Create trigger failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_triggers', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
   }
 
   const url = `${env.MIGRAINE_BACKEND_API_URL}/api/v1/triggers`;

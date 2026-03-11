@@ -1,6 +1,7 @@
 import { env } from '../config/env';
 import { CreateLocationDto, ISummaryResponse, UpdateLocationDto } from '../models/locations.types';
 import { ILocationData } from '../models/profileData.types';
+import { checkUsageLimit } from './api-utils';
 
 const API_URL = `${env.MIGRAINE_BACKEND_API_URL}/api/v1/locations`;
 
@@ -57,6 +58,10 @@ export class LocationsService {
   }
 
   static async createLocation(token: string, data: CreateLocationDto): Promise<void> {
+    // Limit DB records to 10 for open-source version
+    if (!checkUsageLimit('db_records_locations', 10)) {
+      throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
+    }
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {

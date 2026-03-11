@@ -1,7 +1,7 @@
 import { env } from '../config/env';
 import { IIncident } from '../models/profileData.types';
 import { IncidentStats } from '../models/stats.types';
-import { handleResponseError } from './api-utils';
+import { handleResponseError, checkUsageLimit } from './api-utils';
 
 // DTOs
 export interface CreateIncidentDto {
@@ -58,6 +58,10 @@ export async function fetchIncidents(token: string): Promise<IIncident[]> {
 export async function createIncident(dto: CreateIncidentDto, token: string): Promise<IIncident> {
   if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     throw new Error('Create incident failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_incidents', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
   }
 
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/incidents`, {

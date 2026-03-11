@@ -1,6 +1,6 @@
 import { env } from '../config/env';
 import { ISymptom } from '../models/profileData.types';
-import { handleResponseError } from './api-utils';
+import { checkUsageLimit, handleResponseError } from './api-utils';
 
 export interface CreateSymptomDto {
   userId: string;
@@ -49,6 +49,10 @@ export async function fetchSymptoms(token: string): Promise<ISymptom[]> {
 export async function createSymptom(dto: CreateSymptomDto, token: string): Promise<ISymptom> {
   if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     throw new Error('Create symptom failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_symptoms', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
   }
 
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/symptoms`, {

@@ -1,4 +1,5 @@
 import { env } from '../config/env';
+import { checkUsageLimit } from './api-utils';
 
 export interface IWeatherData {
   temperature?: number;
@@ -87,6 +88,13 @@ export async function fetchOpenMeteoWeatherData(
       throw new Error('Weather data fetch failed: Missing configuration or token');
     }
 
+    // Limit OpenWeather/NOAA requests to 10 per day for free tier users
+    if (!checkUsageLimit('environmental_api', 10)) {
+      throw new Error(
+        'Daily request limit reached. Upgrade to Migraine Pulse for unlimited access.'
+      );
+    }
+
     const response = await fetch(
       `${env.MIGRAINE_BACKEND_API_URL}/api/v1/weather?latitude=${latitude}&longitude=${longitude}`,
       {
@@ -126,6 +134,11 @@ export async function fetchGeophysicalWeatherData(
         radioBlackout: { rationale: '' },
       },
     };
+  }
+
+  // Limit OpenWeather/NOAA requests to 10 per day for free tier users
+  if (!checkUsageLimit('environmental_api', 10)) {
+    throw new Error('Daily request limit reached. Upgrade to Migraine Pulse for unlimited access.');
   }
 
   const dateStr = getDateRange(new Date());
@@ -171,6 +184,13 @@ export async function fetchOpenMeteoWeatherDataHistorical(
       return;
     }
 
+    // Limit OpenWeather/NOAA requests to 10 per day for free tier users
+    if (!checkUsageLimit('environmental_api', 10)) {
+      throw new Error(
+        'Daily request limit reached. Upgrade to Migraine Pulse for unlimited access.'
+      );
+    }
+
     const dateStr = getDateRange(dateTime);
 
     const response = await fetch(
@@ -203,6 +223,11 @@ export async function fetchGeophysicalWeatherDataHistorical(
 ): Promise<IGeophysicalWeatherData> {
   const dateStr = getDateRange(dateTime);
 
+  // Limit OpenWeather/NOAA requests to 10 per day for free tier users
+  if (!checkUsageLimit('environmental_api', 10)) {
+    throw new Error('Daily request limit reached. Upgrade to Migraine Pulse for unlimited access.');
+  }
+
   const responseGeoActivity = await fetch(
     `${env.MIGRAINE_BACKEND_API_URL}/api/v1/solar/geophysical/historical?date=${dateStr}`,
     {
@@ -229,6 +254,11 @@ export async function fetchRadiationWeatherData(
 ): Promise<IRadiationTodayData[] | []> {
   if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     return [];
+  }
+
+  // Limit OpenWeather/NOAA requests to 10 per day for free tier users
+  if (!checkUsageLimit('environmental_api', 10)) {
+    throw new Error('Daily request limit reached. Upgrade to Migraine Pulse for unlimited access.');
   }
 
   const responseRadiation = await fetch(
@@ -289,6 +319,11 @@ export const getForecast = async (
       hourly: [],
       daily: [],
     };
+  }
+
+  // Limit OpenWeather/NOAA requests to 10 per day for free tier users
+  if (!checkUsageLimit('environmental_api', 10)) {
+    throw new Error('Daily request limit reached. Upgrade to Migraine Pulse for unlimited access.');
   }
 
   const response = await fetch(

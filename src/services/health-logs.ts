@@ -1,6 +1,6 @@
 import { env } from '../config/env';
 import { IWeight, IHeight, IBloodPressure, ISleep, IWater } from '../models/profileData.types';
-import { handleResponseError } from './api-utils';
+import { handleResponseError, checkUsageLimit } from './api-utils';
 
 // DTOs
 export interface CreateWeightDto {
@@ -76,6 +76,13 @@ export async function fetchHeights(token: string): Promise<IHeight[]> {
 }
 
 export async function createHeight(dto: CreateHeightDto, token: string): Promise<IHeight> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Create incident failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_height', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
+  }
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/height`, {
     method: 'POST',
     headers: getHeaders(token),
@@ -120,6 +127,13 @@ export async function fetchWeights(token: string): Promise<IWeight[]> {
 }
 
 export async function createWeight(dto: CreateWeightDto, token: string): Promise<IWeight> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Create incident failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_weight', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
+  }
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/weight`, {
     method: 'POST',
     headers: getHeaders(token),
@@ -170,6 +184,13 @@ export async function createBloodPressure(
   dto: CreateBloodPressureDto,
   token: string
 ): Promise<IBloodPressure> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Create incident failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_blood_pressure', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
+  }
   const response = await fetch(
     `${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/blood-pressure`,
     {
@@ -223,6 +244,13 @@ export async function fetchSleeps(token: string): Promise<ISleep[]> {
 }
 
 export async function createSleep(dto: CreateSleepDto, token: string): Promise<ISleep> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Create incident failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_sleep', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
+  }
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/sleep`, {
     method: 'POST',
     headers: getHeaders(token),
@@ -263,6 +291,13 @@ export async function fetchWaters(token: string): Promise<IWater[]> {
 }
 
 export async function createWater(dto: CreateWaterDto, token: string): Promise<IWater> {
+  if (!env.MIGRAINE_BACKEND_API_URL || !token) {
+    throw new Error('Create incident failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_water', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
+  }
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/health-logs/water`, {
     method: 'POST',
     headers: getHeaders(token),

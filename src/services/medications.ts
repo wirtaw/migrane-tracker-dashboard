@@ -1,6 +1,6 @@
 import { env } from '../config/env';
 import { IMedication } from '../models/profileData.types';
-import { handleResponseError } from './api-utils';
+import { checkUsageLimit, handleResponseError } from './api-utils';
 
 export interface CreateMedicationDto {
   userId: string;
@@ -54,6 +54,10 @@ export async function createMedication(
 ): Promise<IMedication> {
   if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     throw new Error('Create medication failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_medications', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
   }
 
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/medications`, {

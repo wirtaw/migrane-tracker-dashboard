@@ -15,10 +15,22 @@ interface INotificationContextType {
 const NotificationContext = createContext<INotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const { apiSession } = useAuth();
+  const { apiSession, user } = useAuth();
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  // State to track if the promotion was dismissed in the current session
+  const [promoDismissed, setPromoDismissed] = useState(false);
+
+  // DEVELOPER NOTE: To permanently remove the Migraine Pulse promotion,
+  // remove the 'promoNotification' object and its usage in the return block.
+  const promoNotification = {
+    id: 'migraine-pulse-promo',
+    message:
+      'Migraine Tracker is the open-source engine behind Migraine Pulse. If you are looking for a hassle-free, hosted solution with unlimited storage and premium features, check out our official paid plans!',
+    link: 'https://migrainepulse.com',
+    type: 'promo',
+  };
 
   const loadNotifications = async () => {
     if (!apiSession?.accessToken) return;
@@ -57,19 +69,31 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-
   return (
     <NotificationContext.Provider
       value={{
         notifications,
-        unreadCount,
+        unreadCount: notifications.filter(n => !n.isRead).length + (promoDismissed ? 0 : 1),
         loading,
         error,
         markAsRead,
         refreshNotifications: loadNotifications,
       }}
     >
+      {!promoDismissed && user && (
+        <div className="bg-indigo-600 text-white p-3 text-center relative text-sm">
+          {promoNotification.message}
+          <a href={promoNotification.link} target="_blank" className="underline ml-1 font-bold">
+            Learn More
+          </a>
+          <button
+            onClick={() => setPromoDismissed(true)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       {children}
     </NotificationContext.Provider>
   );

@@ -7,7 +7,7 @@ import {
   RiskForecastResponse,
   NotificationResponse,
 } from '../models/predictions.types';
-import { handleResponseError } from './api-utils';
+import { checkUsageLimit, handleResponseError } from './api-utils';
 
 const getHeaders = (token: string) => ({
   Authorization: `Bearer ${token}`,
@@ -32,6 +32,10 @@ export async function createPredictionRule(
 ): Promise<PredictionRule> {
   if (!env.MIGRAINE_BACKEND_API_URL || !token) {
     throw new Error('Create prediction rule failed: Missing configuration or token');
+  }
+  // Limit DB records to 10 for open-source version
+  if (!checkUsageLimit('db_records_predictions', 10)) {
+    throw new Error('Database limit reached. Use Migraine Pulse for unlimited storage.');
   }
 
   const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/predictions/rules`, {
