@@ -8,6 +8,13 @@ import { LocationsService } from '../../services/locations';
 import { IForecastDto, ISolarDto, ISolarRadiationDto } from '../../models/locations.types';
 import Loader from '../Loader';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
+import {
+  createWeight,
+  createBloodPressure,
+  createHeight,
+  createSleep,
+  createWater,
+} from '../../services/health-logs';
 
 interface IDatabaseUploadFormProps {
   onSubmit: () => void;
@@ -61,6 +68,40 @@ interface RawLocation {
   forecast?: IForecastDto[];
   solar?: ISolarDto[];
   solarRadiation?: ISolarRadiationDto[];
+}
+
+interface RawHealthLogWeight {
+  weight: number;
+  datetimeAt: string;
+  notes?: string;
+}
+
+interface RawHealthLogHeight {
+  height: number;
+  datetimeAt: string;
+  notes?: string;
+}
+
+interface RawHealthLogBloodPressure {
+  systolic: number;
+  diastolic: number;
+  datetimeAt: string;
+  notes?: string;
+}
+
+interface RawHealthLogSleep {
+  minutesTotal: number;
+  minutesDeep: number;
+  minutesRem: number;
+  timesWakeUp: number;
+  datetimeAt: string;
+  notes?: string;
+}
+
+interface RawHealthLogWater {
+  ml: number;
+  datetimeAt: string;
+  notes?: string;
 }
 
 export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProps) {
@@ -158,13 +199,23 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
         const medications = data.medications || [];
         const symptoms = data.symptoms || [];
         const locations = data.logsForecast || [];
+        const weights = data.healthLogs?.weights || [];
+        const heights = data.healthLogs?.heights || [];
+        const bloodPressures = data.healthLogs?.bloodPressures || [];
+        const sleeps = data.healthLogs?.sleeps || [];
+        const waters = data.healthLogs?.waters || [];
 
         const totalItems =
           incidents.length +
           triggers.length +
           medications.length +
           symptoms.length +
-          locations.length;
+          locations.length +
+          weights.length +
+          heights.length +
+          bloodPressures.length +
+          sleeps.length +
+          waters.length;
         setOverallProgress({ current: 0, total: totalItems });
 
         const initialProgress: IProgress[] = [
@@ -204,6 +255,46 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
             type: 'Locations',
             current: 0,
             total: locations.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Weights',
+            current: 0,
+            total: weights.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Heights',
+            current: 0,
+            total: heights.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Blood Pressures',
+            current: 0,
+            total: bloodPressures.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Sleeps',
+            current: 0,
+            total: sleeps.length,
+            status: 'pending',
+            failed: 0,
+            errors: [],
+          },
+          {
+            type: 'Waters',
+            current: 0,
+            total: waters.length,
             status: 'pending',
             failed: 0,
             errors: [],
@@ -374,6 +465,154 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
             prev.map((p, idx) => (idx === 4 ? { ...p, status: 'completed' } : p))
           );
         }
+
+        // 6. Upload Health Logs (Weights, Heights, Blood Pressures, Sleeps, Waters)
+        await Promise.all([
+          weights.length > 0
+            ? (async () => {
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 5 ? { ...p, status: 'processing' } : p))
+                );
+                await uploadConcurrent(
+                  weights,
+                  (item: RawHealthLogWeight) =>
+                    createWeight(
+                      {
+                        userId: userId,
+                        weight: item.weight,
+                        notes: item.notes,
+                        datetimeAt: item.datetimeAt,
+                      },
+                      token
+                    ),
+                  () => {},
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 5 ? { ...p, current, failed, errors } : p))
+                    )
+                );
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 5 ? { ...p, status: 'completed' } : p))
+                );
+              })()
+            : Promise.resolve(),
+          heights.length > 0
+            ? (async () => {
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 6 ? { ...p, status: 'processing' } : p))
+                );
+                await uploadConcurrent(
+                  heights,
+                  (item: RawHealthLogHeight) =>
+                    createHeight(
+                      {
+                        userId: userId,
+                        height: item.height,
+                        datetimeAt: item.datetimeAt,
+                        notes: item.notes,
+                      },
+                      token
+                    ),
+                  () => {},
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 6 ? { ...p, current, failed, errors } : p))
+                    )
+                );
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 6 ? { ...p, status: 'completed' } : p))
+                );
+              })()
+            : Promise.resolve(),
+          bloodPressures.length > 0
+            ? (async () => {
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 7 ? { ...p, status: 'processing' } : p))
+                );
+                await uploadConcurrent(
+                  bloodPressures,
+                  (item: RawHealthLogBloodPressure) =>
+                    createBloodPressure(
+                      {
+                        userId: userId,
+                        systolic: item.systolic,
+                        diastolic: item.diastolic,
+                        datetimeAt: item.datetimeAt,
+                        notes: item.notes,
+                      },
+                      token
+                    ),
+                  () => {},
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 7 ? { ...p, current, failed, errors } : p))
+                    )
+                );
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 7 ? { ...p, status: 'completed' } : p))
+                );
+              })()
+            : Promise.resolve(),
+          sleeps.length > 0
+            ? (async () => {
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 8 ? { ...p, status: 'processing' } : p))
+                );
+                await uploadConcurrent(
+                  sleeps,
+                  (item: RawHealthLogSleep) =>
+                    createSleep(
+                      {
+                        userId: userId,
+                        datetimeAt: item.datetimeAt,
+                        notes: item.notes,
+                        minutesDeep: item.minutesDeep,
+                        minutesRem: item.minutesRem,
+                        minutesTotal: item.minutesTotal,
+                        timesWakeUp: item.timesWakeUp,
+                      },
+                      token
+                    ),
+                  () => {},
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 8 ? { ...p, current, failed, errors } : p))
+                    )
+                );
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 8 ? { ...p, status: 'completed' } : p))
+                );
+              })()
+            : Promise.resolve(),
+          waters.length > 0
+            ? (async () => {
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 9 ? { ...p, status: 'processing' } : p))
+                );
+                await uploadConcurrent(
+                  waters,
+                  (item: RawHealthLogWater) =>
+                    createWater(
+                      {
+                        userId: userId,
+                        ml: item.ml,
+                        datetimeAt: item.datetimeAt,
+                        notes: item.notes,
+                      },
+                      token
+                    ),
+                  () => {},
+                  (current, failed, errors) =>
+                    setProgress(prev =>
+                      prev.map((p, idx) => (idx === 9 ? { ...p, current, failed, errors } : p))
+                    )
+                );
+                setProgress(prev =>
+                  prev.map((p, idx) => (idx === 9 ? { ...p, status: 'completed' } : p))
+                );
+              })()
+            : Promise.resolve(),
+        ]);
 
         const hasErrors = progress.some(p => p.failed > 0);
         if (hasErrors) {

@@ -11,6 +11,16 @@ import {
   IBrokenSymptom,
   ILocationData,
   IBrokenLocation,
+  IWeight,
+  IHeight,
+  IBloodPressure,
+  ISleep,
+  IWater,
+  IBrokenWeight,
+  IBrokenHeight,
+  IBrokenBloodPressure,
+  IBrokenSleep,
+  IBrokenWater,
 } from '../../models/profileData.types';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
 import Loader from '../Loader';
@@ -24,11 +34,26 @@ const brokenTriggers: IBrokenTrigger[] = [];
 const brokenMedications: IBrokenMedication[] = [];
 const brokenSymptoms: IBrokenSymptom[] = [];
 const brokenLocations: IBrokenLocation[] = [];
+const brokenHealthLogs: {
+  weights: IBrokenWeight[];
+  heights: IBrokenHeight[];
+  bloodPressures: IBrokenBloodPressure[];
+  sleeps: IBrokenSleep[];
+  waters: IBrokenWater[];
+} = {
+  weights: [],
+  heights: [],
+  bloodPressures: [],
+  sleeps: [],
+  waters: [],
+};
 
 const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): IIncident[] | [] => {
   if (!jsonDataIncidents || !Array.isArray(jsonDataIncidents)) {
     return [];
   }
+  // Validation logic is intentionally verbose to capture specific issues with each incident for better user feedback. This allows us to identify exactly why an incident was considered "broken" and provide that information back to the user, which can be crucial for troubleshooting data issues during the upload process. Each validation step checks for a specific required field and logs a warning if it's missing, along with the relevant details of the incident for context.
+  // Incidents require: userId, datetimeAt, type, startTime, durationHours. Triggers must be an array if provided.
   const incidents: IIncident[] = [];
   for (const incident of jsonDataIncidents) {
     const { id, userId, datetimeAt, type, startTime, durationHours, triggers, notes, createdAt } =
@@ -152,6 +177,7 @@ const mapIncidentList = (jsonDataIncidents: unknown, maxId: number): IIncident[]
   return incidents;
 };
 
+// Triggers require: userId, datetimeAt, type. Notes and createdAt are optional but will be included if present. Triggers must be an array if provided. Validation logic is verbose to provide detailed feedback on why a trigger might be considered "broken" during the upload process, which can help users identify and fix issues with their data.
 const mapTriggerList = (jsonDataTriggers: unknown, maxId: number): ITrigger[] | [] => {
   if (!jsonDataTriggers || !Array.isArray(jsonDataTriggers)) {
     return [];
@@ -219,6 +245,7 @@ const mapTriggerList = (jsonDataTriggers: unknown, maxId: number): ITrigger[] | 
   return triggers;
 };
 
+// Medications require: userId, datetimeAt, title, dosage. Notes and createdAt are optional but will be included if present. Validation logic is verbose to provide detailed feedback on why a medication might be considered "broken" during the upload process, which can help users identify and fix issues with their data. Medications must be an array if provided.
 const mapMedicationList = (jsonDataMedications: unknown, maxId: number): IMedication[] | [] => {
   if (!jsonDataMedications || !Array.isArray(jsonDataMedications)) {
     return [];
@@ -308,6 +335,7 @@ const mapMedicationList = (jsonDataMedications: unknown, maxId: number): IMedica
   return medications;
 };
 
+// Symptoms require: userId, datetimeAt, type, severity. Notes and createdAt are optional but will be included if present. Validation logic is verbose to provide detailed feedback on why a symptom might be considered "broken" during the upload process, which can help users identify and fix issues with their data. Symptoms must be an array if provided.
 const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): ISymptom[] | [] => {
   if (!jsonDataSymptoms || !Array.isArray(jsonDataSymptoms)) {
     return [];
@@ -392,6 +420,7 @@ const mapSymptomList = (jsonDataSymptoms: unknown, maxId: number): ISymptom[] | 
   return symptoms;
 };
 
+// Locations require: userId, datetimeAt, longitude, latitude. Notes and createdAt are optional but will be included if present. Validation logic is verbose to provide detailed feedback on why a location might be considered "broken" during the upload process, which can help users identify and fix issues with their data. Locations must be an array if provided.
 const mapLocationList = (jsonDataLogsForecast: unknown): ILocationData[] | [] => {
   if (!jsonDataLogsForecast || !Array.isArray(jsonDataLogsForecast)) {
     return [];
@@ -469,6 +498,433 @@ const mapLocationList = (jsonDataLogsForecast: unknown): ILocationData[] | [] =>
   return locations;
 };
 
+// Health logs require: userId, datetimeAt, and specific fields for each log type (weight, height, blood pressure, sleep, water). Notes are optional but will be included if present. Validation logic is verbose to provide detailed feedback on why a health log might be considered "broken" during the upload process, which can help users identify and fix issues with their data. Health logs must be an array if provided. The mapping function for health logs would follow a similar pattern to the above functions, with specific checks for each log type's required fields and appropriate handling of IDs and warnings for broken entries.
+const mapWeightList = (jsonDataWeights: unknown, maxId: number): IWeight[] | [] => {
+  if (!jsonDataWeights || !Array.isArray(jsonDataWeights)) {
+    return [];
+  }
+  const weights: IWeight[] = [];
+  for (const weight of jsonDataWeights) {
+    const { id, userId, datetimeAt, weight: weightValue, notes } = weight;
+
+    if (!userId) {
+      brokenHealthLogs.weights.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        weight: weightValue,
+        notes: notes || '',
+        warning: 'Weight log missing userId',
+      });
+      continue;
+    }
+
+    if (!datetimeAt) {
+      brokenHealthLogs.weights.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        weight: weightValue,
+        notes: notes || '',
+        warning: 'Weight log missing datetimeAt',
+      });
+      continue;
+    }
+
+    if (weightValue === undefined || weightValue === null) {
+      brokenHealthLogs.weights.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        weight: weightValue,
+        notes: notes || '',
+        warning: 'Weight log missing weight value',
+      });
+      continue;
+    }
+
+    const setId = id || maxId + 1;
+
+    weights.push({
+      id: setId,
+      userId: userId.toString(),
+      datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+      weight: weightValue,
+      notes: notes || '',
+    });
+  }
+
+  return weights;
+};
+
+const mapHeightList = (jsonDataHeights: unknown, maxId: number): IHeight[] | [] => {
+  if (!jsonDataHeights || !Array.isArray(jsonDataHeights)) {
+    return [];
+  }
+  const heights: IHeight[] = [];
+  for (const height of jsonDataHeights) {
+    const { id, userId, datetimeAt, height: heightValue, notes } = height;
+
+    if (!userId) {
+      brokenHealthLogs.heights.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        height: heightValue,
+        notes: notes || '',
+        warning: 'Height log missing userId',
+      });
+      continue;
+    }
+
+    if (!datetimeAt) {
+      brokenHealthLogs.heights.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        height: heightValue,
+        notes: notes || '',
+        warning: 'Height log missing datetimeAt',
+      });
+      continue;
+    }
+
+    if (heightValue === undefined || heightValue === null) {
+      brokenHealthLogs.heights.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        height: heightValue,
+        notes: notes || '',
+        warning: 'Height log missing height value',
+      });
+      continue;
+    }
+
+    const setId = id || maxId + 1;
+
+    heights.push({
+      id: setId,
+      userId: userId.toString(),
+      datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+      height: heightValue,
+      notes: notes || '',
+    });
+  }
+
+  return heights;
+};
+
+const mapBloodPressureList = (
+  jsonDataBloodPressures: unknown,
+  maxId: number
+): IBloodPressure[] | [] => {
+  if (!jsonDataBloodPressures || !Array.isArray(jsonDataBloodPressures)) {
+    return [];
+  }
+  const bloodPressures: IBloodPressure[] = [];
+  for (const bp of jsonDataBloodPressures) {
+    const { id, userId, datetimeAt, systolic, diastolic, notes } = bp;
+
+    if (!userId) {
+      brokenHealthLogs.bloodPressures.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        systolic,
+        diastolic,
+        notes: notes || '',
+        warning: 'Blood pressure log missing userId',
+      });
+      continue;
+    }
+
+    if (!datetimeAt) {
+      brokenHealthLogs.bloodPressures.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        systolic,
+        diastolic,
+        notes: notes || '',
+        warning: 'Blood pressure log missing datetimeAt',
+      });
+      continue;
+    }
+
+    if (systolic === undefined || systolic === null) {
+      brokenHealthLogs.bloodPressures.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        systolic,
+        diastolic,
+        notes: notes || '',
+        warning: 'Blood pressure log missing systolic value',
+      });
+      continue;
+    }
+
+    if (diastolic === undefined || diastolic === null) {
+      brokenHealthLogs.bloodPressures.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        systolic,
+        diastolic,
+        notes: notes || '',
+        warning: 'Blood pressure log missing diastolic value',
+      });
+      continue;
+    }
+
+    const setId = id || maxId + 1;
+
+    bloodPressures.push({
+      id: setId,
+      userId: userId.toString(),
+      datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+      systolic,
+      diastolic,
+      notes: notes || '',
+    });
+  }
+
+  return bloodPressures;
+};
+
+const mapSleepList = (jsonDataSleeps: unknown, maxId: number): ISleep[] | [] => {
+  if (!jsonDataSleeps || !Array.isArray(jsonDataSleeps)) {
+    return [];
+  }
+  const sleeps: ISleep[] = [];
+  for (const sleep of jsonDataSleeps) {
+    const {
+      id,
+      userId,
+      datetimeAt,
+      rate,
+      minutesTotal,
+      minutesDeep,
+      minutesRem,
+      notes,
+      timesWakeUp,
+      startedAt,
+    } = sleep;
+
+    if (!userId) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing userId',
+      });
+      continue;
+    }
+
+    if (!datetimeAt) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing datetimeAt',
+      });
+      continue;
+    }
+
+    if (rate === undefined || rate === null) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing rate',
+      });
+      continue;
+    }
+
+    if (minutesTotal === undefined || minutesTotal === null) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing minutesTotal',
+      });
+      continue;
+    }
+
+    if (!startedAt) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing startedAt',
+      });
+      continue;
+    }
+
+    if (minutesDeep === undefined || minutesDeep === null) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing minutesDeep',
+      });
+      continue;
+    }
+
+    if (minutesRem === undefined || minutesRem === null) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing minutesRem',
+      });
+      continue;
+    }
+
+    if (timesWakeUp === undefined || timesWakeUp === null) {
+      brokenHealthLogs.sleeps.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        rate,
+        minutesTotal,
+        minutesDeep,
+        minutesRem,
+        timesWakeUp,
+        startedAt,
+        notes: notes || '',
+        warning: 'Sleep log missing timesWakeUp',
+      });
+      continue;
+    }
+
+    const setId = id || maxId + 1;
+
+    sleeps.push({
+      id: setId,
+      userId: userId.toString(),
+      datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+      rate,
+      minutesTotal,
+      minutesDeep,
+      minutesRem,
+      timesWakeUp,
+      startedAt,
+      notes: notes || '',
+    });
+  }
+
+  return sleeps;
+};
+
+const mapWaterList = (jsonDataWaters: unknown, maxId: number): IWater[] | [] => {
+  if (!jsonDataWaters || !Array.isArray(jsonDataWaters)) {
+    return [];
+  }
+  const waters: IWater[] = [];
+  for (const water of jsonDataWaters) {
+    const { id, userId, datetimeAt, ml, notes } = water;
+
+    if (!userId) {
+      brokenHealthLogs.waters.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        ml,
+        notes: notes || '',
+        warning: 'Water log missing userId',
+      });
+      continue;
+    }
+
+    if (!datetimeAt) {
+      brokenHealthLogs.waters.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        ml,
+        notes: notes || '',
+        warning: 'Water log missing datetimeAt',
+      });
+      continue;
+    }
+
+    if (ml === undefined || ml === null) {
+      brokenHealthLogs.waters.push({
+        id: 0,
+        userId: userId.toString(),
+        datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+        ml,
+        notes: notes || '',
+        warning: 'Water log missing amount',
+      });
+      continue;
+    }
+
+    const setId = id || maxId + 1;
+
+    waters.push({
+      id: setId,
+      userId: userId.toString(),
+      datetimeAt: typeof datetimeAt === 'string' ? new Date(datetimeAt) : datetimeAt,
+      ml,
+      notes: notes || '',
+    });
+  }
+
+  return waters;
+};
+
 export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isLoading, setIsloading] = useState<boolean>(false);
@@ -479,6 +935,11 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
   const [newMedications, setNewMedications] = useState<IMedication[]>([]);
   const [newSymptoms, setNewSymptoms] = useState<ISymptom[]>([]);
   const [newLocations, setNewLocations] = useState<ILocationData[]>([]);
+  const [newWeights, setNewWeights] = useState<IWeight[]>([]);
+  const [newHeights, setNewHeights] = useState<IHeight[]>([]);
+  const [newBloodPressures, setNewBloodPressures] = useState<IBloodPressure[]>([]);
+  const [newSleeps, setNewSleeps] = useState<ISleep[]>([]);
+  const [newWaters, setNewWaters] = useState<IWater[]>([]);
   const {
     incidentList,
     setIncidentList,
@@ -488,7 +949,6 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
     setMedicationList,
     symptomList,
     setSymptomList,
-
     setBrokenImportData,
     medicationEnumList,
     setMedicationEnumList,
@@ -498,6 +958,16 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
     setSymptomEnumList,
     locationList,
     setLocationList,
+    weightList,
+    heightList,
+    bloodPressureList,
+    sleepList,
+    waterList,
+    setWeightList,
+    setHeightList,
+    setBloodPressureList,
+    setSleepList,
+    setWaterList,
   } = useProfileDataContext();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -532,6 +1002,7 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
           medications: jsonDataMedications,
           symptoms: jsonDataSymptoms,
           logsForecast: jsonDataLogsForecast,
+          logHealth: jsonDataLogHealth,
         } = data;
 
         // Incidents
@@ -584,6 +1055,36 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
         setNewLocations(locations);
         setLocationList([...locationList, ...locations]);
 
+        // Health Logs
+        // Similar mapping function would be implemented for health logs, following the same pattern as above, with specific checks for each log type's required fields and appropriate handling of IDs and warnings for broken entries. For brevity, the implementation is omitted here but would be structured similarly to the above functions.
+        maxId = Math.max(...weightList.map(({ id }) => parseInt(id)));
+        const weights: IWeight[] = mapWeightList(jsonDataLogHealth?.weights || [], maxId);
+        setNewWeights(weights);
+        setWeightList([...weightList, ...weights]);
+
+        maxId = Math.max(...heightList.map(({ id }) => parseInt(id)));
+        const heights: IHeight[] = mapHeightList(jsonDataLogHealth?.heights || [], maxId);
+        setNewHeights(heights);
+        setHeightList([...heightList, ...heights]);
+
+        maxId = Math.max(...bloodPressureList.map(({ id }) => parseInt(id)));
+        const bloodPressures: IBloodPressure[] = mapBloodPressureList(
+          jsonDataLogHealth?.bloodPressures || [],
+          maxId
+        );
+        setNewBloodPressures(bloodPressures);
+        setBloodPressureList([...bloodPressureList, ...bloodPressures]);
+
+        maxId = Math.max(...sleepList.map(({ id }) => parseInt(id)));
+        const sleeps: ISleep[] = mapSleepList(jsonDataLogHealth?.sleeps || [], maxId);
+        setNewSleeps(sleeps);
+        setSleepList([...sleepList, ...sleeps]);
+
+        maxId = Math.max(...waterList.map(({ id }) => parseInt(id)));
+        const waters: IWater[] = mapWaterList(jsonDataLogHealth?.waters || [], maxId);
+        setNewWaters(waters);
+        setWaterList([...waterList, ...waters]);
+
         setIsFinished(true);
         setErrorMessage('');
         setWarnMessage('');
@@ -594,6 +1095,14 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
           symptoms: brokenSymptoms.length > 0 ? brokenSymptoms : null,
           medications: brokenMedications.length > 0 ? brokenMedications : null,
           locations: brokenLocations.length > 0 ? brokenLocations : null,
+          healthLogs: {
+            weights: brokenHealthLogs.weights.length > 0 ? brokenHealthLogs.weights : null,
+            heights: brokenHealthLogs.heights.length > 0 ? brokenHealthLogs.heights : null,
+            bloodPressures:
+              brokenHealthLogs.bloodPressures.length > 0 ? brokenHealthLogs.bloodPressures : null,
+            sleeps: brokenHealthLogs.sleeps.length > 0 ? brokenHealthLogs.sleeps : null,
+            waters: brokenHealthLogs.waters.length > 0 ? brokenHealthLogs.waters : null,
+          },
         });
       } catch (error: unknown) {
         setIsFinished(false);
@@ -685,6 +1194,11 @@ export default function UploadDataForm({ onSubmit }: IUploadDataFormProps) {
           { type: 'Medications', count: newMedications.length },
           { type: 'Symptoms', count: newSymptoms.length },
           { type: 'Locations', count: newLocations.length },
+          { type: 'Weight', count: newWeights.length },
+          { type: 'Height', count: newHeights.length },
+          { type: 'BloodPressure', count: newBloodPressures.length },
+          { type: 'Water', count: newWaters.length },
+          { type: 'Sleep', count: newSleeps.length },
         ])}
       </div>
 

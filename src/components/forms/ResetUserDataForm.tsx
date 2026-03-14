@@ -6,8 +6,17 @@ interface IResetUserDataFormProps {
 }
 
 export default function ResetUserDataForm({ onSubmit }: IResetUserDataFormProps) {
-  const { setIncidentList, setTriggerList, setMedicationList, setSymptomList } =
-    useProfileDataContext();
+  const {
+    setIncidentList,
+    setTriggerList,
+    setMedicationList,
+    setSymptomList,
+    setWeightList,
+    setHeightList,
+    setBloodPressureList,
+    setSleepList,
+    setWaterList,
+  } = useProfileDataContext();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +28,11 @@ export default function ResetUserDataForm({ onSubmit }: IResetUserDataFormProps)
     setTriggerList([]);
     setMedicationList([]);
     setSymptomList([]);
+    setWeightList([]);
+    setHeightList([]);
+    setBloodPressureList([]);
+    setSleepList([]);
+    setWaterList([]);
 
     onSubmit();
   };

@@ -10,6 +10,7 @@ import {
   fetchHeights,
   fetchBloodPressures,
   fetchSleeps,
+  fetchWaters,
 } from '../../services/health-logs';
 import Loader from '../Loader';
 import { Download } from 'lucide-react';
@@ -44,6 +45,7 @@ export default function DatabaseBackupForm({ onSubmit }: IDatabaseBackupFormProp
         heights,
         bloodPressures,
         sleeps,
+        waters,
       ] = await Promise.all([
         fetchIncidents(token),
         fetchTriggers(token),
@@ -54,6 +56,7 @@ export default function DatabaseBackupForm({ onSubmit }: IDatabaseBackupFormProp
         fetchHeights(token),
         fetchBloodPressures(token),
         fetchSleeps(token),
+        fetchWaters(token),
       ]);
 
       const backupData = {
@@ -67,6 +70,7 @@ export default function DatabaseBackupForm({ onSubmit }: IDatabaseBackupFormProp
           heights,
           bloodPressures,
           sleeps,
+          waters,
         },
         exportedAt: new Date().toISOString(),
         version: '1.0',

@@ -28,6 +28,8 @@ export default function DataManagement() {
     weightList,
     heightList,
     bloodPressureList,
+    sleepList,
+    waterList,
   } = useProfileDataContext();
 
   useEffect(() => {
@@ -47,8 +49,9 @@ export default function DataManagement() {
       (locationList && locationList.length > 0) ||
       (weightList && weightList.length > 0) ||
       (heightList && heightList.length > 0) ||
-      (bloodPressureList && bloodPressureList.length > 0);
-
+      (bloodPressureList && bloodPressureList.length > 0) ||
+      (sleepList && sleepList.length > 0) ||
+      (waterList && waterList.length > 0);
     setHasUserData(hasData);
     setHasBrokenImportData(hasBrokenData);
   }, [
@@ -61,6 +64,8 @@ export default function DataManagement() {
     weightList,
     heightList,
     bloodPressureList,
+    sleepList,
+    waterList,
   ]);
 
   return (

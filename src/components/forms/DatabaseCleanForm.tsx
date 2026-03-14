@@ -14,6 +14,8 @@ import {
   deleteBloodPressure,
   fetchSleeps,
   deleteSleep,
+  fetchWaters,
+  deleteWater,
 } from '../../services/health-logs';
 import Loader from '../Loader';
 import { AlertTriangle, Trash2 } from 'lucide-react';
@@ -67,6 +69,7 @@ export default function DatabaseCleanForm({ onSubmit }: IDatabaseCleanFormProps)
         heights,
         bloodPressures,
         sleeps,
+        waters,
       ] = await Promise.all([
         fetchIncidents(token),
         fetchTriggers(token),
@@ -77,6 +80,7 @@ export default function DatabaseCleanForm({ onSubmit }: IDatabaseCleanFormProps)
         fetchHeights(token),
         fetchBloodPressures(token),
         fetchSleeps(token),
+        fetchWaters(token),
       ]);
 
       const allItems: IDeleteItem[] = [
@@ -124,6 +128,11 @@ export default function DatabaseCleanForm({ onSubmit }: IDatabaseCleanFormProps)
           id: item.id.toString(),
           type: 'Sleep',
           deleteFn: (id: string, t: string) => deleteSleep(id, t),
+        })),
+        ...waters.map(item => ({
+          id: item.id.toString(),
+          type: 'Waters',
+          deleteFn: (id: string, t: string) => deleteWater(id, t),
         })),
       ];
 

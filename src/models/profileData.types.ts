@@ -222,6 +222,13 @@ export interface IBrokenData {
   symptoms: IBrokenSymptom[] | unknown;
   medications: IBrokenMedication[] | unknown;
   locations: IBrokenLocation[] | unknown;
+  healthLogs: {
+    weights: IBrokenWeight[] | unknown;
+    heights: IBrokenHeight[] | unknown;
+    bloodPressures: IBrokenBloodPressure[] | unknown;
+    sleeps: IBrokenSleep[] | unknown;
+    waters: IBrokenWater[] | unknown;
+  };
 }
 
 export interface IJSONData {
@@ -262,4 +269,55 @@ export interface IApiSession {
   refreshToken: string;
   expiresAt: number;
   userId: string;
+}
+
+export interface IBrokenWeight {
+  id: number;
+  userId: string;
+  weight: number;
+  notes: string | undefined;
+  datetimeAt: Date;
+  warning: string;
+}
+
+export interface IBrokenHeight {
+  id: number;
+  userId: string;
+  height: number;
+  notes: string | undefined;
+  datetimeAt: Date;
+  warning: string;
+}
+
+export interface IBrokenBloodPressure {
+  id: number;
+  userId: string;
+  systolic: number;
+  diastolic: number;
+  notes: string | undefined;
+  datetimeAt: Date;
+  warning: string;
+}
+
+export interface IBrokenSleep {
+  id: number;
+  userId: string;
+  rate?: number;
+  minutesTotal?: number;
+  minutesDeep?: number;
+  minutesRem?: number;
+  timesWakeUp?: number;
+  notes: string | undefined;
+  startedAt?: Date;
+  datetimeAt: Date;
+  warning: string;
+}
+
+export interface IBrokenWater {
+  id: number;
+  userId: string;
+  ml: number;
+  notes?: string;
+  datetimeAt: Date;
+  warning: string;
 }

@@ -25,6 +25,8 @@ export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
     heightList,
     weightList,
     bloodPressureList,
+    sleepList,
+    waterList,
   } = useProfileDataContext();
 
   useEffect(() => {
@@ -42,10 +44,31 @@ export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
       Array.isArray(symptomList) &&
       symptomList.length > 0 &&
       Array.isArray(locationList) &&
-      locationList.length > 0;
+      locationList.length > 0 &&
+      Array.isArray(heightList) &&
+      heightList.length > 0 &&
+      Array.isArray(weightList) &&
+      weightList.length > 0 &&
+      Array.isArray(bloodPressureList) &&
+      bloodPressureList.length > 0 &&
+      Array.isArray(sleepList) &&
+      sleepList.length > 0 &&
+      Array.isArray(waterList) &&
+      waterList.length > 0;
 
     setExistDataExport(hasData);
-  }, [incidentList, triggerList, medicationList, symptomList, locationList]);
+  }, [
+    incidentList,
+    triggerList,
+    medicationList,
+    symptomList,
+    locationList,
+    heightList,
+    weightList,
+    bloodPressureList,
+    sleepList,
+    waterList,
+  ]);
 
   const exportData = useMemo<IJSONData>(() => {
     if (!existDataExport) {
@@ -58,7 +81,13 @@ export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
         medications: [],
         symptoms: [],
         logsForecast: [],
-        logHealth: { heightList: [], weightList: [], bloodPressureList: [] },
+        logHealth: {
+          heightList: [],
+          weightList: [],
+          bloodPressureList: [],
+          waterList: [],
+          sleepList: [],
+        },
       };
     }
 
@@ -82,10 +111,11 @@ export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
       symptoms: symptomList || [],
       logsForecast: sanitizedLocations || [],
       logHealth: {
-        weight: weightList || [],
-        height: heightList || [],
-        bloodPresure: bloodPressureList || [],
-        sleep: [],
+        weights: weightList || [],
+        heights: heightList || [],
+        bloodPressures: bloodPressureList || [],
+        sleeps: sleepList || [],
+        waters: waterList || [],
       },
     };
   }, [
@@ -98,6 +128,8 @@ export default function DownloadDataForm({ onSubmit }: IDownloadDataFormProps) {
     weightList,
     heightList,
     bloodPressureList,
+    sleepList,
+    waterList,
   ]);
 
   useEffect(() => {
