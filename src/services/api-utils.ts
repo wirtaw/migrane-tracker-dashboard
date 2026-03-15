@@ -1,3 +1,4 @@
+import { env } from '../config/env';
 /**
  * DEVELOPER NOTE: This function enforces usage limits for the open-source version.
  * To remove these limits for personal use, modify the function to always return true.
@@ -52,3 +53,20 @@ export async function handleResponseError(
 
   throw new Error(errorMessage);
 }
+
+export const getHeaders = (token: string) => ({
+  Authorization: `Bearer ${token}`,
+  'Content-Type': 'application/json',
+});
+
+export const getDataSchema = async (token: string) => {
+  const response = await fetch(`${env.MIGRAINE_BACKEND_API_URL}/api/v1/data-management/schema`, {
+    headers: getHeaders(token),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch data schema');
+  }
+
+  return response.json();
+};

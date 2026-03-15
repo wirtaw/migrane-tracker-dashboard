@@ -10,8 +10,11 @@ import DatabaseUploadForm from '../components/forms/DatabaseUploadForm';
 import DatabaseBackupForm from '../components/forms/DatabaseBackupForm';
 import DatabaseCleanForm from '../components/forms/DatabaseCleanForm';
 import { useProfileDataContext } from '../context/ProfileDataContext';
+import { getDataSchema } from '../services/api-utils';
+import { useAuth } from '../context/AuthContext';
 
 export default function DataManagement() {
+  const { apiSession } = useAuth();
   const [activeModal, setActiveModal] = useState<
     'uploadJSON' | 'exportJSON' | 'resetData' | 'uploadDB' | 'backupDB' | 'cleanDB' | null
   >(null);
@@ -31,8 +34,23 @@ export default function DataManagement() {
     sleepList,
     waterList,
   } = useProfileDataContext();
+  const [schema, setSchema] = useState<object>({});
+  const [loadingSchema, setLoadingSchema] = useState(true);
 
   useEffect(() => {
+    const fetchSchema = async () => {
+      try {
+        if (!apiSession?.accessToken) {
+          throw new Error('Invalid auth');
+        }
+        const data = await getDataSchema(apiSession.accessToken);
+        setSchema(data);
+      } catch (error) {
+        console.error('Error loading schema:', error);
+      } finally {
+        setLoadingSchema(false);
+      }
+    };
     const hasBrokenData =
       (brokenImportData &&
         Array.isArray(brokenImportData.incidents) &&
@@ -54,6 +72,7 @@ export default function DataManagement() {
       (waterList && waterList.length > 0);
     setHasUserData(hasData);
     setHasBrokenImportData(hasBrokenData);
+    fetchSchema();
   }, [
     brokenImportData,
     incidentList,
@@ -66,6 +85,7 @@ export default function DataManagement() {
     bloodPressureList,
     sleepList,
     waterList,
+    apiSession,
   ]);
 
   return (
@@ -90,91 +110,11 @@ export default function DataManagement() {
                 </p>
                 <details className="text-gray-600 dark:text-gray-300">
                   <pre className="bg-gray-100 p-4 rounded-md text-black">
-                    {JSON.stringify(
-                      {
-                        type: 'object',
-                        properties: {
-                          incidents: {
-                            type: 'array',
-                            items: {
-                              type: 'object',
-                              properties: {
-                                id: { type: 'number' },
-                                userId: { type: 'string' },
-                                datetimeAt: { type: 'string', format: 'date-time' },
-                                type: { type: 'string' },
-                                startTime: { type: 'string', format: 'date-time' },
-                                durationHours: { type: 'number' },
-                                triggers: {
-                                  type: 'array',
-                                  items: { type: 'string' },
-                                },
-                                notes: { type: 'string' },
-                                createdAt: { type: 'string', format: 'date-time' },
-                              },
-                              required: [
-                                'userId',
-                                'datetimeAt',
-                                'type',
-                                'startTime',
-                                'durationHours',
-                              ],
-                            },
-                          },
-                          triggers: {
-                            type: 'array',
-                            items: {
-                              type: 'object',
-                              properties: {
-                                id: { type: 'number' },
-                                userId: { type: 'string' },
-                                datetimeAt: { type: 'string', format: 'date-time' },
-                                type: { type: 'string' },
-                                note: { type: 'string' },
-                                createdAt: { type: 'string', format: 'date-time' },
-                              },
-                              required: ['userId', 'datetimeAt', 'type'],
-                            },
-                          },
-                          medications: {
-                            type: 'array',
-                            items: {
-                              type: 'object',
-                              properties: {
-                                id: { type: 'number' },
-                                userId: { type: 'string' },
-                                datetimeAt: { type: 'string', format: 'date-time' },
-                                title: { type: 'string' },
-                                dosage: { type: 'string' },
-                                notes: { type: 'string' },
-                                createdAt: { type: 'string', format: 'date-time' },
-                                updateAt: { type: 'string', format: 'date-time' },
-                              },
-                              required: ['userId', 'datetimeAt', 'title', 'dosage'],
-                            },
-                          },
-                          symptoms: {
-                            type: 'array',
-                            items: {
-                              type: 'object',
-                              properties: {
-                                id: { type: 'number' },
-                                userId: { type: 'string' },
-                                datetimeAt: { type: 'string', format: 'date-time' },
-                                type: { type: 'string' },
-                                severity: { type: 'number' },
-                                notes: { type: 'string' },
-                                createdAt: { type: 'string', format: 'date-time' },
-                              },
-                              required: ['userId', 'datetimeAt', 'type', 'severity'],
-                            },
-                          },
-                        },
-                        required: ['incidents', 'triggers', 'medications', 'symptoms'],
-                      },
-                      null,
-                      2
-                    )}
+                    {loadingSchema
+                      ? 'Loading schema...'
+                      : schema
+                        ? JSON.stringify(schema, null, 2)
+                        : 'Schema not available.'}
                   </pre>
                 </details>
               </div>
