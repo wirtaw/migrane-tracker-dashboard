@@ -152,9 +152,19 @@ export default function HealthLogsForm({
           });
           promises.push(p);
         } else if (activeTab === 'sleep') {
+          let sleepMinutes = minutesTotal ? parseInt(minutesTotal) : undefined;
+          if (startedAt && datetime) {
+            const startDate = new Date(startedAt);
+            const wakeupDate = new Date(datetime);
+            const diffMs = wakeupDate.getTime() - startDate.getTime();
+
+            if (diffMs > 0) {
+              sleepMinutes = Math.floor(diffMs / 60000);
+            }
+          }
           const dto: UpdateSleepDto = {
             rate: sleepRate ? parseInt(sleepRate) : undefined,
-            minutesTotal: minutesTotal ? parseInt(minutesTotal) : undefined,
+            minutesTotal: sleepMinutes,
             minutesDeep: minutesDeep ? parseInt(minutesDeep) : undefined,
             minutesRem: minutesRem ? parseInt(minutesRem) : undefined,
             timesWakeUp: timesWakeUp ? parseInt(timesWakeUp) : undefined,
