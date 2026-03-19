@@ -8,6 +8,7 @@ import { LocationsService } from '../../services/locations';
 import { IForecastDto, ISolarDto, ISolarRadiationDto } from '../../models/locations.types';
 import Loader from '../Loader';
 import { useProfileDataContext } from '../../context/ProfileDataContext';
+import { validateImportData, IMaxIds } from '../../utils/dataValidation';
 import {
   createWeight,
   createBloodPressure,
@@ -93,9 +94,11 @@ interface RawHealthLogSleep {
   minutesTotal: number;
   minutesDeep: number;
   minutesRem: number;
+  rate: number;
   timesWakeUp: number;
-  datetimeAt: string;
+  datetimeAt: Date;
   notes?: string;
+  startedAt: Date;
 }
 
 interface RawHealthLogWater {
@@ -114,7 +117,7 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
   });
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
-  const { incidentTypeEnumList } = useProfileDataContext();
+  const { incidentTypeEnumList, setBrokenImportData } = useProfileDataContext();
 
   const mapToIncidentType = (type: string): string => {
     if (incidentTypeEnumList.includes(type)) {
@@ -194,16 +197,49 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
         const token = apiSession.accessToken;
         const userId = apiSession.userId;
 
-        const incidents = data.incidents || [];
-        const triggers = data.triggers || [];
-        const medications = data.medications || [];
-        const symptoms = data.symptoms || [];
-        const locations = data.logsForecast || [];
-        const weights = data.healthLogs?.weights || [];
-        const heights = data.healthLogs?.heights || [];
-        const bloodPressures = data.healthLogs?.bloodPressures || [];
-        const sleeps = data.healthLogs?.sleeps || [];
-        const waters = data.healthLogs?.waters || [];
+        const maxIds: IMaxIds = {
+          incidents: 0,
+          triggers: 0,
+          medications: 0,
+          symptoms: 0,
+          weights: 0,
+          heights: 0,
+          bloodPressures: 0,
+          sleeps: 0,
+          waters: 0,
+        };
+        const { validData, brokenData } = validateImportData(data, maxIds);
+
+        setBrokenImportData({
+          incidents: brokenData.incidents.length > 0 ? brokenData.incidents : null,
+          triggers: brokenData.triggers.length > 0 ? brokenData.triggers : null,
+          symptoms: brokenData.symptoms.length > 0 ? brokenData.symptoms : null,
+          medications: brokenData.medications.length > 0 ? brokenData.medications : null,
+          locations: brokenData.locations.length > 0 ? brokenData.locations : null,
+          healthLogs: {
+            weights:
+              brokenData.healthLogs.weights.length > 0 ? brokenData.healthLogs.weights : null,
+            heights:
+              brokenData.healthLogs.heights.length > 0 ? brokenData.healthLogs.heights : null,
+            bloodPressures:
+              brokenData.healthLogs.bloodPressures.length > 0
+                ? brokenData.healthLogs.bloodPressures
+                : null,
+            sleeps: brokenData.healthLogs.sleeps.length > 0 ? brokenData.healthLogs.sleeps : null,
+            waters: brokenData.healthLogs.waters.length > 0 ? brokenData.healthLogs.waters : null,
+          },
+        });
+
+        const incidents = validData.incidents;
+        const triggers = validData.triggers;
+        const medications = validData.medications;
+        const symptoms = validData.symptoms;
+        const locations = validData.locations;
+        const weights = validData.healthLogs.weights;
+        const heights = validData.healthLogs.heights;
+        const bloodPressures = validData.healthLogs.bloodPressures;
+        const sleeps = validData.healthLogs.sleeps;
+        const waters = validData.healthLogs.waters;
 
         const totalItems =
           incidents.length +
@@ -564,12 +600,14 @@ export default function DatabaseUploadForm({ onSubmit }: IDatabaseUploadFormProp
                     createSleep(
                       {
                         userId: userId,
-                        datetimeAt: item.datetimeAt,
+                        datetimeAt: new Date(item.datetimeAt).toISOString(),
                         notes: item.notes,
                         minutesDeep: item.minutesDeep,
                         minutesRem: item.minutesRem,
                         minutesTotal: item.minutesTotal,
                         timesWakeUp: item.timesWakeUp,
+                        rate: item.rate,
+                        startedAt: new Date(item.startedAt).toISOString(),
                       },
                       token
                     ),

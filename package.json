@@ -11,11 +11,11 @@
         "knip": "knip -c ./knip.json",
         "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
         "prepare": "husky",
-        "update": "ncu -i --format=group",
+        "check:updates": "ncu -i --format=group",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@supabase/supabase-js": "^2.95.3",
+        "@supabase/supabase-js": "^2.99.3",
         "appwrite": "^16.1.0",
         "chart.js": "^4.5.1",
         "lucide-react": "^0.545.0",
@@ -33,20 +33,20 @@
         "@types/react-calendar-heatmap": "^1.9.0",
         "@types/react-dom": "^18.3.0",
         "@vitejs/plugin-react": "^4.3.1",
-        "autoprefixer": "^10.4.24",
+        "autoprefixer": "^10.4.27",
         "eslint": "^9.37.0",
         "eslint-plugin-react-hooks": "^5.1.0-rc.0",
         "eslint-plugin-react-refresh": "^0.4.23",
         "globals": "^15.9.0",
         "husky": "^9.1.7",
-        "knip": "^5.83.1",
+        "knip": "^5.88.1",
         "lint-staged": "^15.2.2",
-        "npm-check-updates": "^19.3.2",
-        "postcss": "^8.5.6",
+        "npm-check-updates": "^19.6.5",
+        "postcss": "^8.5.8",
         "prettier": "^3.8.1",
         "tailwindcss": "^3.4.1",
         "typescript": "^5.9.3",
-        "typescript-eslint": "^8.54.0",
+        "typescript-eslint": "^8.57.1",
         "vite": "^5.4.2"
     },
     "lint-staged": {
@@ -57,5 +57,6 @@
         "*.{json,css,scss,md}": [
             "prettier --write"
         ]
-    }
+    },
+    "packageManager": "pnpm@10.32.1"
 }
