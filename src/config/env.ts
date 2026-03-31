@@ -10,7 +10,6 @@ interface IEnvConfig {
   BIRTH_DATE: string;
   SUPBASE_URL: string;
   SUPBASE_KEY: string;
-  REACT_APP_APPWRITE_PROJECT_ID: string;
 
   NOAA_GOV_CURRENT_RESOURCE_URL: string;
   NOAA_GOV_CURRENT_RESOURCE_TITLE: string;
@@ -32,7 +31,6 @@ export const env: IEnvConfig = {
   BIRTH_DATE: import.meta.env.VITE_BIRTH_DATE || '',
   SUPBASE_URL: import.meta.env.VITE_SUPBASE_URL || '',
   SUPBASE_KEY: import.meta.env.VITE_SUPBASE_KEY || '',
-  REACT_APP_APPWRITE_PROJECT_ID: import.meta.env.VITE_REACT_APP_APPWRITE_PROJECT_ID || '',
   NOAA_GOV_CURRENT_RESOURCE_URL: import.meta.env.VITE_NOAA_GOV_CURRENT_RESOURCE_URL || '',
   NOAA_GOV_CURRENT_RESOURCE_TITLE: import.meta.env.VITE_NOAA_GOV_CURRENT_RESOURCE_TITLE || '',
   OPEN_METEO_RESOURCE_URL: import.meta.env.VITE_OPEN_METEO_RESOURCE_URL || '',

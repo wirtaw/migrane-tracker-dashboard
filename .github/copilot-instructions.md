@@ -44,7 +44,7 @@ React + TypeScript health tracking dashboard for migraines with environmental fa
 
 ### Environment Setup
 - Use `.env.local` for Vite vars (prefix with `VITE_`)
-- Required vars: `VITE_SUPBASE_URL`, `VITE_SUPBASE_KEY`, `VITE_REACT_APP_APPWRITE_PROJECT_ID`, weather API keys, backend URL
+- Required vars: `VITE_SUPBASE_URL`, `VITE_SUPBASE_KEY`, weather API keys, backend URL
 - See: [src/config/env.ts](src/config/env.ts) for full IEnvConfig interface
 
 ### Linting Rules
@@ -89,7 +89,6 @@ React + TypeScript health tracking dashboard for migraines with environmental fa
 ## External Integration Points
 - **Supabase**: Auth, user session persistence; configured in [src/lib/supabase.ts](src/lib/supabase.ts)
 - **Weather APIs**: OpenMeteo (free), NOAA (geomagnetic), custom radiation endpoint
-- **Appwrite**: Client initialized in [src/main.tsx](src/main.tsx) (currently minimal use)
 - **Custom Backend**: Base URL from env, handles user profile, statistics, incident syncing
 
 ## Common Tasks
